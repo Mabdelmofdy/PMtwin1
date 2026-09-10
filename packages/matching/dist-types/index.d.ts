@@ -3,9 +3,9 @@ export { EMPTY_CANONICAL_DATA, PROFILE_FIT_SNAPSHOT_KIND, } from './types/index.
 export { DEFAULT_WEIGHTS, DEFAULT_MATCHING_CONFIG, resolveWeights, withMatchingDefaults, } from './config/defaults.ts';
 export { ROLE_COMPATIBILITY, ROLE_ALIASES, } from './constraints/role-matrix.ts';
 export { normalizeRoleLabel, getNeedRole, getOfferRole, rolesCompatible, serviceOverlapScore, passesCoreSkills, passesServiceOverlap, passesPair, } from './constraints/hard-constraints.ts';
-export { budgetCompatible, locationCompatible, timelineOverlap, categoryOverlap, getCandidates, getCandidatesForOffer, } from './candidates/candidate-generator.ts';
+export { budgetCompatible, locationCompatible, timelineOverlap, categoryOverlap, collaborationModelCompatible, sectorCategoryTokens, getCandidates, getCandidatesForOffer, } from './candidates/candidate-generator.ts';
 export type { CandidateGeneratorOptions } from './candidates/candidate-generator.ts';
-export { labelFromScore, attributeOverlap, exchangeCompatibilityFactor, valueCompatibilityFactor, budgetFit, timelineFit, locationFit, reputationScore, scorePair, } from './scoring/post-to-post-scoring.ts';
+export { labelFromScore, attributeOverlap, exchangeCompatibilityFactor, valueCompatibilityFactor, budgetFit, timelineFit, locationFit, reputationScore, categoryFit, scorePair, } from './scoring/post-to-post-scoring.ts';
 export { LABEL_PARTIAL } from './scoring/label-from-score.ts';
 export { isProfileFitSnapshot, scoreProfileFit, } from './scoring/profile-fit-scoring.ts';
 export { getNormalized, exchangeCompatibility, valueCompatibility, oneWayValueFit, barterValueEquivalence, } from './value/value-compatibility.ts';

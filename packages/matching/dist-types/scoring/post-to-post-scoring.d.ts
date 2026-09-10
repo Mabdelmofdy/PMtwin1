@@ -14,5 +14,10 @@ export declare function budgetFit(needNorm: NormalizedPost, offerNorm: Normalize
 export declare function timelineFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult;
 export declare function locationFit(needNorm: NormalizedPost, offerNorm: NormalizedPost, needAttributes?: Readonly<Record<string, unknown>>, offerAttributes?: Readonly<Record<string, unknown>>): ScoreFactorResult;
 export declare function reputationScore(offerNorm: NormalizedPost): ScoreFactorResult;
+/**
+ * Soft sector-category fit. Empty/missing categories score 1 (no penalty).
+ * Mismatch scores 0 but never rejects a candidate.
+ */
+export declare function categoryFit(needNorm: NormalizedPost, offerNorm: NormalizedPost): ScoreFactorResult;
 export declare function scorePair(needPost: OpportunityPost, offerPost: OpportunityPost, config: MatchingConfig, normalizedNeed?: NormalizedPost, normalizedOffer?: NormalizedPost): ScorePairResult;
 //# sourceMappingURL=post-to-post-scoring.d.ts.map

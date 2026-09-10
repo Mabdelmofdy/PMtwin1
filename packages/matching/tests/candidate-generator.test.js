@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import {
   budgetCompatible,
   categoryOverlap,
+  collaborationModelCompatible,
   getCandidates,
   locationCompatible,
   timelineOverlap,
@@ -93,13 +94,46 @@ describe('candidate generator — timeline overlap', () => {
 })
 
 describe('candidate generator — category overlap', () => {
-  it('requires shared model type or category', () => {
+  it('treats sector mismatch as no overlap without using model tokens', () => {
     assert.equal(
-      categoryOverlap({ modelType: 'project_based' }, { modelType: 'hiring' }),
+      categoryOverlap(
+        { modelType: 'project_based', categories: ['Electrical'] },
+        { modelType: 'project_based', categories: ['HVAC'] },
+      ),
       false,
     )
     assert.equal(
-      categoryOverlap({ modelType: 'project_based' }, { modelType: 'project_based' }),
+      categoryOverlap(
+        { modelType: 'project_based', categories: ['Electrical'] },
+        { modelType: 'project_based', categories: ['Electrical'] },
+      ),
+      true,
+    )
+  })
+
+  it('treats empty categories as compatible', () => {
+    assert.equal(
+      categoryOverlap({ modelType: 'project_based' }, { modelType: 'project_based', categories: ['HVAC'] }),
+      true,
+    )
+    assert.equal(categoryOverlap({}, {}), true)
+  })
+})
+
+describe('candidate generator — collaboration model compatibility', () => {
+  it('rejects incompatible model types', () => {
+    assert.equal(
+      collaborationModelCompatible({ modelType: 'project_based' }, { modelType: 'hiring' }),
+      false,
+    )
+  })
+
+  it('accepts matching model types even when sectors differ', () => {
+    assert.equal(
+      collaborationModelCompatible(
+        { modelType: 'project_based', categories: ['Electrical'] },
+        { modelType: 'project_based', categories: ['HVAC'] },
+      ),
       true,
     )
   })

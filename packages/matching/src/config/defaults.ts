@@ -10,6 +10,7 @@ export const DEFAULT_WEIGHTS: MatchingWeights = {
   REPUTATION: 0.05,
   ATTRIBUTE_OVERLAP: 0.25,
   BUDGET_FIT_LEGACY: 0.10,
+  CATEGORY_FIT: 0.05,
 }
 
 export const DEFAULT_MATCHING_CONFIG: MatchingConfig = {

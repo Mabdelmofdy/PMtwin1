@@ -69,6 +69,8 @@ export {
   locationCompatible,
   timelineOverlap,
   categoryOverlap,
+  collaborationModelCompatible,
+  sectorCategoryTokens,
   getCandidates,
   getCandidatesForOffer,
 } from './candidates/candidate-generator.ts'
@@ -83,6 +85,7 @@ export {
   timelineFit,
   locationFit,
   reputationScore,
+  categoryFit,
   scorePair,
 } from './scoring/post-to-post-scoring.ts'
 export { LABEL_PARTIAL } from './scoring/label-from-score.ts'

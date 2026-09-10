@@ -8,6 +8,11 @@ export interface MatchingWeights {
   readonly REPUTATION?: number
   readonly ATTRIBUTE_OVERLAP?: number
   readonly BUDGET_FIT_LEGACY?: number
+  /**
+   * Soft sector-category bonus added on top of the 1.0 weighted sum.
+   * Does not participate in hard eligibility. Default 0.05.
+   */
+  readonly CATEGORY_FIT?: number
 }
 
 export interface MatchingConfig {

@@ -19,7 +19,8 @@ var DEFAULT_WEIGHTS = {
   LOCATION: 0.1,
   REPUTATION: 0.05,
   ATTRIBUTE_OVERLAP: 0.25,
-  BUDGET_FIT_LEGACY: 0.1
+  BUDGET_FIT_LEGACY: 0.1,
+  CATEGORY_FIT: 0.05
 };
 var DEFAULT_MATCHING_CONFIG = {
   CANDIDATE_MAX: 200,
@@ -196,18 +197,45 @@ function timelineOverlap(needNorm, offerNorm) {
   if (oEnd != null && nStart != null && nStart > oEnd) return false;
   return true;
 }
-function categoryOverlap(needNorm, offerNorm) {
-  const needCat = new Set(
-    [needNorm.modelType, needNorm.subModelType, ...needNorm.categories ?? []].filter(Boolean)
+function normalizeToken(value) {
+  if (!value) return void 0;
+  const trimmed = String(value).trim();
+  return trimmed.length > 0 ? trimmed.toLowerCase() : void 0;
+}
+function collaborationModelTokens(norm) {
+  return new Set(
+    [normalizeToken(norm.modelType), normalizeToken(norm.subModelType)].filter(
+      (token) => Boolean(token)
+    )
   );
-  const offerCat = new Set(
-    [offerNorm.modelType, offerNorm.subModelType, ...offerNorm.categories ?? []].filter(Boolean)
-  );
-  if (needCat.size === 0 || offerCat.size === 0) return true;
-  for (const category of needCat) {
-    if (offerCat.has(category)) return true;
+}
+function sectorCategoryTokens(norm) {
+  const exclude = collaborationModelTokens(norm);
+  const seen = /* @__PURE__ */ new Set();
+  const tokens = [];
+  for (const raw of norm.categories ?? []) {
+    const token = normalizeToken(raw);
+    if (!token || exclude.has(token) || seen.has(token)) continue;
+    seen.add(token);
+    tokens.push(token);
+  }
+  return tokens;
+}
+function collaborationModelCompatible(needNorm, offerNorm) {
+  const needTokens = collaborationModelTokens(needNorm);
+  const offerTokens = collaborationModelTokens(offerNorm);
+  if (needTokens.size === 0 || offerTokens.size === 0) return true;
+  for (const token of needTokens) {
+    if (offerTokens.has(token)) return true;
   }
   return false;
+}
+function categoryOverlap(needNorm, offerNorm) {
+  const needCat = sectorCategoryTokens(needNorm);
+  const offerCat = sectorCategoryTokens(offerNorm);
+  if (needCat.length === 0 || offerCat.length === 0) return true;
+  const offerSet = new Set(offerCat);
+  return needCat.some((category) => offerSet.has(category));
 }
 function getCandidates(needPost, offerPosts, config, options = {}) {
   const maxCandidates = options.maxCandidates ?? config.CANDIDATE_MAX ?? 200;
@@ -219,7 +247,7 @@ function getCandidates(needPost, offerPosts, config, options = {}) {
     const offerNorm = offer.normalized ?? {};
     if (!budgetCompatible(needNorm, offerNorm)) return false;
     if (!timelineOverlap(needNorm, offerNorm)) return false;
-    if (!categoryOverlap(needNorm, offerNorm)) return false;
+    if (!collaborationModelCompatible(needNorm, offerNorm)) return false;
     const gate = passesPair(needPost, offer, config, { needNorm, offerNorm });
     if (!gate.ok) return false;
     return true;
@@ -244,7 +272,7 @@ function getCandidatesForOffer(offerPost, needPosts, config, options = {}) {
     const needNorm = need.normalized ?? {};
     if (!budgetCompatible(needNorm, offerNorm)) return false;
     if (!timelineOverlap(needNorm, offerNorm)) return false;
-    if (!categoryOverlap(needNorm, offerNorm)) return false;
+    if (!collaborationModelCompatible(needNorm, offerNorm)) return false;
     const gate = passesPair(need, offerPost, config, { needNorm, offerNorm });
     if (!gate.ok) return false;
     return true;
@@ -450,12 +478,12 @@ var GENERIC_COVERAGE_TOKENS = /* @__PURE__ */ new Set([
   ...GLOBAL_TOKENS,
   ...REMOTE_TOKENS
 ]);
-function normalizeToken(value) {
+function normalizeToken2(value) {
   return value.trim().toLowerCase().replace(/[_/]+/g, " ").replace(/\s+/g, " ");
 }
 function resolveLocationCountry(locationLabel) {
   if (!locationLabel) return "UNKNOWN";
-  const key = normalizeToken(locationLabel);
+  const key = normalizeToken2(locationLabel);
   if (!key) return "UNKNOWN";
   if (LABEL_TO_COUNTRY[key]) return LABEL_TO_COUNTRY[key];
   const dashed = key.replace(/\s+/g, "-");
@@ -463,7 +491,7 @@ function resolveLocationCountry(locationLabel) {
   return "UNKNOWN";
 }
 function pushUnique(target, value) {
-  const normalized2 = normalizeToken(value);
+  const normalized2 = normalizeToken2(value);
   if (normalized2 && !target.includes(normalized2)) target.push(normalized2);
 }
 function collectRawCoverageTokens(primaryLocation, coverageScopes, attributes) {
@@ -505,7 +533,7 @@ function resolveCoverage(primaryLocation, coverageScopes, attributes) {
   const primary = (primaryLocation ?? "").trim();
   const country = resolveLocationCountry(primary);
   let isRemote = country === "REMOTE";
-  let hasNationwide = country === "SA" && normalizeToken(primary) === "ksa";
+  let hasNationwide = country === "SA" && normalizeToken2(primary) === "ksa";
   let hasGccRegional = country === "GCC";
   let hasMena = country === "MENA";
   let hasGlobal = country === "GLOBAL";
@@ -576,8 +604,8 @@ function evaluateLocationCoverage(need, offer) {
   if (countriesCompatibleViaRegional(need, offerCountry) || countriesCompatibleViaRegional(offer, needCountry)) {
     return { score: 0.85, tier: "regional_gcc", label: "Regional GCC" };
   }
-  const needCity = normalizeToken(need.primaryLocation);
-  const offerCity = normalizeToken(offer.primaryLocation);
+  const needCity = normalizeToken2(need.primaryLocation);
+  const offerCity = normalizeToken2(offer.primaryLocation);
   if (needCity && offerCity && needCity === offerCity) {
     return { score: 1, tier: "same_city", label: "Same City" };
   }
@@ -587,7 +615,7 @@ function evaluateLocationCoverage(need, offer) {
   if (overlap.length > 0) {
     return { score: 1, tier: "coverage_overlap", label: "Coverage Overlap" };
   }
-  if (needCountry === "SA" && offerCountry === "SA" || normalizeToken(need.primaryLocation) === "ksa" && offerCountry === "SA" || normalizeToken(offer.primaryLocation) === "ksa" && needCountry === "SA") {
+  if (needCountry === "SA" && offerCountry === "SA" || normalizeToken2(need.primaryLocation) === "ksa" && offerCountry === "SA" || normalizeToken2(offer.primaryLocation) === "ksa" && needCountry === "SA") {
     return { score: 0.75, tier: "same_country", label: "Same Country" };
   }
   if (needCountry !== "UNKNOWN" && offerCountry !== "UNKNOWN" && needCountry === offerCountry && needCountry !== "REMOTE") {
@@ -737,6 +765,20 @@ function reputationScore(offerNorm) {
   const score = Number.isNaN(raw) ? 0.5 : Math.max(0, Math.min(1, raw));
   return { score, label: labelFromScore(score) };
 }
+function categoryFit(needNorm, offerNorm) {
+  const needCat = sectorCategoryTokens(needNorm);
+  const offerCat = sectorCategoryTokens(offerNorm);
+  if (needCat.length === 0 || offerCat.length === 0) {
+    return { score: 1, label: "Match", matched: 0, total: 0 };
+  }
+  const offerSet = new Set(offerCat);
+  let matched = 0;
+  for (const category of needCat) {
+    if (offerSet.has(category)) matched++;
+  }
+  const score = matched / needCat.length;
+  return { score, label: labelFromScore(score), matched, total: needCat.length };
+}
 function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer) {
   const nNorm = normalizedNeed ?? needPost.normalized ?? {};
   const oNorm = normalizedOffer ?? offerPost.normalized ?? {};
@@ -748,6 +790,10 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
   const timeline = timelineFit(nNorm, oNorm);
   const location = locationFit(nNorm, oNorm, needPost.attributes, offerPost.attributes);
   const reputation = reputationScore(oNorm);
+  const category = categoryFit(nNorm, oNorm);
+  const needSectorCount = sectorCategoryTokens(nNorm).length;
+  const offerSectorCount = sectorCategoryTokens(oNorm).length;
+  const categoryBonus = needSectorCount > 0 && offerSectorCount > 0 ? category.score * (weights.CATEGORY_FIT ?? 0.05) : 0;
   const minSkillForScore = config.MIN_SKILL_SCORE_FOR_MATCH ?? 0.5;
   if ((nNorm.requiredServices?.length ?? 0) > 0 && skill.score < minSkillForScore) {
     return {
@@ -762,6 +808,7 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
         timelineFit: timeline.score,
         locationFit: location.score,
         reputation: reputation.score,
+        categoryFit: category.score,
         rejected: "skill_floor"
       },
       labels: {
@@ -772,7 +819,8 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
         budgetFit: budget.label,
         timelineFit: timeline.label,
         locationFit: location.label,
-        reputation: reputation.label
+        reputation: reputation.label,
+        categoryFit: category.label
       }
     };
   }
@@ -786,6 +834,7 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
     timelineFit: timeline.score,
     locationFit: location.score,
     reputation: reputation.score,
+    categoryFit: category.score,
     locationTier: location.tier,
     locationDetail: location.detail
   };
@@ -797,9 +846,10 @@ function scorePair(needPost, offerPost, config, normalizedNeed, normalizedOffer)
     budgetFit: budget.label,
     timelineFit: timeline.label,
     locationFit: location.label,
-    reputation: reputation.label
+    reputation: reputation.label,
+    categoryFit: category.label
   };
-  const score = skill.score * (weights.SKILL_MATCH ?? weights.ATTRIBUTE_OVERLAP ?? 0.25) + exchange.score * (weights.EXCHANGE_COMPATIBILITY ?? 0.2) + value.score * (weights.VALUE_COMPATIBILITY ?? 0.2) + budget.score * (weights.BUDGET_FIT ?? 0.1) + timeline.score * (weights.TIMELINE ?? 0.1) + location.score * (weights.LOCATION ?? 0.1) + reputation.score * (weights.REPUTATION ?? 0.05);
+  const score = skill.score * (weights.SKILL_MATCH ?? weights.ATTRIBUTE_OVERLAP ?? 0.25) + exchange.score * (weights.EXCHANGE_COMPATIBILITY ?? 0.2) + value.score * (weights.VALUE_COMPATIBILITY ?? 0.2) + budget.score * (weights.BUDGET_FIT ?? 0.1) + timeline.score * (weights.TIMELINE ?? 0.1) + location.score * (weights.LOCATION ?? 0.1) + reputation.score * (weights.REPUTATION ?? 0.05) + categoryBonus;
   const rounded = Math.min(1, Math.round(score * 1e3) / 1e3);
   return { score: rounded, breakdown, labels };
 }
@@ -3642,8 +3692,8 @@ function buildSyntheticNeedForRole(leadNeed, leadNorm, roleDef) {
       // Do not hard-gate on tokenized scope prose; role compatibility + scoring suffice.
       requiredServices: [],
       skills: skillHints.length > 0 ? skillHints : [role],
-      // Do not inherit lead JV/consortium categories — partner offers are often
-      // cash/task_based and would fail categoryOverlap otherwise.
+      // Do not inherit lead JV/consortium model tokens — partner offers are often
+      // cash/task_based and would fail collaborationModelCompatible otherwise.
       modelType: void 0,
       subModelType: void 0,
       categories: []
@@ -3713,6 +3763,7 @@ var MATCHING_REJECT_REASONS = {
   BUDGET_INCOMPATIBLE: "BUDGET_INCOMPATIBLE",
   TIMELINE_INCOMPATIBLE: "TIMELINE_INCOMPATIBLE",
   CATEGORY_INCOMPATIBLE: "CATEGORY_INCOMPATIBLE",
+  COLLABORATION_MODEL_INCOMPATIBLE: "COLLABORATION_MODEL_INCOMPATIBLE",
   SKILL_FLOOR: "SKILL_FLOOR",
   BELOW_MATCH_THRESHOLD: "BELOW_MATCH_THRESHOLD",
   SOURCE_INTENT_INVALID: "SOURCE_INTENT_INVALID",
@@ -3959,19 +4010,19 @@ function evaluateOfferCandidate(needPost, offerPost, config, canonical, threshol
       })
     };
   }
-  if (!categoryOverlap(needNorm, offerNorm)) {
+  if (!collaborationModelCompatible(needNorm, offerNorm)) {
     return {
       match: null,
       diagnostic: buildRejectedDiagnostic({
         candidateOpportunityId: candidateId,
-        rejectReason: MATCHING_REJECT_REASONS.CATEGORY_INCOMPATIBLE,
+        rejectReason: MATCHING_REJECT_REASONS.COLLABORATION_MODEL_INCOMPATIBLE,
         checks: [
           check("published", "pass"),
           check("different_party", "pass"),
           check("budget", "pass"),
           check("timeline", "pass"),
-          check("sector", "fail", "No shared collaboration / sector category"),
-          check("collaboration_model", "fail"),
+          check("sector", "pass"),
+          check("collaboration_model", "fail", "Collaboration model / sub-model do not overlap"),
           check("target_role", "n/a"),
           check("skills", "n/a"),
           check("location", "n/a"),
@@ -4212,6 +4263,7 @@ function averageScoreBreakdown(a, b) {
     timelineFit: averageFactor(a.timelineFit, b.timelineFit),
     locationFit: averageFactor(a.locationFit, b.locationFit),
     reputation: averageFactor(a.reputation, b.reputation),
+    categoryFit: averageFactor(a.categoryFit ?? 1, b.categoryFit ?? 1),
     locationTier: preferA ? a.locationTier : b.locationTier,
     locationDetail: preferA ? a.locationDetail : b.locationDetail
   };
@@ -4799,7 +4851,9 @@ export {
   buildRoleSkillHints,
   buildSemanticProfile,
   buildSyntheticNeedForRole,
+  categoryFit,
   categoryOverlap,
+  collaborationModelCompatible,
   detectMatchingModel,
   diagnoseGateAndScore,
   check as diagnosticCheck,
@@ -4850,6 +4904,7 @@ export {
   runMatchingForPost,
   scorePair,
   scoreProfileFit,
+  sectorCategoryTokens,
   serviceOverlapScore,
   summarizeDiagnostics,
   timelineFit,

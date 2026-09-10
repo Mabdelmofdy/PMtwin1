@@ -71,6 +71,8 @@ export {
   locationCompatible,
   timelineOverlap,
   categoryOverlap,
+  collaborationModelCompatible,
+  sectorCategoryTokens,
   getCandidates,
   getCandidatesForOffer,
 } from './dist-types/candidates/candidate-generator'
@@ -85,6 +87,7 @@ export {
   timelineFit,
   locationFit,
   reputationScore,
+  categoryFit,
   scorePair,
 } from './dist-types/scoring/post-to-post-scoring'
 export { LABEL_PARTIAL } from './dist-types/scoring/label-from-score'

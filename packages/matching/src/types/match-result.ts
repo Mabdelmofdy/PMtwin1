@@ -39,6 +39,7 @@ export interface ScoreBreakdown {
   readonly timelineFit: number
   readonly locationFit: number
   readonly reputation: number
+  readonly categoryFit?: number
   readonly rejected?: string
   readonly locationTier?: string
   readonly locationDetail?: string
@@ -53,6 +54,7 @@ export type ScoreLabels = {
   readonly timelineFit: ScoreLabel
   readonly locationFit: ScoreLabel
   readonly reputation: ScoreLabel
+  readonly categoryFit?: ScoreLabel
 }
 
 export interface ScorePairResult {

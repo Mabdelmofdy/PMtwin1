@@ -43,6 +43,7 @@ export function averageScoreBreakdown(
     timelineFit: averageFactor(a.timelineFit, b.timelineFit),
     locationFit: averageFactor(a.locationFit, b.locationFit),
     reputation: averageFactor(a.reputation, b.reputation),
+    categoryFit: averageFactor(a.categoryFit ?? 1, b.categoryFit ?? 1),
     locationTier: preferA ? a.locationTier : b.locationTier,
     locationDetail: preferA ? a.locationDetail : b.locationDetail,
   }

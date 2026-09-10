@@ -1,6 +1,6 @@
 import {
   budgetCompatible,
-  categoryOverlap,
+  collaborationModelCompatible,
   timelineOverlap,
 } from '../candidates/candidate-generator.ts'
 import { passesPair } from '../constraints/hard-constraints.ts'
@@ -128,19 +128,19 @@ function evaluateOfferCandidate(
     }
   }
 
-  if (!categoryOverlap(needNorm, offerNorm)) {
+  if (!collaborationModelCompatible(needNorm, offerNorm)) {
     return {
       match: null,
       diagnostic: buildRejectedDiagnostic({
         candidateOpportunityId: candidateId,
-        rejectReason: MATCHING_REJECT_REASONS.CATEGORY_INCOMPATIBLE,
+        rejectReason: MATCHING_REJECT_REASONS.COLLABORATION_MODEL_INCOMPATIBLE,
         checks: [
           diagnosticCheck('published', 'pass'),
           diagnosticCheck('different_party', 'pass'),
           diagnosticCheck('budget', 'pass'),
           diagnosticCheck('timeline', 'pass'),
-          diagnosticCheck('sector', 'fail', 'No shared collaboration / sector category'),
-          diagnosticCheck('collaboration_model', 'fail'),
+          diagnosticCheck('sector', 'pass'),
+          diagnosticCheck('collaboration_model', 'fail', 'Collaboration model / sub-model do not overlap'),
           diagnosticCheck('target_role', 'n/a'),
           diagnosticCheck('skills', 'n/a'),
           diagnosticCheck('location', 'n/a'),

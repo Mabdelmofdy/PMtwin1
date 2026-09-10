@@ -186,8 +186,8 @@ export function buildSyntheticNeedForRole(
       // Do not hard-gate on tokenized scope prose; role compatibility + scoring suffice.
       requiredServices: [],
       skills: skillHints.length > 0 ? skillHints : [role],
-      // Do not inherit lead JV/consortium categories — partner offers are often
-      // cash/task_based and would fail categoryOverlap otherwise.
+      // Do not inherit lead JV/consortium model tokens — partner offers are often
+      // cash/task_based and would fail collaborationModelCompatible otherwise.
       modelType: undefined,
       subModelType: undefined,
       categories: [],

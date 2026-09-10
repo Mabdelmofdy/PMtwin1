@@ -6,6 +6,7 @@ import {
 import type { MatchingConfig } from '../types/matching-config.ts'
 import type { ScoreFactorResult, ScorePairResult } from '../types/match-result.ts'
 import type { NormalizedPost, OpportunityPost } from '../types/opportunity.ts'
+import { sectorCategoryTokens } from '../candidates/candidate-generator.ts'
 import {
   evaluateLocationCoverage,
   resolveCoverage,
@@ -163,6 +164,28 @@ export function reputationScore(offerNorm: NormalizedPost): ScoreFactorResult {
   return { score, label: labelFromScore(score) }
 }
 
+/**
+ * Soft sector-category fit. Empty/missing categories score 1 (no penalty).
+ * Mismatch scores 0 but never rejects a candidate.
+ */
+export function categoryFit(
+  needNorm: NormalizedPost,
+  offerNorm: NormalizedPost,
+): ScoreFactorResult {
+  const needCat = sectorCategoryTokens(needNorm)
+  const offerCat = sectorCategoryTokens(offerNorm)
+  if (needCat.length === 0 || offerCat.length === 0) {
+    return { score: 1, label: 'Match', matched: 0, total: 0 }
+  }
+  const offerSet = new Set(offerCat)
+  let matched = 0
+  for (const category of needCat) {
+    if (offerSet.has(category)) matched++
+  }
+  const score = matched / needCat.length
+  return { score, label: labelFromScore(score), matched, total: needCat.length }
+}
+
 export function scorePair(
   needPost: OpportunityPost,
   offerPost: OpportunityPost,
@@ -181,6 +204,13 @@ export function scorePair(
   const timeline = timelineFit(nNorm, oNorm)
   const location = locationFit(nNorm, oNorm, needPost.attributes, offerPost.attributes)
   const reputation = reputationScore(oNorm)
+  const category = categoryFit(nNorm, oNorm)
+  const needSectorCount = sectorCategoryTokens(nNorm).length
+  const offerSectorCount = sectorCategoryTokens(oNorm).length
+  const categoryBonus =
+    needSectorCount > 0 && offerSectorCount > 0
+      ? category.score * (weights.CATEGORY_FIT ?? 0.05)
+      : 0
 
   const minSkillForScore = config.MIN_SKILL_SCORE_FOR_MATCH ?? 0.50
   if ((nNorm.requiredServices?.length ?? 0) > 0 && skill.score < minSkillForScore) {
@@ -196,6 +226,7 @@ export function scorePair(
         timelineFit: timeline.score,
         locationFit: location.score,
         reputation: reputation.score,
+        categoryFit: category.score,
         rejected: 'skill_floor',
       },
       labels: {
@@ -207,6 +238,7 @@ export function scorePair(
         timelineFit: timeline.label,
         locationFit: location.label,
         reputation: reputation.label,
+        categoryFit: category.label,
       },
     }
   }
@@ -221,6 +253,7 @@ export function scorePair(
     timelineFit: timeline.score,
     locationFit: location.score,
     reputation: reputation.score,
+    categoryFit: category.score,
     locationTier: location.tier,
     locationDetail: location.detail,
   }
@@ -234,6 +267,7 @@ export function scorePair(
     timelineFit: timeline.label,
     locationFit: location.label,
     reputation: reputation.label,
+    categoryFit: category.label,
   }
 
   const score =
@@ -243,7 +277,8 @@ export function scorePair(
     (budget.score * (weights.BUDGET_FIT ?? 0.10)) +
     (timeline.score * (weights.TIMELINE ?? 0.10)) +
     (location.score * (weights.LOCATION ?? 0.10)) +
-    (reputation.score * (weights.REPUTATION ?? 0.05))
+    (reputation.score * (weights.REPUTATION ?? 0.05)) +
+    categoryBonus
 
   const rounded = Math.min(1, Math.round(score * 1000) / 1000)
   return { score: rounded, breakdown, labels }

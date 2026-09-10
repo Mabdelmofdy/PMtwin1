@@ -51,20 +51,62 @@ export function timelineOverlap(needNorm: NormalizedPost, offerNorm: NormalizedP
   return true
 }
 
-export function categoryOverlap(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean {
-  const needCat = new Set(
-    [needNorm.modelType, needNorm.subModelType, ...(needNorm.categories ?? [])].filter(Boolean),
+function normalizeToken(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  const trimmed = String(value).trim()
+  return trimmed.length > 0 ? trimmed.toLowerCase() : undefined
+}
+
+function collaborationModelTokens(norm: NormalizedPost): Set<string> {
+  return new Set(
+    [normalizeToken(norm.modelType), normalizeToken(norm.subModelType)].filter(
+      (token): token is string => Boolean(token),
+    ),
   )
-  const offerCat = new Set(
-    [offerNorm.modelType, offerNorm.subModelType, ...(offerNorm.categories ?? [])].filter(Boolean),
-  )
-  // No category constraint on either side → compatible (consortium role fills
-  // often pair JV lead with task_based / cash offers).
-  if (needCat.size === 0 || offerCat.size === 0) return true
-  for (const category of needCat) {
-    if (offerCat.has(category)) return true
+}
+
+/** Sector / profession categories only — never modelType or subModelType. */
+export function sectorCategoryTokens(norm: NormalizedPost): string[] {
+  const exclude = collaborationModelTokens(norm)
+  const seen = new Set<string>()
+  const tokens: string[] = []
+  for (const raw of norm.categories ?? []) {
+    const token = normalizeToken(raw)
+    if (!token || exclude.has(token) || seen.has(token)) continue
+    seen.add(token)
+    tokens.push(token)
+  }
+  return tokens
+}
+
+/**
+ * Hard eligibility for collaboration model / sub-model.
+ * Empty on either side is not a reject. Shared modelType or subModelType is enough.
+ * Category / sector tokens are intentionally excluded.
+ */
+export function collaborationModelCompatible(
+  needNorm: NormalizedPost,
+  offerNorm: NormalizedPost,
+): boolean {
+  const needTokens = collaborationModelTokens(needNorm)
+  const offerTokens = collaborationModelTokens(offerNorm)
+  if (needTokens.size === 0 || offerTokens.size === 0) return true
+  for (const token of needTokens) {
+    if (offerTokens.has(token)) return true
   }
   return false
+}
+
+/**
+ * Soft sector overlap. Empty categories are compatible.
+ * Does not consider modelType / subModelType.
+ */
+export function categoryOverlap(needNorm: NormalizedPost, offerNorm: NormalizedPost): boolean {
+  const needCat = sectorCategoryTokens(needNorm)
+  const offerCat = sectorCategoryTokens(offerNorm)
+  if (needCat.length === 0 || offerCat.length === 0) return true
+  const offerSet = new Set(offerCat)
+  return needCat.some((category) => offerSet.has(category))
 }
 
 export function getCandidates(
@@ -84,7 +126,7 @@ export function getCandidates(
     if (!budgetCompatible(needNorm, offerNorm)) return false
     // Location is soft-scored via locationFit — never a hard reject.
     if (!timelineOverlap(needNorm, offerNorm)) return false
-    if (!categoryOverlap(needNorm, offerNorm)) return false
+    if (!collaborationModelCompatible(needNorm, offerNorm)) return false
     const gate = passesPair(needPost, offer, config, { needNorm, offerNorm })
     if (!gate.ok) return false
     return true
@@ -118,7 +160,7 @@ export function getCandidatesForOffer(
     if (!budgetCompatible(needNorm, offerNorm)) return false
     // Location is soft-scored via locationFit — never a hard reject.
     if (!timelineOverlap(needNorm, offerNorm)) return false
-    if (!categoryOverlap(needNorm, offerNorm)) return false
+    if (!collaborationModelCompatible(needNorm, offerNorm)) return false
     const gate = passesPair(need, offerPost, config, { needNorm, offerNorm })
     if (!gate.ok) return false
     return true
