@@ -1,0 +1,154 @@
+// SCAFFOLD ONLY. Not the canonical PM-Twin data model and not production-ready.
+// These tables exist so a local PostgreSQL database can boot, accept seed JSON,
+// and serve read-only opportunity queries.
+// Intentionally absent until a later schema phase:
+// - canonical Party, Workspace, and Membership
+// - foreign keys between aggregates
+// - normalized commercial, negotiation, and contract records
+// ownerPartyId and workspaceId are unconstrained strings, not relations.
+// Most domain state lives in JSON payload columns. Do not build product
+// commands on this shape.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  role         String
+  status       String
+  isPublic     Boolean  @default(false)
+  profile      Json
+  payload      Json
+  createdAt    DateTime
+  updatedAt    DateTime
+
+  @@index([status])
+}
+
+model Company {
+  id           String   @id
+  email        String   @unique
+  passwordHash String
+  role         String   @default("company_owner")
+  status       String
+  isPublic     Boolean  @default(false)
+  profile      Json
+  payload      Json
+  createdAt    DateTime
+  updatedAt    DateTime
+
+  @@index([status])
+}
+
+model Opportunity {
+  id              String   @id
+  title           String
+  description     String   @default("")
+  creatorId       String
+  ownerPartyId    String?
+  workspaceId     String?
+  createdByUserId String?
+  intent          String?
+  status          String
+  modelType       String?
+  payload         Json
+  createdAt       DateTime
+  updatedAt       DateTime
+
+  @@index([status])
+  @@index([creatorId])
+}
+
+model Application {
+  id            String   @id
+  opportunityId String
+  applicantId   String
+  status        String
+  payload       Json
+  createdAt     DateTime
+  updatedAt     DateTime
+
+  @@index([opportunityId])
+  @@index([applicantId])
+}
+
+model PostMatch {
+  id        String   @id
+  matchType String
+  status    String
+  matchScore Float?
+  payload   Json
+  createdAt DateTime
+  updatedAt DateTime
+
+  @@index([status])
+}
+
+model Negotiation {
+  id        String   @id
+  status    String
+  payload   Json
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+model Deal {
+  id        String   @id
+  status    String
+  payload   Json
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+model Contract {
+  id        String   @id
+  dealId    String?
+  status    String
+  payload   Json
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+model Notification {
+  id        String   @id
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  payload   Json
+  createdAt DateTime
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  timestamp  DateTime
+  details    Json?
+
+  @@index([entityType, entityId])
+  @@index([timestamp])
+}
+
+model IdempotencyRecord {
+  key         String   @id
+  commandType String
+  actorId     String
+  result      Json
+  createdAt   DateTime @default(now())
+
+  @@index([actorId, createdAt])
+}

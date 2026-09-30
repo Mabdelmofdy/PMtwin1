@@ -1,0 +1,50 @@
+# Local development only. Not AWS, not production, and not wired to the SPA.
+# Database user, password, and JWT values below are local placeholders.
+# `docker compose up --build` applies the local Prisma migration and, when
+# SEED_ON_BOOT=true, imports POC seed JSON into the local volume only.
+# Usage: docker compose up --build
+# API: http://localhost:3001/api/v1/health
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pmtwin
+      POSTGRES_PASSWORD: pmtwin
+      POSTGRES_DB: pmtwin
+    ports:
+      - "5432:5432"
+    volumes:
+      - pmtwin_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pmtwin -d pmtwin"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: "3001"
+      DATABASE_URL: postgresql://pmtwin:pmtwin@postgres:5432/pmtwin?schema=public
+      JWT_SECRET: local-dev-only-change-me
+      JWT_REFRESH_SECRET: local-dev-only-refresh-change-me
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 7d
+      SEED_MODE: local
+      SEED_ON_BOOT: "true"
+      CORS_ORIGIN: http://localhost:5173
+      SEED_DATA_DIR: /app/POC/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./POC/data:/app/POC/data:ro
+
+volumes:
+  pmtwin_pgdata:

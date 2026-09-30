@@ -82,6 +82,20 @@ PMTwin-MVP/
 2. `npm run dev` — open the URL Vite prints (typically http://localhost:5173)
 3. Run checks: `npm run type-check && npm run test && npm run build`
 
+### Backend foundation (local scaffold only)
+
+The active runtime is the `web/` SPA: browser storage and client-side auth. Domain rules stay in `packages/`.
+
+`server/` is a local Fastify, Prisma, and PostgreSQL scaffold. It is not production-ready and it is not wired to the SPA. It checks passwords with bcrypt (legacy base64 seed hashes still verify), issues access JWTs only, exposes read-only opportunity queries, and accepts `POST /api/v1/commands` only to validate the envelope, store an idempotency failure, write an unimplemented audit row, and return HTTP 501 `COMMAND_NOT_IMPLEMENTED`. There is no refresh route, logout, MFA, or account recovery.
+
+DO NOT ENABLE SERVER API CUTOVER UNTIL COMMAND HANDLER PARITY AND CANONICAL SERVER DATA MODEL ARE COMPLETE.
+
+```bash
+docker compose up --build
+```
+
+Health: `http://localhost:3001/api/v1/health`. Local Docker only. See `server/README.md`.
+
 ### Legacy POC (reference only)
 
 Open `POC/index.html` in a browser for the historical MPA. No build required for basic static run. Do not add new product features here.

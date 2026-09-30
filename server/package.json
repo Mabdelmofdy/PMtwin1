@@ -1,0 +1,34 @@
+{
+  "name": "@pm-twin/server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "PM-Twin local backend scaffold (Fastify, Prisma, PostgreSQL). Not the active product runtime.",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "test": "node --import tsx --test src/infrastructure/password.test.ts src/application/command-gateway.test.ts",
+    "type-check": "tsc --noEmit",
+    "seed": "tsx src/scripts/import-seed.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:migrate:dev": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/jwt": "^10.0.0",
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.2",
+    "fastify": "^5.6.0",
+    "prisma": "^6.16.2",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@pm-twin/commands": "file:../packages/commands",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^24.12.3",
+    "tsx": "^4.20.3",
+    "typescript": "~6.0.2"
+  }
+}

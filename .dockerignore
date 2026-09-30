@@ -1,0 +1,15 @@
+.git
+.cursor
+node_modules
+**/node_modules
+web/node_modules
+POC/node_modules
+server/node_modules
+server/dist
+server/.env
+**/dist
+*.log
+docs
+BRD
+canvases
+agent-transcripts
