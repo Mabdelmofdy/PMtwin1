@@ -433,6 +433,12 @@ function ComponentForm({
             value={component.exitStrategy ?? ''}
             onChange={(e) => onChange({ exitStrategy: e.target.value })}
           />
+          <Input
+            className="sm:col-span-2"
+            placeholder="Governance structure"
+            value={component.boardRepresentation ?? ''}
+            onChange={(e) => onChange({ boardRepresentation: e.target.value })}
+          />
         </div>
       ) : null}
       {component.type === 'custom' ? (

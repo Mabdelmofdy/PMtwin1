@@ -148,6 +148,90 @@ describe('collaboration entity view gates', () => {
     updatedAt: '2026-01-01',
   }
 
+  it('allows company party owners to open a match stored against an employee', () => {
+    const companyMatch = postMatch({
+      participants: [
+        {
+          userId: 'seed-emp-001',
+          role: 'need_owner',
+          partyId: 'party-company-seed-co-corp-001',
+          opportunityId: 'need-1',
+        },
+        { userId: participantId, role: 'offer_provider', opportunityId: 'opp-1' },
+      ],
+    })
+    const companyOwner = buildViewerContext({
+      userId: 'seed-co-corp-001',
+      status: 'active',
+      activePartyId: 'party-company-seed-co-corp-001',
+    })
+    const outsider = buildViewerContext({ userId: outsiderId, status: 'active' })
+    assert.equal(canViewMatchDetail(companyMatch, companyOwner), true)
+    assert.equal(canViewMatchDetail(companyMatch, outsider), false)
+    const listed = filterPostMatchesForViewer([companyMatch], companyOwner)
+    assert.equal(listed.length, 1)
+  })
+
+  it('allows the company owner when the employee row only has actingForPartyId', () => {
+    const companyMatch = postMatch({
+      participants: [
+        {
+          userId: 'seed-emp-001',
+          role: 'need_owner',
+          actingForPartyId: 'party-company-seed-co-corp-001',
+          opportunityId: 'need-1',
+        },
+      ],
+    })
+    const companyOwner = buildViewerContext({
+      userId: 'seed-co-corp-001',
+      status: 'active',
+      activePartyId: 'party-company-seed-co-corp-001',
+    })
+    const outsider = buildViewerContext({
+      userId: outsiderId,
+      status: 'active',
+      activePartyId: 'party-individual-outsider',
+    })
+    assert.equal(canViewMatchDetail(companyMatch, companyOwner), true)
+    assert.equal(canViewMatchDetail(companyMatch, outsider), false)
+  })
+
+  it('treats a legacy company account id as the same party as the canonical company party', () => {
+    const companyMatch = postMatch({
+      participants: [
+        {
+          userId: 'seed-emp-001',
+          role: 'need_owner',
+          partyId: 'seed-co-corp-001',
+          opportunityId: 'need-1',
+        },
+      ],
+    })
+    const companyOwner = buildViewerContext({
+      userId: 'seed-co-corp-001',
+      status: 'active',
+      activePartyId: 'party-company-seed-co-corp-001',
+    })
+    assert.equal(canViewMatchDetail(companyMatch, companyOwner), true)
+  })
+
+  it('includes consortium leads in owned-opportunity match lists', () => {
+    const consortium = postMatch({
+      id: 'pm-consortium',
+      matchType: 'consortium',
+      needOpportunityId: undefined,
+      offerOpportunityId: undefined,
+      participants: [{ userId: 'seed-emp-001', role: 'consortium_lead' }],
+      payload: { leadNeedId: 'lead-owned', roles: [] },
+    })
+    const viewer = buildViewerContext({ userId: 'seed-co-corp-001', status: 'active' })
+    const listed = filterPostMatchesForViewer([consortium], viewer, {
+      ownedOpportunityIds: new Set(['lead-owned']),
+    })
+    assert.equal(listed.length, 1)
+  })
+
   it('blocks match detail for outsiders', () => {
     const outsider = buildViewerContext({ userId: outsiderId, status: 'active' })
     assert.equal(canViewMatchDetail(match, outsider), false)

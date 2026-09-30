@@ -416,6 +416,125 @@ describe('budget and exchange', () => {
     )
   })
 
+  it('accepts Creation 3.0 equity component fields on publish', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'equity',
+        exchangeData: {
+          commercialStructure: {
+            components: [
+              {
+                type: 'equity',
+                enabled: true,
+                equityPercentage: 25,
+                equityType: 'Ordinary',
+                valuation: 1000000,
+              },
+            ],
+          },
+        },
+        collaborationAttributes: { capitalContribution: 5000000 },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'], groups: ['budget'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED),
+      false,
+    )
+  })
+
+  it('accepts Creation 3.0 profit sharing component fields on publish', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'profit_sharing',
+        exchangeData: {
+          commercialStructure: {
+            components: [
+              {
+                type: 'profit_sharing',
+                enabled: true,
+                profitSharePercentage: 40,
+                calculationBasis: 'Net profit',
+                settlementPeriod: 'Quarterly',
+              },
+            ],
+          },
+        },
+      },
+      { operationScope: 'publish' },
+      { scopes: ['publish'], groups: ['budget'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED),
+      false,
+    )
+  })
+
+  it('accepts a complete custom component as hybrid', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'hybrid',
+        exchangeData: {
+          equitySplit: [{ role: 'Lead', share: 60 }],
+          commercialStructure: {
+            components: [
+              {
+                type: 'custom',
+                enabled: true,
+                description: 'Milestone success fee',
+                calculationMethod: 'Fixed on handover',
+              },
+            ],
+          },
+        },
+      },
+      { operationScope: 'draft' },
+      { groups: ['budget'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED),
+      false,
+    )
+  })
+
+  it('accepts equity plus profit sharing hybrid without cash', () => {
+    const result = validateOpportunityBusiness(
+      {
+        title: 'T',
+        exchangeMode: 'hybrid',
+        exchangeData: {
+          commercialStructure: {
+            components: [
+              {
+                type: 'equity',
+                enabled: true,
+                equityPercentage: 30,
+                equityType: 'Ordinary',
+              },
+              {
+                type: 'profit_sharing',
+                enabled: true,
+                profitSharePercentage: 20,
+                calculationBasis: 'Net profit',
+                settlementPeriod: 'Annual',
+              },
+            ],
+          },
+        },
+      },
+      { operationScope: 'draft' },
+      { groups: ['budget'] },
+    )
+    assert.equal(
+      result.issues.some((i) => i.code === VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED),
+      false,
+    )
+  })
+
   it('validates hybrid components when touched', () => {
     const result = validateOpportunityBusiness(
       {

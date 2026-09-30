@@ -306,6 +306,11 @@ function publishDeps(stack: CommandGatewayTestStack) {
       matchingService.runPublishMatchingForOpportunity(opportunityId, matchingDeps),
     runCircularMatching: (opportunityId: string) =>
       matchingService.runCircularMatchingForOpportunity(opportunityId, matchingDeps),
+    rematchConsortiumLeads: (opportunityId: string) =>
+      matchingService.rematchConsortiumLeadsAfterPartnerPublish(
+        opportunityId,
+        matchingDeps,
+      ),
   })
 
   return {
@@ -347,6 +352,33 @@ describe('publish matching wiring', () => {
           && match.offerOpportunityId === offer.id,
       ),
     )
+  })
+
+  it('re-anchors a published consortium lead when a partner offer is published', () => {
+    const lead = {
+      ...matchingNeed('lead-late', 'user-need', 'published'),
+      preferredMatchingTopology: 'consortium',
+      subModelType: 'consortium',
+    }
+    const offer = matchingOffer('offer-late', 'user-offer', 'published')
+    const anchors: string[] = []
+    matchingService.rematchConsortiumLeadsAfterPartnerPublish(offer.id, {
+      getOpportunityById: (id) =>
+        id === lead.id ? lead : id === offer.id ? offer : undefined,
+      listPublishedOpportunities: () => [lead, offer],
+      runMatching: (input) => {
+        anchors.push(String(input.anchorPost.id))
+        return []
+      },
+      getMatchingEngineContext: () => ({ canonical: {}, config: engineConfig }),
+      discoverPostMatch: () => ({
+        success: true,
+        aggregateId: 'pm-probe',
+        commandType: 'DiscoverPostMatch',
+      }),
+      findActiveDuplicateByStrongKey: () => undefined,
+    })
+    assert.deepEqual(anchors, [lead.id])
   })
 
   it('auto-discovers a one_way match and notifies both owners on publish', () => {

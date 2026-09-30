@@ -120,6 +120,23 @@ function buildContractRecommendedAction(
     }
   }
 
+  if (canMutate && model.canComplete) {
+    return {
+      id: 'complete-contract',
+      title: 'Complete contract',
+      context: 'Contract is active and ready to mark as completed.',
+      status: model.status,
+      statusEntity: 'contract',
+      primary: {
+        label: 'Complete contract',
+        render: () => <CompleteContractButton contractId={model.contractId} />,
+      },
+      secondary: model.links.deal
+        ? { label: PRODUCT_LANGUAGE.OPEN_DEAL, href: model.links.deal.path, variant: 'outline' }
+        : undefined,
+    }
+  }
+
   if (model.links.deal) {
     return {
       id: 'open-deal',

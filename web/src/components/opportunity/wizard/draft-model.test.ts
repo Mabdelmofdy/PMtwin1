@@ -211,6 +211,27 @@ describe('buildCollaborationCommandPayload', () => {
   })
 })
 
+describe('consultant hiring deliverables', () => {
+  it('keeps collaboration tag deliverables when the structured list is empty', () => {
+    const built = buildOpportunityDraftInput({
+      ...initialDraft,
+      subModelType: 'consultant_hiring',
+      mainCollaborationModel: 'hiring',
+      modelType: 'hiring',
+      exchangeMode: 'cash',
+      collaborationAttributes: {
+        consultationType: 'Technical',
+        scopeOfWork: 'LEED advisory',
+        deliverables: ['Gap analysis', 'Certification plan'],
+        budget: 80000,
+      },
+      deliverables: [],
+    })
+    const attrs = built.collaborationAttributes as { deliverables?: unknown }
+    assert.deepEqual(attrs.deliverables, ['Gap analysis', 'Certification plan'])
+  })
+})
+
 describe('buildOpportunityDraftInput inheritance seam', () => {
   it('resolves top-level workPackages from opportunity core fields', () => {
     const built = buildOpportunityDraftInput({

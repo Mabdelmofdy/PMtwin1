@@ -11,6 +11,8 @@ import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { contractsApi } from '@/api/contracts.ts'
 import { peopleApi } from '@/api/people.ts'
+import { partiesApi } from '@/api/parties.ts'
+import { companyDisplayNameForParty } from '@/domain/party/party-projection.ts'
 import { applicationRepository, dealRepository } from '@/repositories/index.ts'
 import { auditRepository } from '@/repositories/index.ts'
 import { useDataStoreVersion } from '@/hooks/use-data-store'
@@ -152,6 +154,8 @@ export function OpportunityDetailsShell({
           applicationRepository.getAll().filter((app) => app.opportunityId === id),
         getAuditEntries: () => auditRepository.getAll(),
         getPersonName: (userId) => peopleApi.get(userId)?.profile?.name,
+        getPartyDisplayName: (partyId) =>
+          companyDisplayNameForParty(partiesApi.getParty(partyId)),
         viewer,
         showLegacyApplicationsFlag: getEffectiveProductFlags().showLegacyApplications,
         canMutate: !isPendingApproval,

@@ -3229,8 +3229,9 @@ function contractStatusToReasonCode(status) {
 }
 function contractStatusToHref(entityId, section) {
   const base = `/contracts/${entityId}`;
-  if (section) return `${base}/${section}`;
-  return base;
+  if (!section) return base;
+  if (section === "complete" || section === "terminate") return base;
+  return `${base}/${section}`;
 }
 function resolvePartiesSigned(partiesSigned, parties) {
   if (partiesSigned != null) return partiesSigned;

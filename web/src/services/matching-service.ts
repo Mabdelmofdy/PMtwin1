@@ -302,6 +302,64 @@ function logPublishMatching(
   console.info(`[pmtwin:publish-matching] ${stage}`, details)
 }
 
+const CONSORTIUM_LEAD_SUB_MODELS = new Set([
+  'consortium',
+  'project_jv',
+  'spv',
+  'strategic_jv',
+])
+
+/** Consortium scoring runs only when the lead need is the anchor. */
+export function isConsortiumLeadOpportunity(
+  opportunity: Pick<
+    Opportunity,
+    'intent' | 'preferredMatchingTopology' | 'subModelType' | 'collaborationAttributes' | 'attributes'
+  >,
+): boolean {
+  const intent = (opportunity.intent ?? 'need').toLowerCase()
+  if (intent === 'offer') return false
+  if (opportunity.preferredMatchingTopology === 'consortium') return true
+  if (CONSORTIUM_LEAD_SUB_MODELS.has((opportunity.subModelType ?? '').trim())) return true
+  const attrs = (opportunity.collaborationAttributes ?? opportunity.attributes) as
+    | { readonly memberRoles?: unknown; readonly partnerRoles?: unknown }
+    | undefined
+  const roles = attrs?.memberRoles ?? attrs?.partnerRoles
+  return Array.isArray(roles) && roles.length > 0
+}
+
+/**
+ * Publishing a partner offer does not anchor consortium scoring.
+ * Re-run published consortium leads so the new offer can fill a role.
+ */
+function rematchConsortiumLeadsAfterPartnerPublish(
+  triggerOpportunityId: string,
+  deps?: PublishMatchingDeps,
+): void {
+  const getOpportunityById =
+    deps?.getOpportunityById ?? ((id: string) => opportunityRepository.getById(id))
+  const trigger = getOpportunityById(triggerOpportunityId)
+  if (!trigger || !isMatchingPoolOpportunity(trigger)) return
+  if (isConsortiumLeadOpportunity(trigger)) return
+
+  const listPublishedOpportunities =
+    deps?.listPublishedOpportunities
+    ?? (() => opportunityRepository.getAll().filter((opp) => isMatchingPoolOpportunity(opp)))
+
+  for (const lead of listPublishedOpportunities()) {
+    if (!lead.id || lead.id === triggerOpportunityId) continue
+    if (!isConsortiumLeadOpportunity(lead)) continue
+    try {
+      runPublishMatchingForOpportunity(lead.id, deps)
+    } catch (error) {
+      console.error('[pmtwin:publish-matching] consortium lead rematch exception', {
+        triggerOpportunityId,
+        leadOpportunityId: lead.id,
+        message: error instanceof Error ? error.message : String(error),
+      })
+    }
+  }
+}
+
 function runPublishMatchingForOpportunity(
   opportunityId: string,
   deps?: PublishMatchingDeps,
@@ -936,6 +994,7 @@ export const matchingService = {
   discoverNeedOfferMatch,
   resolveDiscoverMatchScore,
   runPublishMatchingForOpportunity,
+  rematchConsortiumLeadsAfterPartnerPublish,
   runPublishMatchingForPublishedOpportunities,
   runCircularMatchingForOpportunity,
   runCircularMatchingForPublishedOpportunities,

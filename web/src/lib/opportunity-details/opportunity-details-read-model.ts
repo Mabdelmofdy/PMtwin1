@@ -202,6 +202,7 @@ export type OpportunityDetailsReadModelDeps = {
   readonly getApplicationsForOpportunity?: (opportunityId: string) => readonly Application[]
   readonly getAuditEntries?: () => readonly AuditEntry[]
   readonly getPersonName?: (userId: string) => string | undefined
+  readonly getPartyDisplayName?: (partyId: string) => string | undefined
   readonly viewer: ViewerContext
   readonly showLegacyApplicationsFlag?: boolean
   readonly canMutate?: boolean
@@ -518,6 +519,7 @@ export function buildOpportunityDetailsReadModel(
         getNegotiationsForPostMatch: deps.getNegotiationsForPostMatch,
         getDealForPostMatch: deps.getDealForPostMatch,
         getPersonName: deps.getPersonName,
+        getPartyDisplayName: deps.getPartyDisplayName,
         currentUserId: deps.viewer.userId ?? null,
         canMutate: deps.canMutate !== false && !isAuditor,
       })

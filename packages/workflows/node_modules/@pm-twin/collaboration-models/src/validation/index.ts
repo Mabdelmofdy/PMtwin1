@@ -168,10 +168,15 @@ export function validateSubModelAttributes(
   }
 
   const data = attributes ?? {}
+  const labelByKey = new Map(
+    (sub.attributes ?? []).map((field) => [field.key, field.label]),
+  )
   for (const fieldKey of sub.requiredFields) {
     const value = data[fieldKey]
     if (value == null || value === '' || (Array.isArray(value) && value.length === 0)) {
-      errors.push(`Missing required collaboration attribute: ${fieldKey}`)
+      const label = labelByKey.get(fieldKey) ?? fieldKey
+      const shown = label === fieldKey ? fieldKey : `${label} (${fieldKey})`
+      errors.push(`Missing required collaboration attribute: ${shown}`)
     }
   }
 

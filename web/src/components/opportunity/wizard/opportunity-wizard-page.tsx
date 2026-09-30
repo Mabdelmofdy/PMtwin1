@@ -23,7 +23,10 @@ import {
   type AutosaveStatus,
   type LocalDraftSnapshot,
 } from '@/lib/wizard-local-draft.ts'
-import { validateCollaborationTaxonomy } from '@pm-twin/collaboration-models'
+import {
+  validateCollaborationTaxonomy,
+  validateSubModelAttributes,
+} from '@pm-twin/collaboration-models'
 import {
   allowedCommercialComponentTypesForSubModel,
   deriveLegacyExchangeMode,
@@ -152,6 +155,13 @@ function validateWizardStepAdvance(
         })
         if (!taxonomy.valid) {
           return taxonomy.errors[0] ?? 'Collaboration selection is invalid.'
+        }
+        const attributes = validateSubModelAttributes(
+          draft.subModelType,
+          draft.collaborationAttributes,
+        )
+        if (!attributes.valid) {
+          return attributes.errors[0] ?? 'Required collaboration details are missing.'
         }
       }
       return null

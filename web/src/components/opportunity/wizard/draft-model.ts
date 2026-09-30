@@ -223,6 +223,14 @@ export function toWizardDraft(draft: OpportunityDraft): OpportunityWizardDraft {
   }
 }
 
+/** Plain tag strings belong to collaboration attributes, not the structured deliverable editor. */
+function isStructuredDeliverableList(value: unknown): boolean {
+  return (
+    Array.isArray(value) &&
+    value.some((item) => item != null && typeof item === 'object')
+  )
+}
+
 export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
   const attrs = existing.collaborationAttributes ?? {}
   const normalized = existing.normalized ?? {}
@@ -342,7 +350,9 @@ export function opportunityToDraft(existing: Opportunity): OpportunityDraft {
         return fromAttrs ?? fromTop ?? []
       })(),
     ),
-    deliverables: normalizeDeliverables(attrs.deliverables),
+    deliverables: isStructuredDeliverableList(attrs.deliverables)
+      ? normalizeDeliverables(attrs.deliverables)
+      : [],
     milestones:
       milestonesFromAttrs.length > 0
         ? milestonesFromAttrs
@@ -470,7 +480,9 @@ export function buildOpportunityDraftInput(
        * Do not write resolved packages here; that would break Override round-trip.
        */
       workPackages: synced.workPackages,
-      deliverables: synced.deliverables,
+      ...(synced.deliverables.length > 0
+        ? { deliverables: synced.deliverables }
+        : {}),
       milestones: synced.milestones,
       resources: synced.resources,
       capacity: synced.intent === 'offer' ? synced.capacity : undefined,

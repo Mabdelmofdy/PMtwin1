@@ -6,6 +6,9 @@ import { matchesApi } from '@/api/matches.ts'
 import { negotiationsApi } from '@/api/negotiations.ts'
 import { opportunitiesApi } from '@/api/opportunities.ts'
 import { peopleApi } from '@/api/people.ts'
+import { partiesApi } from '@/api/parties.ts'
+import { companyDisplayNameForParty } from '@/domain/party/party-projection.ts'
+import { canShowCreateCommercialAgreementFromNegotiation } from '@/lib/create-commercial-agreement-ui-actions.ts'
 import { dealsApi } from '@/api/deals.ts'
 import { formatDate } from '@/lib/format'
 import {
@@ -327,6 +330,23 @@ function buildNegotiationRecommendedAction(input: {
   }
 
   if (!canMutate) return null
+
+  if (canShowCreateCommercialAgreementFromNegotiation(neg)) {
+    return {
+      id: 'create-commercial-agreement',
+      title: 'Create commercial agreement',
+      context: 'Terms are agreed. Create the commercial agreement to continue.',
+      status: neg.status,
+      statusEntity: 'negotiation',
+      primary: {
+        label: 'Create Commercial Agreement',
+        render: () => <CreateCommercialAgreementButton negotiation={neg} />,
+      },
+      secondary: neg.postMatchId
+        ? { label: PRODUCT_LANGUAGE.OPEN_MATCH, href: `/matches/${neg.postMatchId}`, variant: 'outline' }
+        : undefined,
+    }
+  }
 
   return {
     id: 'agree-terms',
@@ -710,6 +730,8 @@ export function MatchDetailPage() {
       getNegotiationsForPostMatch: negotiationsApi.getByPostMatchId,
       getDealForPostMatch: (postMatchId) => dealRepository.findByPostMatchId(postMatchId),
       getPersonName: (userId) => peopleApi.get(userId)?.profile?.name,
+      getPartyDisplayName: (partyId) =>
+        companyDisplayNameForParty(partiesApi.getParty(partyId)),
       currentUserId: user?.id ?? null,
       canAct: !isPendingApproval,
     })

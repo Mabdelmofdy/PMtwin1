@@ -8,7 +8,8 @@ import {
 /**
  * Map sub-model allowedExchangeModes onto selectable commercial component types.
  * `hybrid` is derived when multiple components are enabled — it is not a button.
- * When hybrid is allowed, `custom` remains available so users can form a hybrid.
+ * `revenue_sharing` and `custom` are commercial components, not ExchangeMode values.
+ * When hybrid is allowed, both stay selectable and serialize to hybrid.
  */
 export function allowedCommercialComponentTypesForSubModel(
   subModelType: string | null | undefined,
@@ -33,6 +34,7 @@ export function filterCommercialComponentTypesByExchangeModes(
   }
   if (allowedExchangeModes.includes('hybrid')) {
     allowed.add('custom')
+    allowed.add('revenue_sharing')
   }
 
   if (allowed.size === 0) return COMMERCIAL_COMPONENT_TYPES

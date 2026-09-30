@@ -7,6 +7,7 @@ import { resolveCanonicalStatus } from '@/lib/status-display.ts'
 import { normalizeParticipants } from '@/types/participant.ts'
 import { resolvePostMatchOpportunityIds } from '@/domain/normalized/post-match-opportunity-ids.ts'
 import { isOpportunityOwnedByContext } from '@/domain/identity/ownership-adapters.ts'
+import { partyIdLookupAliases } from '@/domain/party/party-projection.ts'
 import type {
   Contract,
   Deal,
@@ -150,6 +151,47 @@ export function findParticipantMatchForOpportunity(
 
 export function isMatchParticipant(match: PostMatch, viewer: ViewerContext): boolean {
   return isParticipantOnEntity(match, viewer.userId)
+}
+
+/** Same marketplace party, including legacy account-id aliases. */
+function sameMarketplaceParty(
+  left: string | undefined,
+  right: string | undefined,
+): boolean {
+  if (!left || !right) return false
+  if (left === right) return true
+  const leftAliases = new Set(partyIdLookupAliases(left))
+  return partyIdLookupAliases(right).some((alias) => leftAliases.has(alias))
+}
+
+/**
+ * Company ownership stays on partyId. The persisted participant userId may be
+ * the human representative required for discovery. The company workspace may
+ * still open the match.
+ */
+export function isMatchPartyViewer(match: PostMatch, viewer: ViewerContext): boolean {
+  const participants = normalizeParticipants(match.participants)
+  if (
+    viewer.userId &&
+    participants.some((participant) =>
+      participant.representativeUserIds?.includes(viewer.userId as string),
+    )
+  ) {
+    return true
+  }
+  if (
+    viewer.activePartyId &&
+    participants.some((participant) =>
+      sameMarketplaceParty(participant.partyId, viewer.activePartyId ?? undefined)
+      || sameMarketplaceParty(
+        participant.actingForPartyId,
+        viewer.activePartyId ?? undefined,
+      ),
+    )
+  ) {
+    return true
+  }
+  return false
 }
 
 function opportunityCanonicalStatus(opportunity: Opportunity): string {
@@ -325,9 +367,9 @@ export function resolveOpportunityDetailVisibility(
   }
 }
 
-/** POC match detail: participant-only (no admin bypass on user route). */
+/** Match detail: human participant, or the company party that owns the slot. */
 export function canViewMatchDetail(match: PostMatch, viewer: ViewerContext): boolean {
-  return isMatchParticipant(match, viewer)
+  return isMatchParticipant(match, viewer) || isMatchPartyViewer(match, viewer)
 }
 
 /** POC negotiation detail: party-only (no admin bypass on user route). */
@@ -367,13 +409,13 @@ export function canMutateNegotiationDetail(
 }
 
 function matchTouchesOpportunity(match: PostMatch, opportunityId: string): boolean {
-  const needId = match.needOpportunityId ?? match.payload?.needOpportunityId
-  const offerId = match.offerOpportunityId ?? match.payload?.offerOpportunityId
-  return (
-    match.participants?.some((participant) => participant.opportunityId === opportunityId) === true ||
-    needId === opportunityId ||
-    offerId === opportunityId
-  )
+  if (
+    match.participants?.some((participant) => participant.opportunityId === opportunityId) ===
+    true
+  ) {
+    return true
+  }
+  return resolvePostMatchOpportunityIds(match).opportunityIds.includes(opportunityId)
 }
 
 export function filterPostMatchesForViewer(
@@ -386,12 +428,12 @@ export function filterPostMatchesForViewer(
   if (viewer.canAccessAdmin) return [...matches]
   if (!viewer.userId) return []
   return matches.filter((match) => {
-    if (isMatchParticipant(match, viewer)) return true
+    if (isMatchParticipant(match, viewer) || isMatchPartyViewer(match, viewer)) return true
     if (options.ownedOpportunityIds) {
-      const needId = match.needOpportunityId ?? match.payload?.needOpportunityId
-      const offerId = match.offerOpportunityId ?? match.payload?.offerOpportunityId
-      if (needId && options.ownedOpportunityIds.has(needId)) return true
-      if (offerId && options.ownedOpportunityIds.has(offerId)) return true
+      const touchesOwned = resolvePostMatchOpportunityIds(match).opportunityIds.some((id) =>
+        options.ownedOpportunityIds?.has(id),
+      )
+      if (touchesOwned) return true
     }
     return false
   })
@@ -451,7 +493,9 @@ export function viewerTouchesOpportunityMatch(
   viewer: ViewerContext,
 ): boolean {
   return postMatches.some(
-    (match) => matchTouchesOpportunity(match, opportunityId) && isMatchParticipant(match, viewer),
+    (match) =>
+      matchTouchesOpportunity(match, opportunityId) &&
+      (isMatchParticipant(match, viewer) || isMatchPartyViewer(match, viewer)),
   )
 }
 

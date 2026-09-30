@@ -95,6 +95,7 @@ export function PmFormStepper({
             errorStepIds,
             step,
           })
+          const isCurrent = step.id === activeStepId
           const navigable =
             onStepClick &&
             (status === 'completed' || status === 'active' || status === 'error')
@@ -105,13 +106,14 @@ export function PmFormStepper({
                 type="button"
                 disabled={!navigable}
                 onClick={() => navigable && onStepClick(step.id)}
-                aria-current={status === 'active' ? 'step' : undefined}
+                aria-current={isCurrent ? 'step' : undefined}
+                data-current={isCurrent ? 'true' : undefined}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-start transition-colors',
                   pmMotionSafe,
                   navigable && 'cursor-pointer hover:border-border-strong',
                   !navigable && 'cursor-default',
-                  status === 'active' && 'ring-2 ring-primary/20',
+                  isCurrent && 'ring-2 ring-primary/20',
                 )}
               >
                 <span

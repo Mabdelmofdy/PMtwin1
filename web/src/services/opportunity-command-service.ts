@@ -25,6 +25,7 @@ export type OpportunityCommandServiceDeps = {
   readonly gateway?: DefaultCommandGateway
   readonly runPublishMatching?: (opportunityId: string) => PublishMatchingResult
   readonly runCircularMatching?: (opportunityId: string) => PublishMatchingResult
+  readonly rematchConsortiumLeads?: (opportunityId: string) => void
   readonly getOpportunityById?: (id: string) => Opportunity | undefined
 }
 
@@ -89,6 +90,21 @@ function runPostPublishMatching(
     ?? matchingService.runCircularMatchingForOpportunity.bind(matchingService)
 
   const matching = runPublishMatching(opportunityId)
+
+  // Partner publishes do not anchor consortium scoring. Re-run existing leads.
+  // Injected matching runners must opt in so isolated tests do not scan the app repository.
+  const rematch = deps?.rematchConsortiumLeads
+    ?? (deps?.runPublishMatching
+      ? undefined
+      : matchingService.rematchConsortiumLeadsAfterPartnerPublish.bind(matchingService))
+  try {
+    rematch?.(opportunityId)
+  } catch (error) {
+    console.error('[pmtwin:publish-matching] consortium lead rematch exception', {
+      opportunityId,
+      message: error instanceof Error ? error.message : String(error),
+    })
+  }
 
   // Circular matching is best-effort and must never fail the publish action.
   console.info('[pmtwin:publish-matching] circular matching started', {

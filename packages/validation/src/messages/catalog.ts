@@ -27,9 +27,9 @@ const MESSAGES: Readonly<Record<string, string>> = {
   [VAL_CODES.BUDGET_CASH_REQUIRED]: 'Budget is required for cash exchange.',
   [VAL_CODES.BUDGET_BELOW_MINIMUM]: 'Budget is below the configured minimum.',
   [VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED]:
-    'Profit share percentage, revenue basis, and settlement cycle are required.',
+    'Profit share percentage, calculation basis, and settlement period are required.',
   [VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED]:
-    'Equity percentage, capital contribution, and governance rights are required.',
+    'Equity percentage, capital contribution or valuation, and governance structure or equity type are required.',
   [VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED]:
     'Each selected hybrid component needs complete data.',
 

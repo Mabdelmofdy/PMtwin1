@@ -42,8 +42,10 @@ export function contractStatusToHref(
   section?: 'sign' | 'milestones' | 'complete' | 'terminate',
 ): string {
   const base = `/contracts/${entityId}`
-  if (section) return `${base}/${section}`
-  return base
+  if (!section) return base
+  // Complete and terminate have no child routes; those paths fall through to the dashboard.
+  if (section === 'complete' || section === 'terminate') return base
+  return `${base}/${section}`
 }
 
 export function resolvePartiesSigned(

@@ -69,12 +69,23 @@ function isTagsLikeType(type: DynamicFieldType): boolean {
   )
 }
 
+/**
+ * Tokenize tag text without eating the in-progress token.
+ * A trailing space or comma is kept so "Gap analysis, Certification plan"
+ * can be typed. Completed values stay a string array.
+ */
+export function parseTagsInput(raw: string): string | string[] {
+  if (!raw.trim()) return []
+  if (/[\s,]$/.test(raw)) return raw
+  return raw
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}
+
 function writeFieldValue(field: DynamicFieldDefinition, raw: string): unknown {
   if (isTagsLikeType(field.type)) {
-    return raw
-      .split(',')
-      .map((item) => item.trim())
-      .filter(Boolean)
+    return parseTagsInput(raw)
   }
   if (field.type === 'number' || field.type === 'currency') {
     const num = Number(raw)

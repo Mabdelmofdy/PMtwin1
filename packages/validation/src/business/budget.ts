@@ -90,6 +90,181 @@ function resolveBudgetFromNotes(notes: unknown): number | null {
   return toNumber(match[1].replace(/,/g, ''))
 }
 
+type CommercialComponentRecord = Record<string, unknown>
+
+function readEnabledCommercialComponents(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): CommercialComponentRecord[] {
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure
+    if (!structure || typeof structure !== 'object') continue
+    const components = (structure as Record<string, unknown>).components
+    if (!Array.isArray(components)) continue
+    const enabled = components.filter(
+      (component): component is CommercialComponentRecord =>
+        component !== null &&
+        typeof component === 'object' &&
+        (component as CommercialComponentRecord).enabled !== false,
+    )
+    if (enabled.length > 0) return enabled
+  }
+  return []
+}
+
+function findEnabledComponent(
+  input: {
+    exchangeData?: Readonly<Record<string, unknown>>
+    collaborationAttributes?: Readonly<Record<string, unknown>>
+  },
+  type: string,
+): CommercialComponentRecord | undefined {
+  return readEnabledCommercialComponents(input).find(
+    (component) => component.type === type,
+  )
+}
+
+function hasNonEmptyCollection(value: unknown): boolean {
+  if (Array.isArray(value)) return value.length > 0
+  if (value && typeof value === 'object') return Object.keys(value as object).length > 0
+  return false
+}
+
+function componentHasSubstantiveValue(
+  component: CommercialComponentRecord,
+  keys: readonly string[],
+): boolean {
+  for (const key of keys) {
+    const value = component[key]
+    if (typeof value === 'number' && Number.isFinite(value)) return true
+    if (hasText(value)) return true
+    if (Array.isArray(value) && value.length > 0) return true
+  }
+  return false
+}
+
+/** Creation 3.0 component is filled enough to count as a hybrid part. */
+function commercialComponentIsComplete(component: CommercialComponentRecord): boolean {
+  switch (component.type) {
+    case 'cash':
+      return (
+        componentHasSubstantiveValue(component, [
+          'fixedAmount',
+          'minimumAmount',
+          'maximumAmount',
+          'notes',
+          'paymentTerms',
+        ]) ||
+        (Array.isArray(component.paymentSchedule) && component.paymentSchedule.length > 0)
+      )
+    case 'barter':
+      return componentHasSubstantiveValue(component, [
+        'offeredAssetOrService',
+        'requestedAssetOrService',
+        'estimatedValue',
+        'valuationMethod',
+      ])
+    case 'equity':
+      return componentHasSubstantiveValue(component, [
+        'equityPercentage',
+        'equityType',
+        'valuation',
+      ])
+    case 'profit_sharing':
+      return componentHasSubstantiveValue(component, [
+        'profitSharePercentage',
+        'calculationBasis',
+        'settlementPeriod',
+      ])
+    case 'revenue_sharing':
+      return componentHasSubstantiveValue(component, [
+        'revenueSharePercentage',
+        'revenueDefinition',
+        'settlementPeriod',
+      ])
+    case 'custom':
+      return componentHasSubstantiveValue(component, [
+        'description',
+        'calculationMethod',
+      ])
+    default:
+      return false
+  }
+}
+
+/**
+ * Hybrid from Creation 3.0 is one custom/revenue component, or two or more
+ * enabled components. Returns null when no commercial structure is stored.
+ */
+function hybridCommercialStructureState(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): 'absent' | 'complete' | 'incomplete' {
+  const components = readEnabledCommercialComponents(input)
+  if (components.length === 0) return 'absent'
+  const complete = components.every(commercialComponentIsComplete)
+  if (!complete) return 'incomplete'
+  if (components.length >= 2) return 'complete'
+  const type = components[0]?.type
+  if (type === 'custom' || type === 'revenue_sharing') return 'complete'
+  return 'incomplete'
+}
+
+function equityFigurePresent(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): boolean {
+  const data = input.exchangeData
+  const attrs = input.collaborationAttributes
+  if (getNestedNumber(data, ['equityPercentage', 'equitySplit']) !== null) return true
+  if (getNestedNumber(attrs, ['equityPercentage', 'equitySplit']) !== null) return true
+  if (hasNonEmptyCollection(data?.equitySplit) || hasNonEmptyCollection(attrs?.equitySplit)) {
+    return true
+  }
+  const component = findEnabledComponent(input, 'equity')
+  if (!component) return false
+  return toNumber(component.equityPercentage) !== null || hasText(component.equityType)
+}
+
+function capitalFigurePresent(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): boolean {
+  const data = input.exchangeData
+  const attrs = input.collaborationAttributes
+  const capitalKeys = ['capitalContribution', 'ownershipTerms'] as const
+  if (getNestedString(data, capitalKeys) || getNestedString(attrs, capitalKeys)) return true
+  if (getNestedNumber(data, ['capitalContribution']) !== null) return true
+  if (getNestedNumber(attrs, ['capitalContribution']) !== null) return true
+  const component = findEnabledComponent(input, 'equity')
+  return component != null && toNumber(component.valuation) !== null
+}
+
+function governanceFigurePresent(input: {
+  exchangeData?: Readonly<Record<string, unknown>>
+  collaborationAttributes?: Readonly<Record<string, unknown>>
+}): boolean {
+  const keys = [
+    'governanceRights',
+    'equityStructure',
+    'governance',
+    'governanceStructure',
+    'votingRights',
+    'boardRepresentation',
+  ] as const
+  const data = input.exchangeData
+  const attrs = input.collaborationAttributes
+  if (getNestedString(data, keys) || getNestedString(attrs, keys)) return true
+  const component = findEnabledComponent(input, 'equity')
+  if (!component) return false
+  return (
+    hasText(component.votingRights) ||
+    hasText(component.boardRepresentation) ||
+    hasText(component.equityType) ||
+    hasText(component.exitStrategy)
+  )
+}
+
 function hasConfiguredCashCommercial(input: {
   exchangeData?: Readonly<Record<string, unknown>>
   collaborationAttributes?: Readonly<Record<string, unknown>>
@@ -170,15 +345,23 @@ export const budgetProfitFieldsRequired: ValidationRule = {
     if (mode !== 'profit_sharing') return null
     const data = input.exchangeData
     const attrs = input.collaborationAttributes
+    const profitComponent = findEnabledComponent(input, 'profit_sharing')
     const profit =
       getNestedNumber(data, ['profitSplit', 'profitSharePercentage', 'profitPercent']) ??
-      getNestedNumber(attrs, ['profitSplit', 'profitSharePercentage', 'profitPercent'])
+      getNestedNumber(attrs, ['profitSplit', 'profitSharePercentage', 'profitPercent']) ??
+      (profitComponent ? toNumber(profitComponent.profitSharePercentage) : null)
     const basis =
       getNestedString(data, ['calculationBasis', 'revenueBasis', 'revenueModel']) ??
-      getNestedString(attrs, ['calculationBasis', 'revenueBasis', 'revenueModel'])
+      getNestedString(attrs, ['calculationBasis', 'revenueBasis', 'revenueModel']) ??
+      (profitComponent && hasText(profitComponent.calculationBasis)
+        ? String(profitComponent.calculationBasis)
+        : undefined)
     const cycle =
-      getNestedString(data, ['settlementCycle', 'profitDistribution']) ??
-      getNestedString(attrs, ['settlementCycle', 'profitDistribution'])
+      getNestedString(data, ['settlementCycle', 'settlementPeriod', 'profitDistribution']) ??
+      getNestedString(attrs, ['settlementCycle', 'settlementPeriod', 'profitDistribution']) ??
+      (profitComponent && hasText(profitComponent.settlementPeriod)
+        ? String(profitComponent.settlementPeriod)
+        : undefined)
     if (profit !== null && hasText(basis) && hasText(cycle)) return null
     return budgetIssue(
       VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED,
@@ -200,18 +383,13 @@ export const budgetEquityFieldsRequired: ValidationRule = {
   execute(input) {
     const mode = normalizeExchangeMode(input.exchangeMode)
     if (mode !== 'equity') return null
-    const data = input.exchangeData
-    const attrs = input.collaborationAttributes
-    const equity =
-      getNestedNumber(data, ['equityPercentage', 'equitySplit']) ??
-      getNestedNumber(attrs, ['equityPercentage', 'equitySplit'])
-    const capital =
-      getNestedString(data, ['capitalContribution', 'ownershipTerms']) ??
-      getNestedString(attrs, ['capitalContribution', 'ownershipTerms'])
-    const governance =
-      getNestedString(data, ['governanceRights', 'equityStructure']) ??
-      getNestedString(attrs, ['governanceRights', 'equityStructure'])
-    if (equity !== null && hasText(capital) && hasText(governance)) return null
+    if (
+      equityFigurePresent(input) &&
+      capitalFigurePresent(input) &&
+      governanceFigurePresent(input)
+    ) {
+      return null
+    }
     return budgetIssue(
       VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED,
       ['exchangeData.equityPercentage'],
@@ -232,6 +410,11 @@ export const budgetHybridComponents: ValidationRule = {
   execute(input) {
     const mode = normalizeExchangeMode(input.exchangeMode)
     if (mode !== 'hybrid') return null
+    const structureState = hybridCommercialStructureState(input)
+    if (structureState === 'complete') return null
+    if (structureState === 'incomplete') {
+      return budgetIssue(VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED, ['exchangeData'])
+    }
     const data = input.exchangeData ?? {}
     const cash = getNestedNumber(data, ['cashComponent', 'budget', 'cashAmount'])
     const nonCash =

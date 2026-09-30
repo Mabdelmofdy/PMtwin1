@@ -120,8 +120,8 @@ var MESSAGES = {
   [VAL_CODES.DATE_AVAILABILITY_END_BEFORE_START]: "Availability end date cannot be before Start date.",
   [VAL_CODES.BUDGET_CASH_REQUIRED]: "Budget is required for cash exchange.",
   [VAL_CODES.BUDGET_BELOW_MINIMUM]: "Budget is below the configured minimum.",
-  [VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED]: "Profit share percentage, revenue basis, and settlement cycle are required.",
-  [VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED]: "Equity percentage, capital contribution, and governance rights are required.",
+  [VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED]: "Profit share percentage, calculation basis, and settlement period are required.",
+  [VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED]: "Equity percentage, capital contribution or valuation, and governance structure or equity type are required.",
   [VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED]: "Each selected hybrid component needs complete data.",
   [VAL_CODES.SKILL_REQUIRED_MISSING]: "Add at least one required skill.",
   [VAL_CODES.SKILL_PROVIDED_MISSING]: "Add at least one provided skill.",
@@ -695,6 +695,130 @@ function resolveBudgetFromNotes(notes) {
   if (!match?.[1]) return null;
   return toNumber(match[1].replace(/,/g, ""));
 }
+function readEnabledCommercialComponents(input) {
+  for (const source of [input.exchangeData, input.collaborationAttributes]) {
+    const structure = source?.commercialStructure;
+    if (!structure || typeof structure !== "object") continue;
+    const components = structure.components;
+    if (!Array.isArray(components)) continue;
+    const enabled = components.filter(
+      (component) => component !== null && typeof component === "object" && component.enabled !== false
+    );
+    if (enabled.length > 0) return enabled;
+  }
+  return [];
+}
+function findEnabledComponent(input, type) {
+  return readEnabledCommercialComponents(input).find(
+    (component) => component.type === type
+  );
+}
+function hasNonEmptyCollection(value) {
+  if (Array.isArray(value)) return value.length > 0;
+  if (value && typeof value === "object") return Object.keys(value).length > 0;
+  return false;
+}
+function componentHasSubstantiveValue(component, keys) {
+  for (const key of keys) {
+    const value = component[key];
+    if (typeof value === "number" && Number.isFinite(value)) return true;
+    if (hasText(value)) return true;
+    if (Array.isArray(value) && value.length > 0) return true;
+  }
+  return false;
+}
+function commercialComponentIsComplete(component) {
+  switch (component.type) {
+    case "cash":
+      return componentHasSubstantiveValue(component, [
+        "fixedAmount",
+        "minimumAmount",
+        "maximumAmount",
+        "notes",
+        "paymentTerms"
+      ]) || Array.isArray(component.paymentSchedule) && component.paymentSchedule.length > 0;
+    case "barter":
+      return componentHasSubstantiveValue(component, [
+        "offeredAssetOrService",
+        "requestedAssetOrService",
+        "estimatedValue",
+        "valuationMethod"
+      ]);
+    case "equity":
+      return componentHasSubstantiveValue(component, [
+        "equityPercentage",
+        "equityType",
+        "valuation"
+      ]);
+    case "profit_sharing":
+      return componentHasSubstantiveValue(component, [
+        "profitSharePercentage",
+        "calculationBasis",
+        "settlementPeriod"
+      ]);
+    case "revenue_sharing":
+      return componentHasSubstantiveValue(component, [
+        "revenueSharePercentage",
+        "revenueDefinition",
+        "settlementPeriod"
+      ]);
+    case "custom":
+      return componentHasSubstantiveValue(component, [
+        "description",
+        "calculationMethod"
+      ]);
+    default:
+      return false;
+  }
+}
+function hybridCommercialStructureState(input) {
+  const components = readEnabledCommercialComponents(input);
+  if (components.length === 0) return "absent";
+  const complete = components.every(commercialComponentIsComplete);
+  if (!complete) return "incomplete";
+  if (components.length >= 2) return "complete";
+  const type = components[0]?.type;
+  if (type === "custom" || type === "revenue_sharing") return "complete";
+  return "incomplete";
+}
+function equityFigurePresent(input) {
+  const data = input.exchangeData;
+  const attrs = input.collaborationAttributes;
+  if (getNestedNumber(data, ["equityPercentage", "equitySplit"]) !== null) return true;
+  if (getNestedNumber(attrs, ["equityPercentage", "equitySplit"]) !== null) return true;
+  if (hasNonEmptyCollection(data?.equitySplit) || hasNonEmptyCollection(attrs?.equitySplit)) {
+    return true;
+  }
+  const component = findEnabledComponent(input, "equity");
+  if (!component) return false;
+  return toNumber(component.equityPercentage) !== null || hasText(component.equityType);
+}
+function capitalFigurePresent(input) {
+  const data = input.exchangeData;
+  const attrs = input.collaborationAttributes;
+  const capitalKeys = ["capitalContribution", "ownershipTerms"];
+  if (getNestedString(data, capitalKeys) || getNestedString(attrs, capitalKeys)) return true;
+  if (getNestedNumber(data, ["capitalContribution"]) !== null) return true;
+  if (getNestedNumber(attrs, ["capitalContribution"]) !== null) return true;
+  const component = findEnabledComponent(input, "equity");
+  return component != null && toNumber(component.valuation) !== null;
+}
+function governanceFigurePresent(input) {
+  const keys = [
+    "governanceRights",
+    "equityStructure",
+    "governance",
+    "governanceStructure",
+    "votingRights",
+    "boardRepresentation"
+  ];
+  const data = input.exchangeData;
+  const attrs = input.collaborationAttributes;
+  if (getNestedString(data, keys) || getNestedString(attrs, keys)) return true;
+  const component = findEnabledComponent(input, "equity");
+  if (!component) return false;
+  return hasText(component.votingRights) || hasText(component.boardRepresentation) || hasText(component.equityType) || hasText(component.exitStrategy);
+}
 function hasConfiguredCashCommercial(input) {
   for (const source of [input.exchangeData, input.collaborationAttributes]) {
     const structure = source?.commercialStructure;
@@ -764,9 +888,10 @@ var budgetProfitFieldsRequired = {
     if (mode !== "profit_sharing") return null;
     const data = input.exchangeData;
     const attrs = input.collaborationAttributes;
-    const profit = getNestedNumber(data, ["profitSplit", "profitSharePercentage", "profitPercent"]) ?? getNestedNumber(attrs, ["profitSplit", "profitSharePercentage", "profitPercent"]);
-    const basis = getNestedString(data, ["calculationBasis", "revenueBasis", "revenueModel"]) ?? getNestedString(attrs, ["calculationBasis", "revenueBasis", "revenueModel"]);
-    const cycle = getNestedString(data, ["settlementCycle", "profitDistribution"]) ?? getNestedString(attrs, ["settlementCycle", "profitDistribution"]);
+    const profitComponent = findEnabledComponent(input, "profit_sharing");
+    const profit = getNestedNumber(data, ["profitSplit", "profitSharePercentage", "profitPercent"]) ?? getNestedNumber(attrs, ["profitSplit", "profitSharePercentage", "profitPercent"]) ?? (profitComponent ? toNumber(profitComponent.profitSharePercentage) : null);
+    const basis = getNestedString(data, ["calculationBasis", "revenueBasis", "revenueModel"]) ?? getNestedString(attrs, ["calculationBasis", "revenueBasis", "revenueModel"]) ?? (profitComponent && hasText(profitComponent.calculationBasis) ? String(profitComponent.calculationBasis) : void 0);
+    const cycle = getNestedString(data, ["settlementCycle", "settlementPeriod", "profitDistribution"]) ?? getNestedString(attrs, ["settlementCycle", "settlementPeriod", "profitDistribution"]) ?? (profitComponent && hasText(profitComponent.settlementPeriod) ? String(profitComponent.settlementPeriod) : void 0);
     if (profit !== null && hasText(basis) && hasText(cycle)) return null;
     return budgetIssue(
       VAL_CODES.BUDGET_PROFIT_FIELDS_REQUIRED,
@@ -787,12 +912,9 @@ var budgetEquityFieldsRequired = {
   execute(input) {
     const mode = normalizeExchangeMode(input.exchangeMode);
     if (mode !== "equity") return null;
-    const data = input.exchangeData;
-    const attrs = input.collaborationAttributes;
-    const equity = getNestedNumber(data, ["equityPercentage", "equitySplit"]) ?? getNestedNumber(attrs, ["equityPercentage", "equitySplit"]);
-    const capital = getNestedString(data, ["capitalContribution", "ownershipTerms"]) ?? getNestedString(attrs, ["capitalContribution", "ownershipTerms"]);
-    const governance = getNestedString(data, ["governanceRights", "equityStructure"]) ?? getNestedString(attrs, ["governanceRights", "equityStructure"]);
-    if (equity !== null && hasText(capital) && hasText(governance)) return null;
+    if (equityFigurePresent(input) && capitalFigurePresent(input) && governanceFigurePresent(input)) {
+      return null;
+    }
     return budgetIssue(
       VAL_CODES.BUDGET_EQUITY_FIELDS_REQUIRED,
       ["exchangeData.equityPercentage"],
@@ -812,6 +934,11 @@ var budgetHybridComponents = {
   execute(input) {
     const mode = normalizeExchangeMode(input.exchangeMode);
     if (mode !== "hybrid") return null;
+    const structureState = hybridCommercialStructureState(input);
+    if (structureState === "complete") return null;
+    if (structureState === "incomplete") {
+      return budgetIssue(VAL_CODES.BUDGET_HYBRID_COMPONENT_REQUIRED, ["exchangeData"]);
+    }
     const data = input.exchangeData ?? {};
     const cash = getNestedNumber(data, ["cashComponent", "budget", "cashAmount"]);
     const nonCash = getNestedString(data, ["nonCashComponent"]) ?? getNestedNumber(data, ["equityComponent", "profitComponent", "barterComponent"]);

@@ -48,8 +48,9 @@ describe('allowedCommercialComponentTypesForSubModel', () => {
     assert.ok(alliance.includes('barter'))
   })
 
-  it('maps hybrid allowance to custom without inventing barter', () => {
+  it('maps hybrid allowance to custom and revenue sharing without inventing barter', () => {
     const types = filterCommercialComponentTypesByExchangeModes(['cash', 'hybrid'])
-    assert.deepEqual([...types], ['cash', 'custom'])
+    assert.deepEqual([...types], ['cash', 'revenue_sharing', 'custom'])
+    assert.equal(types.includes('barter'), false)
   })
 })

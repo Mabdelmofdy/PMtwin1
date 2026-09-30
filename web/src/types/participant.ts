@@ -5,6 +5,11 @@ export type Participant = {
   role: string
   /** Canonical marketplace party for this participation row. */
   partyId?: string
+  /**
+   * Company the human participant is acting for when partyId is not set.
+   * Present on seeded company matches that store the employee as userId.
+   */
+  actingForPartyId?: string
   /** Canonical business workspace for this participation row. */
   workspaceId?: string
   representativeUserIds?: string[]

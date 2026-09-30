@@ -66,6 +66,15 @@ export function projectPrimaryMembership(
   return synthesizePrimaryMembership(account.id, partyId, 'owner')
 }
 
+/** Company business name for match display. Individuals stay unnamed here. */
+export function companyDisplayNameForParty(
+  party: { readonly partyType?: string; readonly displayName?: string } | null | undefined,
+): string | undefined {
+  if (!party || party.partyType !== 'company') return undefined
+  const name = party.displayName?.trim()
+  return name || undefined
+}
+
 export function buildCompanyIdSet(companyIds: readonly string[]): ReadonlySet<string> {
   return new Set(companyIds)
 }

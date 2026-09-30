@@ -71,6 +71,8 @@ export type OpportunityMatchesReadModelDeps = {
   ) => readonly Negotiation[]
   readonly getDealForPostMatch?: (postMatchId: string) => Deal | undefined
   readonly getPersonName?: (userId: string) => string | undefined
+  /** Company party display name. Individual parties should return undefined. */
+  readonly getPartyDisplayName?: (partyId: string) => string | undefined
   readonly currentUserId?: string | null
   readonly canMutate?: boolean
 }
@@ -84,11 +86,20 @@ export function formatMatchTypeLabel(matchType: string): string {
 }
 
 function resolveParticipantDisplayName(
-  userId: string,
+  participant: {
+    readonly userId: string
+    readonly partyId?: string
+    readonly actingForPartyId?: string
+  },
   deps: OpportunityMatchesReadModelDeps,
 ): string {
-  const name = deps.getPersonName?.(userId)
-  return name?.trim() ? name : userId
+  for (const partyId of [participant.partyId, participant.actingForPartyId]) {
+    if (!partyId) continue
+    const partyName = deps.getPartyDisplayName?.(partyId)?.trim()
+    if (partyName) return partyName
+  }
+  const name = deps.getPersonName?.(participant.userId)
+  return name?.trim() ? name : participant.userId
 }
 
 type MatchLinkageDeps = Pick<
@@ -215,7 +226,7 @@ function buildMatchCard(
     userId: participant.userId,
     role: participant.role,
     participantStatus: participant.participantStatus,
-    displayName: resolveParticipantDisplayName(participant.userId, deps),
+    displayName: resolveParticipantDisplayName(participant, deps),
   }))
 
   return {
