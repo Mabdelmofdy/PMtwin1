@@ -1,0 +1,290 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Commercial STR
+state=visible dims=A1:G191 max_row=191 max_col=7
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 4 — Commercial structure
+A3	s	Screen title: Commercial Structure Screen subtitle: Define how value will be exchanged in this collaboration. Layout: Exchange mechanism selection first, then conditional fields based on selection. Barter specification section appears only when barter is selected. Dynamic filtering: Only exchange mechanisms compatible with the selected collaboration model are shown. Incompatible options are hidden — not greyed out.
+A7	s	Section A — Exchange mechanism
+A9	s	Code
+B9	s	Field label
+C9	s	Type
+D9	s	Required
+E9	s	Condition
+A10	s	S4-F01
+B10	s	How will value be exchanged?
+C10	s	Multi-select cards
+D10	s	Yes
+E10	s	Filtered by model
+A11	s	S4-F01a
+B11	s	Hybrid label
+C11	s	Read-only
+D11	s	Auto
+E11	s	Shown when 2+ mechanisms selected
+A13	s	S4-F01 — Exchange mechanism values (shown based on model compatibility matrix):
+A15	s	Code
+B15	s	Option
+C15	s	Description
+A16	s	S4-F01-CA
+B16	s	Cash
+C16	s	Direct payment for the collaboration
+A17	s	S4-F01-BA
+B17	s	Barter
+C17	s	Exchange of equivalent value — no cash
+A18	s	S4-F01-PS
+B18	s	Profit Sharing
+C18	s	Share of net profit generated
+A19	s	S4-F01-RS
+B19	s	Revenue Sharing
+C19	s	Share of gross revenue generated
+A20	s	S4-F01-EQ
+B20	s	Equity
+C20	s	Ownership stake in entity or asset
+A21	s	S4-F01-CU
+B21	s	Custom
+C21	s	Define your own arrangement
+A23	s	When 2 or more selected → S4-F01a displays: "Hybrid arrangement — details confirmed in negotiation"
+A27	s	Model-to-mechanism mapping (developer implementation rule):
+A29	s	✓ = shown and valid | ○ = shown, flagged as edge case | ✗ = hidden entirely
+A31	s	Collaboration model
+B31	s	Cash
+C31	s	Barter
+D31	s	Profit Sharing
+E31	s	Revenue Sharing
+F31	s	Equity
+G31	s	Custom
+A32	s	JV
+B32	s	✓
+C32	s	○
+D32	s	✓
+E32	s	✓
+F32	s	✓
+G32	s	✓
+A33	s	Co-ownership
+B33	s	✓
+C33	s	✗
+D33	s	○
+E33	s	✓
+F33	s	✓
+G33	s	✓
+A34	s	Resource Sharing
+B34	s	✓
+C34	s	✓
+D34	s	○
+E34	s	○
+F34	s	○
+G34	s	✓
+A35	s	Resource Exchange
+B35	s	○
+C35	s	✓
+D35	s	✗
+E35	s	✗
+F35	s	✗
+G35	s	✓
+A36	s	Bulk Purchasing
+B36	s	✓
+C36	s	✗
+D36	s	○
+E36	s	○
+F36	s	✗
+G36	s	✓
+A37	s	Task-based Collaboration
+B37	s	✓
+C37	s	✓
+D37	s	○
+E37	s	○
+F37	s	○
+G37	s	✓
+A38	s	Hiring
+B38	s	✓
+C38	s	○
+D38	s	○
+E38	s	○
+F38	s	○
+G38	s	✓
+A39	s	Mentorship
+B39	s	✓
+C39	s	✓
+D39	s	○
+E39	s	○
+F39	s	✓
+G39	s	✓
+A41	s	Edge case (○) behaviour: option is shown with a note — "Less common for this model — confirm this is intentional before proceeding"
+A47	s	Section B — Mechanism-specific fields (conditional)
+A49	s	When Cash is selected
+A51	s	Code
+B51	s	Field label
+C51	s	Type
+D51	s	Required
+E51	s	Other trigger
+A52	s	S4-F02
+B52	s	Payment structure
+C52	s	Dropdown
+D52	s	Yes
+E52	s	No
+A53	s	S4-F03
+B53	s	Estimated amount
+C53	s	Numeric input + currency (S4-F03-CUR)
+D53	s	No
+E53	s	No
+A54	s	S4-F04
+B54	s	Payment timing
+C54	s	Dropdown
+D54	s	No
+E54	s	No
+A56	s	S4-F02 — Payment structure values: Fixed fee / Hourly rate / Daily rate / Monthly retainer / Milestone-based / To be agreed
+A58	s	S4-F03-CUR — Currency values: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A60	s	S4-F04 — Payment timing values: Upfront / On delivery / Milestone-based / Monthly / To be agreed
+A64	s	When Barter is selected
+A66	s	Code
+B66	s	Field label
+C66	s	Type
+D66	s	Required
+E66	s	Condition
+A67	s	S4-F05
+B67	s	Barter type
+C67	s	Dropdown
+D67	s	Yes
+E67	s	Always when barter selected
+A68	s	S4-F06
+B68	s	What are you offering in barter?
+C68	s	Text area
+D68	s	Yes
+E68	s	Always when barter selected
+A69	s	S4-F07
+B69	s	Estimated barter value
+C69	s	Numeric input + currency (S4-F07-CUR)
+D69	s	No
+E69	s	No
+A70	s	S4-F08
+B70	s	Barter scope
+C70	s	Text area
+D70	s	No
+E70	s	No
+A72	s	S4-F05 — Barter type values: Full barter (no cash component) / Partial barter (combined with cash) / To be agreed
+A74	s	S4-F06 — Barter specification: Placeholder: "Describe specifically what you are offering in exchange — service, resource, or capacity" Example hint: "ERP implementation for first 3 client accounts"
+A76	s	S4-F07-CUR — Currency values: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A78	s	S4-F08 — Barter scope: Placeholder: "Specify any conditions or limits on this barter component (e.g., first 3 accounts, 6-month period)"
+A80	s	Barter value balance calculation
+A82	s	Live calculation shown as soon as both values are available. Updates dynamically as values change.
+A84	s	Code
+B84	s	Field label
+C84	s	Type
+D84	s	Condition
+A85	s	S4-F09a
+B85	s	Value of what you are offering
+C85	s	Read-only — pulled from S4-F07
+D85	s	Shown when S4-F07 is entered
+A86	s	S4-F09b
+B86	s	Value of what you are seeking
+C86	s	Read-only — pulled from Step 3 need value field
+D86	s	Shown when Step 3 need value is entered
+A87	s	S4-F09c
+B87	s	Barter balance ratio
+C87	s	Calculated field — Offer value ÷ Need value
+D87	s	Shown when both values available
+A88	s	S4-F09d
+B88	s	Balance indicator label
+C88	s	Read-only label derived from S4-F09c
+D88	s	Shown when both values available
+A90	s	Calculation: S4-F09c = S4-F07 (offer value) ÷ Step 3 need value
+A92	s	S4-F09d — Balance label logic:
+A94	s	S4-F09c result
+B94	s	Label displayed
+A95	s	0.85 – 1.15 (within 15%)
+B95	s	"Balanced exchange — values are approximately equal"
+A96	s	Above 1.15
+B96	s	"You are offering more than you are seeking — consider adjusting scope or adding conditions"
+A97	s	Below 0.85
+B97	s	"You are offering less than you are seeking — consider adjusting scope or adding a cash component"
+A98	s	Either value not entered
+B98	s	Calculation not shown
+A100	s	Note: Informational only — does not block publishing. Helps users present an attractive and credible barter before the opportunity goes live.
+A104	s	When Profit Sharing is selected
+A106	s	Code
+B106	s	Field label
+C106	s	Type
+D106	s	Required
+E106	s	Other trigger
+A107	s	S4-F09
+B107	s	Indicative profit share
+C107	s	Dropdown
+D107	s	No
+E107	s	No
+A108	s	S4-F10
+B108	s	Profit calculation basis
+C108	s	Dropdown
+D108	s	No
+E108	s	No
+A110	s	S4-F09 — Indicative profit share values: Up to 10% / 10–25% / 25–50% / 50%+ / To be agreed
+A112	s	S4-F10 — Profit calculation basis values: Net profit / Gross margin / Project profit / To be agreed
+A116	s	When Revenue Sharing is selected
+A118	s	Code
+B118	s	Field label
+C118	s	Type
+D118	s	Required
+E118	s	Other trigger
+A119	s	S4-F11
+B119	s	Indicative revenue share
+C119	s	Dropdown
+D119	s	No
+E119	s	No
+A120	s	S4-F12
+B120	s	Revenue calculation basis
+C120	s	Dropdown
+D120	s	No
+E120	s	No
+A122	s	S4-F11 — Indicative revenue share values: Up to 5% / 5–10% / 10–20% / 20%+ / To be agreed
+A124	s	S4-F12 — Revenue basis values: Total project revenue / Contract value / Sales revenue / To be agreed
+A128	s	When Equity is selected (JV / Co-ownership / Resource Sharing / Task-based / Hiring / Mentorship)
+A130	s	Code
+B130	s	Field label
+C130	s	Type
+D130	s	Required
+E130	s	Other trigger
+A131	s	S4-F13
+B131	s	Indicative equity stake
+C131	s	Dropdown
+D131	s	No
+E131	s	No
+A132	s	S4-F14
+B132	s	Equity structure
+C132	s	Dropdown
+D132	s	No
+E132	s	Yes
+A134	s	S4-F13 — Equity stake values: Up to 10% / 10–25% / 25–49% / 50% (equal) / 51%+ / To be agreed
+A136	s	S4-F14 — Equity structure values: SPV shares / Company shares / Asset ownership / To be agreed / Other → free text
+A140	s	When Custom is selected
+A142	s	Custom activates all mechanisms marked ✓ or ○ for the selected collaboration model — based on the mapping table above. Mechanisms marked ✗ for that model remain hidden even under Custom. No free text field. User completes the fields relevant to their arrangement. System manages validation — no section is individually required under Custom.
+A144	s	Developer rule: Apply model compatibility matrix filter first, then activate all passing mechanisms simultaneously.
+A146	s	Example — Custom on Resource Exchange:
+A148	s	Cash (○) → activated
+A150	s	Barter (✓) → activated
+A152	s	Profit Sharing (✗) → hidden
+A154	s	Revenue Sharing (✗) → hidden
+A156	s	Equity (✗) → hidden
+A158	s	Custom fields shown: Cash + Barter only
+A160	s	Fields activated per mechanism (when applicable to model):
+A162	s	Cash fields: S4-F02 (payment structure) / S4-F03 (estimated amount + currency) / S4-F04 (payment timing)
+A164	s	Barter fields: S4-F05 (barter type) / S4-F06 (what you are offering in barter) / S4-F07 (estimated barter value + currency) / S4-F08 (barter scope) / S4-F09a–d (barter balance calculation)
+A166	s	Profit Sharing fields: S4-F09 (indicative profit share %) / S4-F10 (profit calculation basis)
+A168	s	Revenue Sharing fields: S4-F11 (indicative revenue share %) / S4-F12 (revenue calculation basis)
+A170	s	Equity fields: S4-F13 (indicative equity stake %) / S4-F14 (equity structure)
+A174	s	Section C — Commercial constraints (optional)
+A176	s	Code
+B176	s	Field label
+C176	s	Type
+D176	s	Required
+E176	s	Other trigger
+A177	s	S4-F16
+B177	s	Any commercial conditions or constraints?
+C177	s	Text — add multiple
+D177	s	No
+E177	s	No
+A179	s	Placeholder examples: "Payment in SAR only" / "Minimum contract value applies" / "Subject to board approval"
+A183	s	Step 4 completion criteria
+A185	s	S4-F01 must be selected. Mechanism-specific required fields (S4-F02 for cash, S4-F05 and S4-F06 for barter) must be completed when their mechanism is selected.
+A189	s	Navigation
+A191	s	Back: returns to Step 3 Save Draft: always available Continue: enabled once required fields complete → proceeds to Step 5

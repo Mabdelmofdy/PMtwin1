@@ -1,0 +1,466 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 3-TB-Wireframe
+state=visible dims=A1:T90 max_row=90 max_col=20
+merged=['C87:D87']
+
+## DATA VALIDATIONS
+sqref=C26 C55 C73 C75 C77 type=date formula1=46023 formula2=None allow_blank=True
+sqref=C27 C56 type=decimal formula1=0 formula2=None allow_blank=True
+
+## CELLS
+P1	s	FEED → Step 4 / Step 5
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	s	Task-based Collaboration
+B3	s	Scope & Work  ·  Task-based Collaboration
+P3	s	Gate
+Q3	f	=$N$26
+B4	s	Define the service or skill you offer and the task or service you are seeking.
+P4	s	Readiness
+Q4	f	=$N$24
+B5	s	Account type: Individual professional only  ·  Post a Need to find a task or service, an Offer to make your skills available, or both.
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  SCOPE & WORK  ·  TASK-BASED COLLABORATION
+D7	f	="Readiness  "&TEXT($N$24,"0%")
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($N$14="YES","◆ Active — Task-based Collaboration selected in Step 2. Auto-save on.","○ Not active — select Task-based Collaboration in Step 2 to use this form.")
+P8	s	Offer value
+Q8	f	=$C$29
+P9	s	Need intent
+Q9	f	=$C$41
+B10	s	SECTION A  —  OFFER SIDE  ·  The service or skill you are offering
+G10	s	OFFER PICKER  ·  multi-select
+J10	s	NEED PICKER  ·  multi-select
+P10	s	Need category
+Q10	f	=$C$42
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint
+G11	s	Option
+H11	s	Select
+J11	s	Option
+K11	s	Select
+M11	s	VALIDATION ENGINE (live)
+P11	s	Need sub-category
+Q11	f	=$C$44
+R11	s	Req shown
+S11	s	Req done
+B12	s	S3-TB-I-O00 · Collaboration intent *
+D12	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$12="","● Required","✓ Complete"))
+E12	s	Single select.
+G12	s	S3-TB-I-O12 · Personal credentials
+H12	s	Select
+J12	s	S3-TB-I-N12 · Required credentials
+K12	s	Select
+M12	s	Model
+N12	s	Task-based Collaboration
+P12	s	Need value
+Q12	f	=$C$58
+R12	f	=IF(AND($N$16="YES"),1,0)
+S12	f	=IF(AND($R$12=1,$C$12<>""),1,0)
+B13	s	S3-TB-I-O01 · Service category *
+D13	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$13="","● Required","✓ Complete"))
+E13	s	Single select.
+G13	f	='Step 3-TB-Lists'!$L$6
+J13	f	='Step 3-TB-Lists'!$Q$6
+M13	s	Model selected in Step 2
+N13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=$C$40
+R13	f	=IF(AND($N$16="YES"),1,0)
+S13	f	=IF(AND($R$13=1,$C$13<>""),1,0)
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$13))),"— Hidden",IF($C$14="","● Required","✓ Complete")))
+E14	s	Free text — shown when Other is selected.
+G14	f	='Step 3-TB-Lists'!$L$7
+J14	f	='Step 3-TB-Lists'!$Q$7
+M14	s	Model active
+N14	f	=IF($N$13=$N$12,"YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$67,$C$68,$C$69)
+R14	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$13))),1,0)
+S14	f	=IF(AND($R$14=1,$C$14<>""),1,0)
+B15	s	S3-TB-I-O02 · Service specialisation *
+D15	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$15="","● Required","✓ Complete"))
+E15	s	Options depend on S3-TB-I-O01.
+G15	f	='Step 3-TB-Lists'!$L$8
+J15	f	='Step 3-TB-Lists'!$Q$8
+M15	s	Post type (Step 1)
+N15	f	=IF('Step 1-Wireframe'!$C$12="","",'Step 1-Wireframe'!$C$12)
+P15	s	Milestones
+Q15	f	=COUNTA($C$72,$C$74,$C$76)
+R15	f	=IF(AND($N$16="YES"),1,0)
+S15	f	=IF(AND($R$15=1,$C$15<>""),1,0)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$15))),"— Hidden",IF($C$16="","● Required","✓ Complete")))
+E16	s	Free text — shown when Other is selected.
+G16	f	='Step 3-TB-Lists'!$L$9
+J16	f	='Step 3-TB-Lists'!$Q$9
+M16	s	Offer side active
+N16	f	=IF(OR($N$15="",ISNUMBER(SEARCH("Offer",$N$15))),"YES","NO")
+R16	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$15))),1,0)
+S16	f	=IF(AND($R$16=1,$C$16<>""),1,0)
+B17	s	S3-TB-I-O03 · Sector or project context
+D17	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$17="","○ Optional","✓ Complete"))
+E17	s	Single select.
+G17	f	='Step 3-TB-Lists'!$L$10
+J17	f	='Step 3-TB-Lists'!$Q$10
+M17	s	Need side active
+N17	f	=IF(OR($N$15="",ISNUMBER(SEARCH("Need",$N$15))),"YES","NO")
+R17	n	0
+S17	f	=IF(AND($R$17=1,$C$17<>""),1,0)
+B18	s	»  O03 — specify "Other"
+D18	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$17))),"— Hidden",IF($C$18="","● Required","✓ Complete")))
+E18	s	Free text — shown when Other is selected.
+G18	f	='Step 3-TB-Lists'!$L$11
+J18	f	='Step 3-TB-Lists'!$Q$11
+M18	s	Offer required — shown
+N18	f	=SUM($R$12:$R$36)
+R18	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$17))),1,0)
+S18	f	=IF(AND($R$18=1,$C$18<>""),1,0)
+B19	s	S3-TB-I-O04 · Service description *
+D19	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$19="","● Required","✓ Complete"))
+E19	s	Free text — a few sentences.
+G19	f	='Step 3-TB-Lists'!$L$12
+J19	f	='Step 3-TB-Lists'!$Q$12
+M19	s	Offer required — done
+N19	f	=SUM($S$12:$S$36)
+R19	f	=IF(AND($N$16="YES"),1,0)
+S19	f	=IF(AND($R$19=1,$C$19<>""),1,0)
+B20	s	S3-TB-I-O05 · Delivery mode *
+D20	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$20="","● Required","✓ Complete"))
+E20	s	Single select.
+G20	f	='Step 3-TB-Lists'!$L$13
+J20	f	='Step 3-TB-Lists'!$Q$13
+M20	s	Need required — shown
+N20	f	=SUM($R$40:$R$64)
+R20	f	=IF(AND($N$16="YES"),1,0)
+S20	f	=IF(AND($R$20=1,$C$20<>""),1,0)
+B21	s	S3-TB-I-O06 · Service location — country *
+D21	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$21="","● Required","✓ Complete"))
+E21	s	Country list (same as S1-F03).
+G21	f	='Step 3-TB-Lists'!$L$14
+J21	f	='Step 3-TB-Lists'!$Q$14
+M21	s	Need required — done
+N21	f	=SUM($S$40:$S$64)
+R21	f	=IF(AND($N$16="YES"),1,0)
+S21	f	=IF(AND($R$21=1,$C$21<>""),1,0)
+B22	s	S3-TB-I-O06a · Service location — city
+D22	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$22="","○ Optional","✓ Complete"))
+E22	s	Cities for the country in S3-TB-I-O06 (same as S1-F04).
+G22	f	='Step 3-TB-Lists'!$L$15
+M22	s	Required — total
+N22	f	=$N$18+$N$20
+R22	n	0
+S22	f	=IF(AND($R$22=1,$C$22<>""),1,0)
+B23	s	S3-TB-I-O07 · Engagement type *
+D23	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$23="","● Required","✓ Complete"))
+E23	s	Single select.
+G23	f	='Step 3-TB-Lists'!$L$16
+J23	s	S3-TB-I-N13 · Language requirement
+K23	s	Select
+M23	s	Required — done
+N23	f	=$N$19+$N$21
+R23	f	=IF(AND($N$16="YES"),1,0)
+S23	f	=IF(AND($R$23=1,$C$23<>""),1,0)
+B24	s	»  O07 — specify "Other"
+D24	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$23))),"— Hidden",IF($C$24="","● Required","✓ Complete")))
+E24	s	Free text — shown when Other is selected.
+J24	f	='Step 3-TB-Lists'!$M$6
+M24	s	Readiness
+N24	f	=IFERROR($N$23/$N$22,0)
+R24	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$23))),1,0)
+S24	f	=IF(AND($R$24=1,$C$24<>""),1,0)
+B25	s	S3-TB-I-O08 · Availability *
+D25	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$25="","● Required","✓ Complete"))
+E25	s	Single select.
+G25	s	S3-TB-I-O13 · Languages
+H25	s	Select
+J25	f	='Step 3-TB-Lists'!$M$7
+M25	s	Step 2 gate
+N25	f	='Step 2-Wireframe'!$L$19
+R25	f	=IF(AND($N$16="YES"),1,0)
+S25	f	=IF(AND($R$25=1,$C$25<>""),1,0)
+B26	s	»  O08 — specific date
+D26	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT($C$25="Specific date"),"— Hidden",IF($C$26="","● Required","✓ Complete")))
+E26	s	Date picker — shown when "Specific date" is selected.
+G26	f	='Step 3-TB-Lists'!$M$6
+J26	f	='Step 3-TB-Lists'!$M$8
+M26	s	Step 4 gate
+N26	f	=IF(AND($N$14="YES",$N$25="YES",$N$22>0,$N$23=$N$22),"YES","NO")
+R26	f	=IF(AND($N$16="YES",$C$25="Specific date"),1,0)
+S26	f	=IF(AND($R$26=1,$C$26<>""),1,0)
+B27	s	S3-TB-I-O09 · Estimated service duration *
+D27	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$27="","● Required","✓ Complete"))
+E27	s	Enter a number, then pick the time unit on the next row.
+G27	f	='Step 3-TB-Lists'!$M$7
+J27	f	='Step 3-TB-Lists'!$M$9
+R27	f	=IF(AND($N$16="YES"),1,0)
+S27	f	=IF(AND($R$27=1,$C$27<>""),1,0)
+B28	s	»  O09-TU — time unit
+D28	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$28="","● Required","✓ Complete"))
+E28	s	Time unit for the duration above.
+G28	f	='Step 3-TB-Lists'!$M$8
+J28	f	='Step 3-TB-Lists'!$M$10
+R28	f	=IF(AND($N$16="YES"),1,0)
+S28	f	=IF(AND($R$28=1,$C$28<>""),1,0)
+B29	s	S3-TB-I-O10 · Rate expected
+D29	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$29="","○ Optional","✓ Complete"))
+E29	s	Pick a range, then the currency on the next row.
+G29	f	='Step 3-TB-Lists'!$M$9
+J29	f	='Step 3-TB-Lists'!$M$11
+R29	n	0
+S29	f	=IF(AND($R$29=1,$C$29<>""),1,0)
+B30	s	»  O10-CUR — currency
+D30	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$30="","○ Optional","✓ Complete"))
+E30	s	Currency for the range above.
+G30	f	='Step 3-TB-Lists'!$M$10
+J30	f	='Step 3-TB-Lists'!$M$12
+R30	n	0
+S30	f	=IF(AND($R$30=1,$C$30<>""),1,0)
+B31	s	»  O10-CUR — specify "Other"
+D31	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$30))),"— Hidden",IF($C$31="","● Required","✓ Complete")))
+E31	s	Free text — shown when currency is Other.
+G31	f	='Step 3-TB-Lists'!$M$11
+R31	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$30))),1,0)
+S31	f	=IF(AND($R$31=1,$C$31<>""),1,0)
+B32	s	S3-TB-I-O11 · Rate unit
+D32	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$32="","○ Optional","✓ Complete"))
+E32	s	Single select.
+G32	f	='Step 3-TB-Lists'!$M$12
+R32	n	0
+S32	f	=IF(AND($R$32=1,$C$32<>""),1,0)
+B33	s	S3-TB-I-O12 · Personal credentials
+C33	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127308890>
+D33	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$33="","○ Optional","✓ Complete"))
+E33	s	Multi-select — set Yes beside each option in the Offer picker (G:H).
+R33	n	0
+S33	f	=IF(AND($R$33=1,$C$33<>""),1,0)
+B34	s	»  O12 — specify "Other"
+D34	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$33))),"— Hidden",IF($C$34="","● Required","✓ Complete")))
+E34	s	Free text — shown when Other is selected.
+R34	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$33))),1,0)
+S34	f	=IF(AND($R$34=1,$C$34<>""),1,0)
+B35	s	S3-TB-I-O13 · Languages
+C35	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212730A840>
+D35	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$35="","○ Optional","✓ Complete"))
+E35	s	Multi-select — set Yes beside each option in the Offer picker (G:H).
+R35	n	0
+S35	f	=IF(AND($R$35=1,$C$35<>""),1,0)
+B36	s	»  O13 — specify "Other"
+D36	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$35))),"— Hidden",IF($C$36="","● Required","✓ Complete")))
+E36	s	Free text — shown when Other is selected.
+R36	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$35))),1,0)
+S36	f	=IF(AND($R$36=1,$C$36<>""),1,0)
+B38	s	SECTION B  —  NEED SIDE  ·  The task or service you are seeking
+B39	s	Field
+C39	s	Your input
+D39	s	Status
+E39	s	Hint
+B40	s	S3-TB-I-N00 · Match with *
+D40	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$40="","● Required","✓ Complete"))
+E40	s	Single select.
+R40	f	=IF(AND($N$17="YES"),1,0)
+S40	f	=IF(AND($R$40=1,$C$40<>""),1,0)
+B41	s	S3-TB-I-N01 · Collaboration intent *
+D41	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$41="","● Required","✓ Complete"))
+E41	s	Single select.
+R41	f	=IF(AND($N$17="YES"),1,0)
+S41	f	=IF(AND($R$41=1,$C$41<>""),1,0)
+B42	s	S3-TB-I-N02 · Service category needed *
+D42	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$42="","● Required","✓ Complete"))
+E42	s	Single select.
+R42	f	=IF(AND($N$17="YES"),1,0)
+S42	f	=IF(AND($R$42=1,$C$42<>""),1,0)
+B43	s	»  N02 — specify "Other"
+D43	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$42))),"— Hidden",IF($C$43="","● Required","✓ Complete")))
+E43	s	Free text — shown when Other is selected.
+R43	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$42))),1,0)
+S43	f	=IF(AND($R$43=1,$C$43<>""),1,0)
+B44	s	S3-TB-I-N03 · Service specialisation *
+D44	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$44="","● Required","✓ Complete"))
+E44	s	Options depend on S3-TB-I-N02.
+R44	f	=IF(AND($N$17="YES"),1,0)
+S44	f	=IF(AND($R$44=1,$C$44<>""),1,0)
+B45	s	»  N03 — specify "Other"
+D45	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$44))),"— Hidden",IF($C$45="","● Required","✓ Complete")))
+E45	s	Free text — shown when Other is selected.
+R45	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$44))),1,0)
+S45	f	=IF(AND($R$45=1,$C$45<>""),1,0)
+B46	s	S3-TB-I-N04 · Sector or project context
+D46	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$46="","○ Optional","✓ Complete"))
+E46	s	Single select.
+R46	n	0
+S46	f	=IF(AND($R$46=1,$C$46<>""),1,0)
+B47	s	»  N04 — specify "Other"
+D47	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$46))),"— Hidden",IF($C$47="","● Required","✓ Complete")))
+E47	s	Free text — shown when Other is selected.
+R47	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$46))),1,0)
+S47	f	=IF(AND($R$47=1,$C$47<>""),1,0)
+B48	s	S3-TB-I-N05 · Scope description *
+D48	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$48="","● Required","✓ Complete"))
+E48	s	Free text — a few sentences.
+R48	f	=IF(AND($N$17="YES"),1,0)
+S48	f	=IF(AND($R$48=1,$C$48<>""),1,0)
+B49	s	S3-TB-I-N06 · Delivery mode preference
+D49	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$49="","○ Optional","✓ Complete"))
+E49	s	Single select.
+R49	n	0
+S49	f	=IF(AND($R$49=1,$C$49<>""),1,0)
+B50	s	S3-TB-I-N07 · Service location — country *
+D50	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$50="","● Required","✓ Complete"))
+E50	s	Country list (same as S1-F03).
+R50	f	=IF(AND($N$17="YES"),1,0)
+S50	f	=IF(AND($R$50=1,$C$50<>""),1,0)
+B51	s	S3-TB-I-N07a · Service location — city
+D51	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$51="","○ Optional","✓ Complete"))
+E51	s	Cities for the country in S3-TB-I-N07 (same as S1-F04).
+R51	n	0
+S51	f	=IF(AND($R$51=1,$C$51<>""),1,0)
+B52	s	S3-TB-I-N08 · Engagement type sought *
+D52	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$52="","● Required","✓ Complete"))
+E52	s	Single select.
+R52	f	=IF(AND($N$17="YES"),1,0)
+S52	f	=IF(AND($R$52=1,$C$52<>""),1,0)
+B53	s	»  N08 — specify "Other"
+D53	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$52))),"— Hidden",IF($C$53="","● Required","✓ Complete")))
+E53	s	Free text — shown when Other is selected.
+R53	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$52))),1,0)
+S53	f	=IF(AND($R$53=1,$C$53<>""),1,0)
+B54	s	S3-TB-I-N09 · When do I need this? *
+D54	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$54="","● Required","✓ Complete"))
+E54	s	Single select.
+R54	f	=IF(AND($N$17="YES"),1,0)
+S54	f	=IF(AND($R$54=1,$C$54<>""),1,0)
+B55	s	»  N09 — specific date
+D55	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT($C$54="Specific date"),"— Hidden",IF($C$55="","● Required","✓ Complete")))
+E55	s	Date picker — shown when "Specific date" is selected.
+R55	f	=IF(AND($N$17="YES",$C$54="Specific date"),1,0)
+S55	f	=IF(AND($R$55=1,$C$55<>""),1,0)
+B56	s	S3-TB-I-N10 · Duration required *
+D56	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$56="","● Required","✓ Complete"))
+E56	s	Enter a number, then pick the time unit on the next row.
+R56	f	=IF(AND($N$17="YES"),1,0)
+S56	f	=IF(AND($R$56=1,$C$56<>""),1,0)
+B57	s	»  N10-TU — time unit
+D57	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$57="","● Required","✓ Complete"))
+E57	s	Time unit for the duration above.
+R57	f	=IF(AND($N$17="YES"),1,0)
+S57	f	=IF(AND($R$57=1,$C$57<>""),1,0)
+B58	s	S3-TB-I-N11 · Budget range
+D58	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$58="","○ Optional","✓ Complete"))
+E58	s	Pick a range, then the currency on the next row.
+R58	n	0
+S58	f	=IF(AND($R$58=1,$C$58<>""),1,0)
+B59	s	»  N11-CUR — currency
+D59	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$59="","○ Optional","✓ Complete"))
+E59	s	Currency for the range above.
+R59	n	0
+S59	f	=IF(AND($R$59=1,$C$59<>""),1,0)
+B60	s	»  N11-CUR — specify "Other"
+D60	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$59))),"— Hidden",IF($C$60="","● Required","✓ Complete")))
+E60	s	Free text — shown when currency is Other.
+R60	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$59))),1,0)
+S60	f	=IF(AND($R$60=1,$C$60<>""),1,0)
+B61	s	S3-TB-I-N12 · Required credentials
+C61	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125D8E930>
+D61	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$61="","○ Optional","✓ Complete"))
+E61	s	Multi-select — set Yes beside each option in the Need picker (J:K).
+R61	n	0
+S61	f	=IF(AND($R$61=1,$C$61<>""),1,0)
+B62	s	»  N12 — specify "Other"
+D62	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$61))),"— Hidden",IF($C$62="","● Required","✓ Complete")))
+E62	s	Free text — shown when Other is selected.
+R62	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$61))),1,0)
+S62	f	=IF(AND($R$62=1,$C$62<>""),1,0)
+B63	s	S3-TB-I-N13 · Language requirement
+C63	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127344650>
+D63	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$63="","○ Optional","✓ Complete"))
+E63	s	Multi-select — set Yes beside each option in the Need picker (J:K).
+R63	n	0
+S63	f	=IF(AND($R$63=1,$C$63<>""),1,0)
+B64	s	»  N13 — specify "Other"
+D64	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$63))),"— Hidden",IF($C$64="","● Required","✓ Complete")))
+E64	s	Free text — shown when Other is selected.
+R64	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$63))),1,0)
+S64	f	=IF(AND($R$64=1,$C$64<>""),1,0)
+B66	s	SECTION C  —  DELIVERABLES  (Need side — encouraged)
+E66	s	Collapsed by default (+ to expand). Describe the expected output from the task or service.
+B67	s	S3-TB-I-D01 · Deliverable 1
+D67	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$67="","○ Optional","✓ Complete"))
+E67	s	Optional — short description.
+R67	n	0
+S67	f	=IF(AND($R$67=1,$C$67<>""),1,0)
+B68	s	S3-TB-I-D02 · Deliverable 2
+D68	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$68="","○ Optional","✓ Complete"))
+E68	s	Optional — short description.
+R68	n	0
+S68	f	=IF(AND($R$68=1,$C$68<>""),1,0)
+B69	s	S3-TB-I-D03 · Deliverable 3
+D69	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$69="","○ Optional","✓ Complete"))
+E69	s	Optional — short description.
+R69	n	0
+S69	f	=IF(AND($R$69=1,$C$69<>""),1,0)
+B71	s	SECTION D  —  MILESTONES  (optional)
+E71	s	Collapsed by default (+ to expand).
+B72	s	S3-TB-I-M01 · Milestone 1 — title
+D72	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$72="","○ Optional","✓ Complete"))
+E72	s	Optional.
+R72	n	0
+S72	f	=IF(AND($R$72=1,$C$72<>""),1,0)
+B73	s	»  M01 — target date
+D73	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$73="","○ Optional","✓ Complete"))
+E73	s	Date picker.
+R73	n	0
+S73	f	=IF(AND($R$73=1,$C$73<>""),1,0)
+B74	s	S3-TB-I-M02 · Milestone 2 — title
+D74	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$74="","○ Optional","✓ Complete"))
+E74	s	Optional.
+R74	n	0
+S74	f	=IF(AND($R$74=1,$C$74<>""),1,0)
+B75	s	»  M02 — target date
+D75	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$75="","○ Optional","✓ Complete"))
+E75	s	Date picker.
+R75	n	0
+S75	f	=IF(AND($R$75=1,$C$75<>""),1,0)
+B76	s	S3-TB-I-M03 · Milestone 3 — title
+D76	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$76="","○ Optional","✓ Complete"))
+E76	s	Optional.
+R76	n	0
+S76	f	=IF(AND($R$76=1,$C$76<>""),1,0)
+B77	s	»  M03 — target date
+D77	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$77="","○ Optional","✓ Complete"))
+E77	s	Date picker.
+R77	n	0
+S77	f	=IF(AND($R$77=1,$C$77<>""),1,0)
+B79	s	SECTION E  —  VALIDATION
+B80	s	Check
+C80	s	Result
+D80	s	Status
+E80	s	Detail
+B81	s	Model selected in Step 2
+C81	f	=$N$13
+D81	f	=IF($N$14="YES","✓ Pass","⚠ Select Task-based Collaboration in Step 2")
+E81	s	This form only applies when Task-based Collaboration is the Step 2 model.
+B82	s	Step 2 complete
+C82	f	=$N$25
+D82	f	=IF($N$25="YES","✓ Pass","⚠ Blocks Step 4")
+E82	s	Step 2 routing and model must be complete.
+B83	s	Offer side — required fields
+C83	f	=$N$19&" / "&$N$18
+D83	f	=IF($N$16<>"YES","— Not in post type",IF($N$19=$N$18,"✓ Pass","● Incomplete"))
+E83	s	Counts required Offer fields that are currently shown.
+B84	s	Need side — required fields
+C84	f	=$N$21&" / "&$N$20
+D84	f	=IF($N$17<>"YES","— Not in post type",IF($N$21=$N$20,"✓ Pass","● Incomplete"))
+E84	s	Counts required Need fields that are currently shown.
+B85	s	Overall readiness
+C85	f	=$N$24
+D85	f	=IF($N$24=1,"✓ Pass","● In progress")
+E85	s	Required fields completed ÷ required fields shown.
+B87	s	← Back to Step 2
+C87	f	=IF($N$26="YES","→ Continue to Step 4 — Matching","🔒 Complete required fields to continue")

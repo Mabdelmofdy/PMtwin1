@@ -1,0 +1,371 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 1-Lists
+state=visible dims=A1:Z205 max_row=205 max_col=26
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 1
+B3	s	Single source of truth for every Step 1 dropdown. Edit here and the wireframe updates.
+B5	s	Post type (S1-F00)
+C5	s	Description
+D5	s	Matching eligibility
+F5	s	Timeline duration (S1-F07)
+H5	s	Coverage area (S1-F05)
+J5	s	Yes / No
+L5	s	Country (S1-F03)
+N5	s	Month (date picker)
+P5	s	Day (date picker)
+R5	s	Year (date picker)
+T5	s	S1-F06 — selectable dates
+V5	s	S1-F08 — selectable dates
+B6	s	Need
+C6	s	You are seeking something
+D6	s	Type 1 matching
+F6	s	Immediate
+H6	s	GCC-wide
+J6	s	No
+L6	f	=IF(Cities!A2="","",Cities!A2)
+N6	s	January
+P6	n	1
+R6	n	2026
+T6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127169100>
+V6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127168D70>
+B7	s	Offer
+C7	s	You are providing something
+D7	s	Type 1 matching
+F7	s	Within 1 month
+H7	s	KSA
+J7	s	Yes
+L7	f	=IF(Cities!A3="","",Cities!A3)
+N7	s	February
+P7	n	2
+R7	n	2027
+T7	f	=
+V7	f	=
+B8	s	Need & Offer
+C8	s	You are both seeking and providing — same collaboration model
+D8	s	Types 1, 2, 3, 4
+F8	s	1–3 months
+H8	s	UAE
+L8	f	=IF(Cities!A4="","",Cities!A4)
+N8	s	March
+P8	n	3
+R8	n	2028
+T8	f	=
+V8	f	=
+F9	s	3–6 months
+H9	s	Qatar
+L9	f	=IF(Cities!A5="","",Cities!A5)
+N9	s	April
+P9	n	4
+R9	n	2029
+T9	f	=
+V9	f	=
+F10	s	6–12 months
+H10	s	Kuwait
+L10	f	=IF(Cities!A6="","",Cities!A6)
+N10	s	May
+P10	n	5
+R10	n	2030
+T10	f	=
+V10	f	=
+F11	s	12+ months
+H11	s	Bahrain
+L11	f	=IF(Cities!A7="","",Cities!A7)
+N11	s	June
+P11	n	6
+R11	n	2031
+T11	f	=
+V11	f	=
+F12	s	Flexible
+H12	s	Oman
+L12	f	=IF(Cities!A8="","",Cities!A8)
+N12	s	July
+P12	n	7
+R12	n	2032
+T12	f	=
+V12	f	=
+F13	s	To be agreed
+H13	s	Egypt
+L13	f	=IF(Cities!A9="","",Cities!A9)
+N13	s	August
+P13	n	8
+R13	n	2033
+T13	f	=
+V13	f	=
+F14	s	Other
+H14	s	North Africa
+L14	f	=IF(Cities!A10="","",Cities!A10)
+N14	s	September
+P14	n	9
+R14	n	2034
+T14	f	=
+V14	f	=
+H15	s	Wider MENA
+L15	f	=IF(Cities!A11="","",Cities!A11)
+N15	s	October
+P15	n	10
+R15	n	2035
+T15	f	=
+V15	f	=
+H16	s	Turkey
+L16	f	=IF(Cities!A12="","",Cities!A12)
+N16	s	November
+P16	n	11
+R16	n	2036
+T16	f	=
+V16	f	=
+H17	s	Europe
+L17	f	=IF(Cities!A13="","",Cities!A13)
+N17	s	December
+P17	n	12
+T17	f	=
+V17	f	=
+H18	s	Asia
+L18	f	=IF(Cities!A14="","",Cities!A14)
+P18	n	13
+T18	f	=
+V18	f	=
+H19	s	Africa
+L19	f	=IF(Cities!A15="","",Cities!A15)
+P19	n	14
+T19	f	=
+V19	f	=
+H20	s	Americas
+L20	f	=IF(Cities!A16="","",Cities!A16)
+P20	n	15
+T20	f	=
+V20	f	=
+H21	s	International (worldwide)
+L21	f	=IF(Cities!A17="","",Cities!A17)
+P21	n	16
+T21	f	=
+V21	f	=
+L22	f	=IF(Cities!A18="","",Cities!A18)
+P22	n	17
+T22	f	=
+V22	f	=
+L23	f	=IF(Cities!A19="","",Cities!A19)
+P23	n	18
+T23	f	=
+V23	f	=
+L24	f	=IF(Cities!A20="","",Cities!A20)
+P24	n	19
+T24	f	=
+V24	f	=
+L25	f	=IF(Cities!A21="","",Cities!A21)
+P25	n	20
+T25	f	=
+V25	f	=
+L26	f	=IF(Cities!A22="","",Cities!A22)
+P26	n	21
+T26	f	=
+V26	f	=
+L27	f	=IF(Cities!A23="","",Cities!A23)
+P27	n	22
+T27	f	=
+V27	f	=
+L28	f	=IF(Cities!A24="","",Cities!A24)
+P28	n	23
+T28	f	=
+V28	f	=
+L29	f	=IF(Cities!A25="","",Cities!A25)
+P29	n	24
+T29	f	=
+V29	f	=
+L30	f	=IF(Cities!A26="","",Cities!A26)
+P30	n	25
+T30	f	=
+V30	f	=
+L31	f	=IF(Cities!A27="","",Cities!A27)
+P31	n	26
+T31	f	=
+V31	f	=
+L32	f	=IF(Cities!A28="","",Cities!A28)
+P32	n	27
+T32	f	=
+V32	f	=
+L33	f	=IF(Cities!A29="","",Cities!A29)
+P33	n	28
+T33	f	=
+V33	f	=
+L34	f	=IF(Cities!A30="","",Cities!A30)
+P34	n	29
+T34	f	=
+V34	f	=
+L35	f	=IF(Cities!A31="","",Cities!A31)
+P35	n	30
+T35	f	=
+V35	f	=
+L36	f	=IF(Cities!A32="","",Cities!A32)
+P36	n	31
+L37	f	=IF(Cities!A33="","",Cities!A33)
+L38	f	=IF(Cities!A34="","",Cities!A34)
+L39	f	=IF(Cities!A35="","",Cities!A35)
+L40	f	=IF(Cities!A36="","",Cities!A36)
+L41	f	=IF(Cities!A37="","",Cities!A37)
+L42	f	=IF(Cities!A38="","",Cities!A38)
+L43	f	=IF(Cities!A39="","",Cities!A39)
+L44	f	=IF(Cities!A40="","",Cities!A40)
+L45	f	=IF(Cities!A41="","",Cities!A41)
+L46	f	=IF(Cities!A42="","",Cities!A42)
+L47	f	=IF(Cities!A43="","",Cities!A43)
+L48	f	=IF(Cities!A44="","",Cities!A44)
+L49	f	=IF(Cities!A45="","",Cities!A45)
+L50	f	=IF(Cities!A46="","",Cities!A46)
+L51	f	=IF(Cities!A47="","",Cities!A47)
+L52	f	=IF(Cities!A48="","",Cities!A48)
+L53	f	=IF(Cities!A49="","",Cities!A49)
+L54	f	=IF(Cities!A50="","",Cities!A50)
+L55	f	=IF(Cities!A51="","",Cities!A51)
+L56	f	=IF(Cities!A52="","",Cities!A52)
+L57	f	=IF(Cities!A53="","",Cities!A53)
+L58	f	=IF(Cities!A54="","",Cities!A54)
+L59	f	=IF(Cities!A55="","",Cities!A55)
+L60	f	=IF(Cities!A56="","",Cities!A56)
+L61	f	=IF(Cities!A57="","",Cities!A57)
+L62	f	=IF(Cities!A58="","",Cities!A58)
+L63	f	=IF(Cities!A59="","",Cities!A59)
+L64	f	=IF(Cities!A60="","",Cities!A60)
+L65	f	=IF(Cities!A61="","",Cities!A61)
+L66	f	=IF(Cities!A62="","",Cities!A62)
+L67	f	=IF(Cities!A63="","",Cities!A63)
+L68	f	=IF(Cities!A64="","",Cities!A64)
+L69	f	=IF(Cities!A65="","",Cities!A65)
+L70	f	=IF(Cities!A66="","",Cities!A66)
+L71	f	=IF(Cities!A67="","",Cities!A67)
+L72	f	=IF(Cities!A68="","",Cities!A68)
+L73	f	=IF(Cities!A69="","",Cities!A69)
+L74	f	=IF(Cities!A70="","",Cities!A70)
+L75	f	=IF(Cities!A71="","",Cities!A71)
+L76	f	=IF(Cities!A72="","",Cities!A72)
+L77	f	=IF(Cities!A73="","",Cities!A73)
+L78	f	=IF(Cities!A74="","",Cities!A74)
+L79	f	=IF(Cities!A75="","",Cities!A75)
+L80	f	=IF(Cities!A76="","",Cities!A76)
+L81	f	=IF(Cities!A77="","",Cities!A77)
+L82	f	=IF(Cities!A78="","",Cities!A78)
+L83	f	=IF(Cities!A79="","",Cities!A79)
+L84	f	=IF(Cities!A80="","",Cities!A80)
+L85	f	=IF(Cities!A81="","",Cities!A81)
+L86	f	=IF(Cities!A82="","",Cities!A82)
+L87	f	=IF(Cities!A83="","",Cities!A83)
+L88	f	=IF(Cities!A84="","",Cities!A84)
+L89	f	=IF(Cities!A85="","",Cities!A85)
+L90	f	=IF(Cities!A86="","",Cities!A86)
+L91	f	=IF(Cities!A87="","",Cities!A87)
+L92	f	=IF(Cities!A88="","",Cities!A88)
+L93	f	=IF(Cities!A89="","",Cities!A89)
+L94	f	=IF(Cities!A90="","",Cities!A90)
+L95	f	=IF(Cities!A91="","",Cities!A91)
+L96	f	=IF(Cities!A92="","",Cities!A92)
+L97	f	=IF(Cities!A93="","",Cities!A93)
+L98	f	=IF(Cities!A94="","",Cities!A94)
+L99	f	=IF(Cities!A95="","",Cities!A95)
+L100	f	=IF(Cities!A96="","",Cities!A96)
+L101	f	=IF(Cities!A97="","",Cities!A97)
+L102	f	=IF(Cities!A98="","",Cities!A98)
+L103	f	=IF(Cities!A99="","",Cities!A99)
+L104	f	=IF(Cities!A100="","",Cities!A100)
+L105	f	=IF(Cities!A101="","",Cities!A101)
+L106	f	=IF(Cities!A102="","",Cities!A102)
+L107	f	=IF(Cities!A103="","",Cities!A103)
+L108	f	=IF(Cities!A104="","",Cities!A104)
+L109	f	=IF(Cities!A105="","",Cities!A105)
+L110	f	=IF(Cities!A106="","",Cities!A106)
+L111	f	=IF(Cities!A107="","",Cities!A107)
+L112	f	=IF(Cities!A108="","",Cities!A108)
+L113	f	=IF(Cities!A109="","",Cities!A109)
+L114	f	=IF(Cities!A110="","",Cities!A110)
+L115	f	=IF(Cities!A111="","",Cities!A111)
+L116	f	=IF(Cities!A112="","",Cities!A112)
+L117	f	=IF(Cities!A113="","",Cities!A113)
+L118	f	=IF(Cities!A114="","",Cities!A114)
+L119	f	=IF(Cities!A115="","",Cities!A115)
+L120	f	=IF(Cities!A116="","",Cities!A116)
+L121	f	=IF(Cities!A117="","",Cities!A117)
+L122	f	=IF(Cities!A118="","",Cities!A118)
+L123	f	=IF(Cities!A119="","",Cities!A119)
+L124	f	=IF(Cities!A120="","",Cities!A120)
+L125	f	=IF(Cities!A121="","",Cities!A121)
+L126	f	=IF(Cities!A122="","",Cities!A122)
+L127	f	=IF(Cities!A123="","",Cities!A123)
+L128	f	=IF(Cities!A124="","",Cities!A124)
+L129	f	=IF(Cities!A125="","",Cities!A125)
+L130	f	=IF(Cities!A126="","",Cities!A126)
+L131	f	=IF(Cities!A127="","",Cities!A127)
+L132	f	=IF(Cities!A128="","",Cities!A128)
+L133	f	=IF(Cities!A129="","",Cities!A129)
+L134	f	=IF(Cities!A130="","",Cities!A130)
+L135	f	=IF(Cities!A131="","",Cities!A131)
+L136	f	=IF(Cities!A132="","",Cities!A132)
+L137	f	=IF(Cities!A133="","",Cities!A133)
+L138	f	=IF(Cities!A134="","",Cities!A134)
+L139	f	=IF(Cities!A135="","",Cities!A135)
+L140	f	=IF(Cities!A136="","",Cities!A136)
+L141	f	=IF(Cities!A137="","",Cities!A137)
+L142	f	=IF(Cities!A138="","",Cities!A138)
+L143	f	=IF(Cities!A139="","",Cities!A139)
+L144	f	=IF(Cities!A140="","",Cities!A140)
+L145	f	=IF(Cities!A141="","",Cities!A141)
+L146	f	=IF(Cities!A142="","",Cities!A142)
+L147	f	=IF(Cities!A143="","",Cities!A143)
+L148	f	=IF(Cities!A144="","",Cities!A144)
+L149	f	=IF(Cities!A145="","",Cities!A145)
+L150	f	=IF(Cities!A146="","",Cities!A146)
+L151	f	=IF(Cities!A147="","",Cities!A147)
+L152	f	=IF(Cities!A148="","",Cities!A148)
+L153	f	=IF(Cities!A149="","",Cities!A149)
+L154	f	=IF(Cities!A150="","",Cities!A150)
+L155	f	=IF(Cities!A151="","",Cities!A151)
+L156	f	=IF(Cities!A152="","",Cities!A152)
+L157	f	=IF(Cities!A153="","",Cities!A153)
+L158	f	=IF(Cities!A154="","",Cities!A154)
+L159	f	=IF(Cities!A155="","",Cities!A155)
+L160	f	=IF(Cities!A156="","",Cities!A156)
+L161	f	=IF(Cities!A157="","",Cities!A157)
+L162	f	=IF(Cities!A158="","",Cities!A158)
+L163	f	=IF(Cities!A159="","",Cities!A159)
+L164	f	=IF(Cities!A160="","",Cities!A160)
+L165	f	=IF(Cities!A161="","",Cities!A161)
+L166	f	=IF(Cities!A162="","",Cities!A162)
+L167	f	=IF(Cities!A163="","",Cities!A163)
+L168	f	=IF(Cities!A164="","",Cities!A164)
+L169	f	=IF(Cities!A165="","",Cities!A165)
+L170	f	=IF(Cities!A166="","",Cities!A166)
+L171	f	=IF(Cities!A167="","",Cities!A167)
+L172	f	=IF(Cities!A168="","",Cities!A168)
+L173	f	=IF(Cities!A169="","",Cities!A169)
+L174	f	=IF(Cities!A170="","",Cities!A170)
+L175	f	=IF(Cities!A171="","",Cities!A171)
+L176	f	=IF(Cities!A172="","",Cities!A172)
+L177	f	=IF(Cities!A173="","",Cities!A173)
+L178	f	=IF(Cities!A174="","",Cities!A174)
+L179	f	=IF(Cities!A175="","",Cities!A175)
+L180	f	=IF(Cities!A176="","",Cities!A176)
+L181	f	=IF(Cities!A177="","",Cities!A177)
+L182	f	=IF(Cities!A178="","",Cities!A178)
+L183	f	=IF(Cities!A179="","",Cities!A179)
+L184	f	=IF(Cities!A180="","",Cities!A180)
+L185	f	=IF(Cities!A181="","",Cities!A181)
+L186	f	=IF(Cities!A182="","",Cities!A182)
+L187	f	=IF(Cities!A183="","",Cities!A183)
+L188	f	=IF(Cities!A184="","",Cities!A184)
+L189	f	=IF(Cities!A185="","",Cities!A185)
+L190	f	=IF(Cities!A186="","",Cities!A186)
+L191	f	=IF(Cities!A187="","",Cities!A187)
+L192	f	=IF(Cities!A188="","",Cities!A188)
+L193	f	=IF(Cities!A189="","",Cities!A189)
+L194	f	=IF(Cities!A190="","",Cities!A190)
+L195	f	=IF(Cities!A191="","",Cities!A191)
+L196	f	=IF(Cities!A192="","",Cities!A192)
+L197	f	=IF(Cities!A193="","",Cities!A193)
+L198	f	=IF(Cities!A194="","",Cities!A194)
+L199	f	=IF(Cities!A195="","",Cities!A195)
+L200	f	=IF(Cities!A196="","",Cities!A196)
+L201	f	=IF(Cities!A197="","",Cities!A197)
+L202	f	=IF(Cities!A198="","",Cities!A198)
+L203	f	=IF(Cities!A199="","",Cities!A199)
+L204	f	=IF(Cities!A200="","",Cities!A200)
+L205	f	=IF(Cities!A201="","",Cities!A201)

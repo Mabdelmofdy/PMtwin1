@@ -1,0 +1,78 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 2-Lists
+state=visible dims=B2:Z15 max_row=15 max_col=26
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 2 · Collaboration model (Individual professional)
+B3	s	Individual path: three collaboration models are available — Task-based Collaboration, Hiring and Mentorship.
+B4	s	Individual path: routing options D–F only (Task-based Collaboration, Hiring, Mentorship). Matching is Type 1, or Type 2 when both sides are posted.
+B5	s	Option
+C5	s	Label (S2-F01)
+D5	s	Routes to
+E5	s	Follow-up required
+G5	s	Parent
+H5	s	Label (S2-F02)
+I5	s	Suggested model
+J5	s	Variant
+L5	s	#
+M5	s	Model (S2-F03)
+N5	s	Description
+O5	s	Typical example
+P5	s	Base structure
+Q5	s	If both sides posted (Need & Offer)
+R5	s	Pooling / chain variant
+T5	s	Condition (S2-F05)
+U5	s	Label displayed
+W5	s	ENGINE — S2-F02 dynamic list
+Z5	s	FILTERED S2-F02 OPTIONS — validation source for 'Step 2-Wireframe'!C13
+B6	s	D
+C6	s	Offering or seeking a task or service
+D6	s	Task-based Collaboration
+E6	s	No
+G6	s	— No follow-up questions on the individual path
+L6	n	1
+M6	s	Task-based Collaboration
+N6	s	Offer or exchange a task or service as an individual professional
+O6	s	BIM modelling in exchange for contract-drafting support
+P6	s	Straightforward Match (Type 1)
+Q6	s	Two-Way Match (Type 2) — higher match value
+R6	s	— Not used (individual path)
+T6	s	Single party each side
+U6	s	Straightforward Match (Type 1)
+W6	s	Active S2-F01 label
+X6	f	='Step 2-Wireframe'!$C$12
+Z6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221271B46B0>
+B7	s	E
+C7	s	Finding an engagement or offering my professional expertise
+D7	s	Hiring
+E7	s	No
+L7	n	2
+M7	s	Hiring
+N7	s	Find an engagement or make your professional expertise visible
+O7	s	Senior PM seeking a 6-month programme role
+P7	s	Straightforward Match (Type 1)
+Q7	s	Straightforward Match (Type 1)
+R7	s	— Not used (individual path)
+T7	s	Both sides match both ways
+U7	s	Two-Way Match (Type 2) — higher match value
+W7	s	Parent option letter
+X7	f	=IFERROR(INDEX($B$6:$B$11,MATCH($X$6,$C$6:$C$11,0)),"")
+Z7	n	0
+B8	s	F
+C8	s	Developing expertise — mine or someone else's
+D8	s	Mentorship
+E8	s	No
+L8	n	3
+M8	s	Mentorship
+N8	s	Develop expertise — give or receive
+O8	s	PM mentorship in exchange for PropTech knowledge
+P8	s	Straightforward Match (Type 1)
+Q8	s	Two-Way Match (Type 2) — higher match value
+R8	s	— Not used (individual path)
+W8	s	Follow-up applicable?
+X8	f	=IF(OR($X$7="A",$X$7="B"),"Yes","No")
+Z8	n	0
+Z9	n	0
+L15	s	PROPOSED DEFAULT — the three structure columns above map the Type 1–4 rules onto the 3 individual models. Edit any cell and the wireframe follows.

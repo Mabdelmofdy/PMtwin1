@@ -1,0 +1,204 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step3-ind-task-based-coll
+state=visible dims=A1:E115 max_row=115 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Individual path: Task-based Collaboration
+A5	s	Screen title: Scope & Work — Task-based Collaboration Screen subtitle: Define the service or skill you offer and the task or service you are seeking. Account type: Individual professional only Note: Post a Need to find a task or service, post an Offer to make your skills available, or post both.
+A9	s	Offer side — "The service or skill you are offering"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-TB-I-O00
+B12	s	Collaboration intent
+C12	s	Dropdown
+D12	s	Yes
+E12	s	No
+A13	s	S3-TB-I-O01
+B13	s	Service category
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-TB-I-O02
+B14	s	Service specialisation
+C14	s	Dropdown
+D14	s	Yes
+E14	s	Yes
+A15	s	S3-TB-I-O03
+B15	s	Sector or project context
+C15	s	Dropdown
+D15	s	No
+E15	s	Yes
+A16	s	S3-TB-I-O04
+B16	s	Service description
+C16	s	Text area
+D16	s	Yes
+E16	s	No
+A17	s	S3-TB-I-O05
+B17	s	Delivery mode
+C17	s	Dropdown
+D17	s	Yes
+E17	s	No
+A18	s	S3-TB-I-O06
+B18	s	Service location — country
+C18	s	Dropdown
+D18	s	Yes
+E18	s	Yes
+A19	s	S3-TB-I-O06a
+B19	s	Service location — city
+C19	s	Dropdown
+D19	s	No
+E19	s	Populates per O06
+A20	s	S3-TB-I-O07
+B20	s	Engagement type
+C20	s	Dropdown
+D20	s	Yes
+E20	s	No
+A21	s	S3-TB-I-O08
+B21	s	Availability
+C21	s	Dropdown
+D21	s	Yes
+E21	s	No
+A22	s	S3-TB-I-O09
+B22	s	Estimated service duration
+C22	s	Numeric input + time unit (S3-TB-I-O09-TU)
+D22	s	Yes
+E22	s	No
+A23	s	S3-TB-I-O10
+B23	s	Rate expected
+C23	s	Range dropdown + currency (S3-TB-I-O10-CUR)
+D23	s	No
+E23	s	No
+A24	s	S3-TB-I-O11
+B24	s	Rate unit
+C24	s	Dropdown
+D24	s	No
+E24	s	No
+A25	s	S3-TB-I-O12
+B25	s	Personal credentials
+C25	s	Multi-select dropdown
+D25	s	No
+E25	s	Yes
+A26	s	S3-TB-I-O13
+B26	s	Languages
+C26	s	Multi-select dropdown
+D26	s	No
+E26	s	No
+A28	s	S3-TB-I-O00 — Collaboration intent values: Offering a new task collaboration / Extending an existing engagement / Open to discussion
+A30	s	S3-TB-I-O01 — Service category values: Technical services / Professional services / Technology services / Logistics & operations / Training & development / Administration & support / Other → free text
+A32	s	S3-TB-I-O02 — Specialisation values (conditional on O01): Same comprehensive taxonomy as S3-TB-N03 (company Task-based Need side)
+A34	s	S3-TB-I-O03 — Sector / project context values: Residential development / Commercial development / Mixed-use / Infrastructure / Industrial / Hospitality / Healthcare / Education / Giga-project / Retail / General business / Other → free text
+A36	s	S3-TB-I-O05 — Delivery mode values: On-site / Remote / Hybrid / Flexible
+A38	s	S3-TB-I-O06 — Service location country values: Full country list (same as S1-F03)
+A40	s	S3-TB-I-O06a — Service location city values: Conditional on O06. Same city taxonomy as S1-F04
+A42	s	S3-TB-I-O07 — Engagement type values: One-off task / Project-based / Retainer / Fractional / Part-time / Advisory / Other → free text
+A44	s	S3-TB-I-O08 — Availability values: Immediate / Within 2 weeks / Within 1 month / 1–3 months / Flexible / Specific date → date picker
+A46	s	S3-TB-I-O09-TU — Duration time unit values: Hours / Days / Weeks / Months / Years
+A48	s	S3-TB-I-O10 — Rate range values: Under $500 / $500–$2K / $2K–$5K / $5K–$10K / $10K–$20K / Above $20K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A50	s	S3-TB-I-O11 — Rate unit values: Per hour / Per day / Per week / Per project / To be agreed
+A52	s	S3-TB-I-O12 — Personal credentials values: RICS / CIOB / PE licence / PMP / PRINCE2 / MBA / PMTwin vetted / MOMRA approved / Saudi Council of Engineers / None / Other → free text
+A54	s	S3-TB-I-O13 — Languages values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A58	s	Need side — "The task or service you are seeking"
+A60	s	Code
+B60	s	Field label
+C60	s	Type
+D60	s	Required
+E60	s	Other trigger
+A61	s	S3-TB-I-N00
+B61	s	Match with
+C61	s	Single select
+D61	s	Yes
+E61	s	Yes
+A62	s	S3-TB-I-N01
+B62	s	Collaboration intent
+C62	s	Dropdown
+D62	s	Yes
+E62	s	No
+A63	s	S3-TB-I-N02
+B63	s	Service category needed
+C63	s	Dropdown
+D63	s	Yes
+E63	s	Yes
+A64	s	S3-TB-I-N03
+B64	s	Service specialisation
+C64	s	Dropdown
+D64	s	Yes
+E64	s	Yes
+A65	s	S3-TB-I-N04
+B65	s	Sector or project context
+C65	s	Dropdown
+D65	s	No
+E65	s	Yes
+A66	s	S3-TB-I-N05
+B66	s	Scope description
+C66	s	Text area
+D66	s	Yes
+E66	s	No
+A67	s	S3-TB-I-N06
+B67	s	Delivery mode preference
+C67	s	Dropdown
+D67	s	No
+E67	s	No
+A68	s	S3-TB-I-N07
+B68	s	Service location — country
+C68	s	Dropdown
+D68	s	Yes
+E68	s	Yes
+A69	s	S3-TB-I-N07a
+B69	s	Service location — city
+C69	s	Dropdown
+D69	s	No
+E69	s	Populates per N07
+A70	s	S3-TB-I-N08
+B70	s	Engagement type sought
+C70	s	Dropdown
+D70	s	Yes
+E70	s	No
+A71	s	S3-TB-I-N09
+B71	s	When do I need this?
+C71	s	Dropdown
+D71	s	Yes
+E71	s	No
+A72	s	S3-TB-I-N10
+B72	s	Duration required
+C72	s	Numeric input + time unit (S3-TB-I-N10-TU)
+D72	s	Yes
+E72	s	No
+A73	s	S3-TB-I-N11
+B73	s	Budget range
+C73	s	Range dropdown + currency (S3-TB-I-N11-CUR)
+D73	s	No
+E73	s	No
+A74	s	S3-TB-I-N12
+B74	s	Required credentials
+C74	s	Multi-select dropdown
+D74	s	No
+E74	s	Yes
+A75	s	S3-TB-I-N13
+B75	s	Language requirement
+C75	s	Multi-select dropdown
+D75	s	No
+E75	s	No
+A77	s	S3-TB-I-N00 — Match with values: Companies only / Individual professionals only / Both If "Include individual professionals" → individual attributes section opens (same as S3-TB-N00a)
+A79	s	S3-TB-I-N01 — Collaboration intent values: Seeking a new task collaboration / Extending an existing engagement / Replacing an existing provider / Open to discussion
+A81	s	S3-TB-I-N02 — Service category values: Same taxonomy as S3-TB-I-O01
+A83	s	S3-TB-I-N03 — Specialisation values: Same conditional taxonomy as S3-TB-I-O02
+A85	s	S3-TB-I-N04 — Sector / project context values: Same as S3-TB-I-O03
+A87	s	S3-TB-I-N06 — Delivery mode values: On-site / Remote / Hybrid / Flexible
+A89	s	S3-TB-I-N07 — Service location country values: Full country list (same as S1-F03)
+A91	s	S3-TB-I-N07a — Service location city values: Conditional on N07. Same city taxonomy as S1-F04
+A93	s	S3-TB-I-N08 — Engagement type values: One-off task / Project-based / Retainer / Fractional / Part-time / Advisory / Other → free text
+A95	s	S3-TB-I-N09 — When do I need this? values: Immediately / Within 2 weeks / Within 1 month / 1–3 months / Flexible / Specific date → date picker
+A97	s	S3-TB-I-N10-TU — Duration time unit values: Hours / Days / Weeks / Months / Years
+A99	s	S3-TB-I-N11 — Budget range values: Under $500 / $500–$2K / $2K–$5K / $5K–$10K / $10K–$20K / Above $20K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A101	s	S3-TB-I-N12 — Required credentials values: RICS / CIOB / PE licence / PMP / PRINCE2 / MBA / PMTwin vetted / None / Other → free text
+A103	s	S3-TB-I-N13 — Language requirement values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A107	s	Deliverables (Need side — encouraged)
+A109	s	Collapsed by default. Individual describes expected output from the task or service.
+A113	s	Milestones (optional)
+A115	s	Collapsed by default.

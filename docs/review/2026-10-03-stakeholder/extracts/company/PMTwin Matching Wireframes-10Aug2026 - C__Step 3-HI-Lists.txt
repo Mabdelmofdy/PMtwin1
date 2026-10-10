@@ -1,0 +1,472 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-HI-Lists
+state=visible dims=B2:BK103 max_row=103 max_col=63
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 7: Hiring / Professional Engagement
+B3	s	Covers companies seeking professionals AND professionals offering expertise. Both sides mandatory.
+B5	s	Role / expertise category (O01 / N01)
+D5	s	Years of experience (O03)
+F5	s	Minimum experience required (N03)
+H5	s	Relevant credentials — Offer (O04)
+J5	s	Required credentials — Need (N04)
+K5	s	Applies to
+M5	s	Engagement type (O05 / N05)
+O5	s	Availability — Offer (O06)
+Q5	s	When do you need this? (N06)
+S5	s	Engagement duration unit (N07-TU)
+U5	s	Work location type (O07 / N08)
+W5	s	Rate / budget range (O08 / N09)
+Y5	s	Currency (O08-CUR / N09-CUR)
+AA5	s	Rate unit (O09 / N10)
+AC5	s	Notice period — Offer (O10)
+AE5	s	Expected notice period (N14)
+AG5	s	Work permit / visa status — Offer (O11)
+AI5	s	Work permit / visa required (N13)
+AK5	s	Languages (O12 / N12)
+AM5	s	Sector experience / project type (O13 / N11)
+AO5	s	Match with (N00)
+AQ5	s	Hidden fields for the Hiring model
+AS5	s	Month (date scope)
+AU5	s	Year (date scope)
+AW5	s	Role category
+AX5	s	Role sub-type (O02 / N02)
+AZ5	s	O02 role sub-type source
+BB5	s	N02 role sub-type source
+BD5	s	O07b work city source
+BF5	s	N08b work city source
+BH5	s	Date options (specific dates & milestones)
+BJ5	s	Comparison rank helpers
+B6	s	Engineering
+D6	s	0–3 years
+F6	s	0–3 years
+H6	s	RICS
+J6	s	RICS
+K6	s	Individuals
+M6	s	Full-time
+O6	s	Immediate
+Q6	s	Immediately
+S6	s	Days
+U6	s	On-site
+W6	s	Under $500/month
+Y6	s	USD ($)
+AA6	s	Per hour
+AC6	s	Immediate
+AE6	s	Immediate availability
+AG6	s	Valid KSA work permit
+AI6	s	Must have valid KSA work permit
+AK6	s	Arabic
+AM6	s	Residential development
+AO6	s	Companies only
+AQ6	s	Asset type
+AS6	s	January
+AU6	n	2026
+AW6	s	Engineering
+AX6	s	Civil engineer
+AZ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263851F0>
+BB6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263875F0>
+BD6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126387620>
+BF6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126387650>
+BH6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126387680>
+BJ6	s	Offer rate rank (O08)
+BK6	f	=IFERROR(MATCH('Step 3-HI-Wireframe'!$C$28,$W$6:$W$13,0),0)
+B7	s	Project management
+D7	s	3–7 years
+F7	s	3–7 years
+H7	s	CIOB
+J7	s	CIOB
+K7	s	Individuals
+M7	s	Part-time
+O7	s	Within 2 weeks
+Q7	s	Within 2 weeks
+S7	s	Weeks
+U7	s	Remote
+W7	s	$500–$2K/month
+Y7	s	SAR (ر.س)
+AA7	s	Per day
+AC7	s	Up to 2 weeks
+AE7	s	Up to 2 weeks
+AG7	s	Valid UAE work permit
+AI7	s	Must have valid UAE work permit
+AK7	s	English
+AM7	s	Commercial development
+AO7	s	Individual professionals only
+AQ7	s	Pool size
+AS7	s	February
+AU7	n	2027
+AW7	s	Engineering
+AX7	s	Structural engineer
+BH7	f	=
+BJ7	s	Need budget rank (N09)
+BK7	f	=IFERROR(MATCH('Step 3-HI-Wireframe'!$C$60,$W$6:$W$13,0),0)
+B8	s	Commercial
+D8	s	7–15 years
+F8	s	7–15 years
+H8	s	PE licence
+J8	s	PE licence
+K8	s	Individuals
+M8	s	Project-based
+O8	s	Within 1 month
+Q8	s	Within 1 month
+S8	s	Months
+U8	s	Hybrid
+W8	s	$2K–$5K/month
+Y8	s	AED (د.إ)
+AA8	s	Per month
+AC8	s	Up to 1 month
+AE8	s	Up to 1 month
+AG8	s	Valid GCC permit
+AI8	s	Must have valid GCC permit
+AK8	s	Arabic & English
+AM8	s	Mixed-use
+AO8	s	Both
+AQ8	s	Material category
+AS8	s	March
+AU8	n	2028
+AW8	s	Engineering
+AX8	s	MEP engineer (mechanical)
+BH8	f	=
+BJ8	s	Offer experience rank (O03)
+BK8	f	=IFERROR(MATCH('Step 3-HI-Wireframe'!$C$16,$D$6:$D$9,0),0)
+B9	s	Design
+D9	s	15+ years
+F9	s	15+ years
+H9	s	PMP
+J9	s	PMP
+K9	s	Individuals
+M9	s	Fractional
+O9	s	1–3 months
+Q9	s	1–3 months
+S9	s	Years
+U9	s	Flexible
+W9	s	$5K–$10K/month
+Y9	s	EGP (ج.م)
+AA9	s	Per project
+AC9	s	Up to 3 months
+AE9	s	Up to 3 months
+AG9	s	Valid Egyptian work permit
+AI9	s	Employer will sponsor visa
+AK9	s	French
+AM9	s	Infrastructure
+AQ9	s	Entity establishment
+AS9	s	April
+AU9	n	2029
+AW9	s	Engineering
+AX9	s	MEP engineer (electrical)
+BH9	f	=
+BJ9	s	Need min experience rank (N03)
+BK9	f	=IFERROR(MATCH('Step 3-HI-Wireframe'!$C$46,$F$6:$F$10,0),0)
+B10	s	Digital & technology
+F10	s	Not specified
+H10	s	PRINCE2
+J10	s	PRINCE2
+K10	s	Individuals
+M10	s	Retainer
+O10	s	Flexible
+Q10	s	Flexible start
+W10	s	$10K–$20K/month
+Y10	s	QAR (ر.ق)
+AA10	s	To be agreed
+AC10	s	Flexible
+AE10	s	Flexible
+AG10	s	Requires visa sponsorship
+AI10	s	No requirement
+AK10	s	Mandarin
+AM10	s	Industrial
+AQ10	s	Swap duration
+AS10	s	May
+AU10	n	2030
+AW10	s	Engineering
+AX10	s	MEP engineer (plumbing)
+BH10	f	=
+B11	s	Operations & HSE
+H11	s	MBA
+J11	s	MBA
+K11	s	Individuals
+M11	s	Advisory
+O11	s	Specific date
+Q11	s	Specific date
+W11	s	Above $20K/month
+Y11	s	KWD (د.ك)
+AE11	s	Not specified
+AG11	s	Open to relocation
+AI11	s	Other
+AK11	s	Hindi
+AM11	s	Hospitality
+AS11	s	June
+AU11	n	2031
+AW11	s	Engineering
+AX11	s	Environmental engineer
+BH11	f	=
+B12	s	Real estate
+H12	s	ISO certified
+J12	s	LEED AP
+K12	s	Individuals
+M12	s	Secondment
+W12	s	Per project (specify)
+Y12	s	BHD (د.ب)
+AG12	s	Other
+AK12	s	Other
+AM12	s	Healthcare
+AS12	s	July
+AU12	n	2032
+AW12	s	Engineering
+AX12	s	Geotechnical engineer
+BH12	f	=
+B13	s	Finance & accounting
+H13	s	PMTwin vetted
+J13	s	BREEAM Assessor
+K13	s	Individuals
+M13	s	Other
+W13	s	To be agreed
+Y13	s	OMR (ر.ع)
+AM13	s	Education
+AS13	s	August
+AU13	n	2033
+AW13	s	Engineering
+AX13	s	Fire protection engineer
+BH13	f	=
+B14	s	Legal & compliance
+H14	s	MOMRA approved
+J14	s	Saudi Council of Engineers
+K14	s	Individuals
+Y14	s	EUR (€)
+AM14	s	Giga-project
+AS14	s	September
+AU14	n	2034
+AW14	s	Engineering
+AX14	s	Acoustic engineer
+BH14	f	=
+B15	s	Administration
+H15	s	Saudi Council of Engineers
+J15	s	UAE Engineering licence
+K15	s	Individuals
+Y15	s	GBP (£)
+AM15	s	Retail
+AS15	s	October
+AU15	n	2035
+AW15	s	Engineering
+AX15	s	Facade engineer
+BH15	f	=
+B16	s	Sales & business development
+H16	s	UAE Engineering licence
+J16	s	Muqawil registered
+K16	s	Companies
+Y16	s	Other
+AM16	s	General business
+AS16	s	November
+AU16	n	2036
+AW16	s	Engineering
+AX16	s	Infrastructure engineer
+BH16	f	=
+B17	s	Other
+H17	s	LEED AP
+J17	s	ISO certified
+K17	s	Companies
+AM17	s	Other
+AS17	s	December
+AW17	s	Engineering
+AX17	s	Traffic & transportation engineer
+BH17	f	=
+H18	s	BREEAM Assessor
+J18	s	MOMRA approved
+K18	s	Companies
+AW18	s	Engineering
+AX18	s	Other
+BH18	f	=
+H19	s	Other
+J19	s	PMTwin vetted
+K19	s	Both
+AW19	s	Project management
+AX19	s	Project manager
+BH19	f	=
+J20	s	None
+K20	s	Both
+AW20	s	Project management
+AX20	s	Senior project manager
+BH20	f	=
+J21	s	Other
+K21	s	Both
+AW21	s	Project management
+AX21	s	Construction manager
+BH21	f	=
+AW22	s	Project management
+AX22	s	Planning engineer
+BH22	f	=
+AW23	s	Project management
+AX23	s	Scheduler
+BH23	f	=
+AW24	s	Project management
+AX24	s	Risk manager
+BH24	f	=
+AW25	s	Project management
+AX25	s	Document controller
+BH25	f	=
+AW26	s	Project management
+AX26	s	Project coordinator
+BH26	f	=
+AW27	s	Project management
+AX27	s	Programme manager
+BH27	f	=
+AW28	s	Project management
+AX28	s	PMO manager
+BH28	f	=
+AW29	s	Project management
+AX29	s	Other
+BH29	f	=
+AW30	s	Commercial
+AX30	s	Quantity surveyor
+BH30	f	=
+AW31	s	Commercial
+AX31	s	Senior quantity surveyor
+BH31	f	=
+AW32	s	Commercial
+AX32	s	Chief QS
+BH32	f	=
+AW33	s	Commercial
+AX33	s	Contract manager
+BH33	f	=
+AW34	s	Commercial
+AX34	s	Procurement specialist
+BH34	f	=
+AW35	s	Commercial
+AX35	s	Cost estimator
+BH35	f	=
+AW36	s	Commercial
+AX36	s	Cost planner
+AW37	s	Commercial
+AX37	s	Claims manager
+AW38	s	Commercial
+AX38	s	Commercial manager
+AW39	s	Commercial
+AX39	s	Commercial director
+AW40	s	Commercial
+AX40	s	Other
+AW41	s	Design
+AX41	s	Architect
+AW42	s	Design
+AX42	s	Senior architect
+AW43	s	Design
+AX43	s	Principal architect
+AW44	s	Design
+AX44	s	Interior designer
+AW45	s	Design
+AX45	s	Urban planner
+AW46	s	Design
+AX46	s	Landscape architect
+AW47	s	Design
+AX47	s	Lighting designer
+AW48	s	Design
+AX48	s	Signage designer
+AW49	s	Design
+AX49	s	Graphic designer
+AW50	s	Design
+AX50	s	Other
+AW51	s	Digital & technology
+AX51	s	BIM manager
+AW52	s	Digital & technology
+AX52	s	BIM coordinator
+AW53	s	Digital & technology
+AX53	s	Data analyst
+AW54	s	Digital & technology
+AX54	s	PropTech specialist
+AW55	s	Digital & technology
+AX55	s	IT systems manager
+AW56	s	Digital & technology
+AX56	s	Software developer
+AW57	s	Digital & technology
+AX57	s	Digital transformation specialist
+AW58	s	Digital & technology
+AX58	s	GIS specialist
+AW59	s	Digital & technology
+AX59	s	Other
+AW60	s	Operations & HSE
+AX60	s	Site engineer
+AW61	s	Operations & HSE
+AX61	s	Site manager
+AW62	s	Operations & HSE
+AX62	s	HSE officer
+AW63	s	Operations & HSE
+AX63	s	HSE manager
+AW64	s	Operations & HSE
+AX64	s	Logistics coordinator
+AW65	s	Operations & HSE
+AX65	s	Facilities manager
+AW66	s	Operations & HSE
+AX66	s	Operations manager
+AW67	s	Operations & HSE
+AX67	s	Commissioning engineer
+AW68	s	Operations & HSE
+AX68	s	Other
+AW69	s	Real estate
+AX69	s	Real estate agent
+AW70	s	Real estate
+AX70	s	Property manager
+AW71	s	Real estate
+AX71	s	Asset manager
+AW72	s	Real estate
+AX72	s	Development manager
+AW73	s	Real estate
+AX73	s	Sales manager
+AW74	s	Real estate
+AX74	s	Leasing manager
+AW75	s	Real estate
+AX75	s	Property valuer
+AW76	s	Real estate
+AX76	s	Transaction manager
+AW77	s	Real estate
+AX77	s	Other
+AW78	s	Finance & accounting
+AX78	s	Financial controller
+AW79	s	Finance & accounting
+AX79	s	CFO
+AW80	s	Finance & accounting
+AX80	s	Finance manager
+AW81	s	Finance & accounting
+AX81	s	Accountant
+AW82	s	Finance & accounting
+AX82	s	Internal auditor
+AW83	s	Finance & accounting
+AX83	s	Budget analyst
+AW84	s	Finance & accounting
+AX84	s	Other
+AW85	s	Legal & compliance
+AX85	s	Legal counsel
+AW86	s	Legal & compliance
+AX86	s	Contract specialist
+AW87	s	Legal & compliance
+AX87	s	Compliance officer
+AW88	s	Legal & compliance
+AX88	s	Corporate lawyer
+AW89	s	Legal & compliance
+AX89	s	Real estate lawyer
+AW90	s	Legal & compliance
+AX90	s	Construction lawyer
+AW91	s	Legal & compliance
+AX91	s	Other
+AW92	s	Administration
+AX92	s	Executive assistant
+AW93	s	Administration
+AX93	s	Project administrator
+AW94	s	Administration
+AX94	s	Office manager
+AW95	s	Administration
+AX95	s	Receptionist
+AW96	s	Administration
+AX96	s	Other
+AW97	s	Sales & business development
+AX97	s	Business development manager
+AW98	s	Sales & business development
+AX98	s	Sales director
+AW99	s	Sales & business development
+AX99	s	Account manager
+AW100	s	Sales & business development
+AX100	s	Client relations manager
+AW101	s	Sales & business development
+AX101	s	Marketing manager
+AW102	s	Sales & business development
+AX102	s	Other
+AW103	s	Other
+AX103	s	Other

@@ -1,0 +1,204 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-BP
+state=visible dims=A1:E121 max_row=121 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 5: Bulk Purchasing
+A5	s	Screen title: Scope & Work — Bulk Purchasing Screen subtitle: Define what you want to purchase and what you bring to the group order. Layout: Offer side (top) and Need side (bottom). Both required. Note: Both sides of every post are mandatory. In bulk purchasing, the Offer side represents your contribution to the pool (volume commitment, anchor order, or purchasing capacity). The Need side represents what you want to procure.
+A9	s	Offer side — "What you are contributing to the purchasing pool"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-BP-O00
+B12	s	Pool role
+C12	s	Dropdown
+D12	s	Yes
+E12	s	No
+A13	s	S3-BP-O01
+B13	s	Material or product you are pooling for
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-BP-O02
+B14	s	Material sub-type
+C14	s	Dropdown
+D14	s	Yes
+E14	s	Yes
+A15	s	S3-BP-O03
+B15	s	Volume commitment
+C15	s	Numeric input + unit (S3-BP-O03-TU)
+D15	s	Yes
+E15	s	No
+A16	s	S3-BP-O04
+B16	s	Estimated budget contribution
+C16	s	Range dropdown + currency (S3-BP-O04-CUR)
+D16	s	Yes
+E16	s	No
+A17	s	S3-BP-O05
+B17	s	Delivery location — country
+C17	s	Dropdown
+D17	s	Yes
+E17	s	Yes
+A18	s	S3-BP-O05a
+B18	s	Delivery location — city
+C18	s	Dropdown
+D18	s	Yes
+E18	s	Populates per O05
+A19	s	S3-BP-O06
+B19	s	Required delivery date
+C19	s	Date picker
+D19	s	Yes
+E19	s	No
+A20	s	S3-BP-O07
+B20	s	Supply preference
+C20	s	Dropdown
+D20	s	No
+E20	s	No
+A22	s	S3-BP-O00 — Pool role values: Pool initiator (anchor order) / Pool participant (joining existing pool) / Exiting existing pool commitment / Open to either
+A24	s	S3-BP-O01 — Material category values: Same taxonomy as S3-BP-N01 (Need side)
+A26	s	S3-BP-O02 — Sub-type values: Same comprehensive taxonomy as S3-BP-N02
+A28	s	S3-BP-O03-TU — Volume unit values: Units / Tonnes / Cubic metres (m³) / Linear metres (m) / Square metres (m²) / Bags / Rolls / Litres / Kilograms / Pallets / Containers / Other → free text
+A30	s	S3-BP-O04 — Budget contribution range values: Under $10K / $10K–$50K / $50K–$100K / $100K–$500K / $500K–$1M / Above $1M / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A32	s	S3-BP-O05 — Delivery location country values: Full country list (same as S1-F03)
+A34	s	S3-BP-O05a — Delivery location city values: Conditional on O05. Same city taxonomy as S1-F04
+A36	s	S3-BP-O07 — Supply preference values: Local supply only / GCC manufacture preferred / Import acceptable / No preference / Other → free text
+A40	s	Need side — "What you want to procure"
+A42	s	Code
+B42	s	Field label
+C42	s	Type
+D42	s	Required
+E42	s	Other trigger
+A43	s	S3-BP-N00
+B43	s	Pool intent
+C43	s	Dropdown
+D43	s	Yes
+E43	s	No
+A44	s	S3-BP-N01
+B44	s	Material or product category
+C44	s	Dropdown
+D44	s	Yes
+E44	s	Yes
+A45	s	S3-BP-N02
+B45	s	Material or product sub-type
+C45	s	Dropdown
+D45	s	Yes
+E45	s	Yes
+A46	s	S3-BP-N03
+B46	s	Specification / grade
+C46	s	Text area
+D46	s	No
+E46	s	No
+A47	s	S3-BP-N04
+B47	s	Brand / manufacturer preference
+C47	s	Dropdown
+D47	s	No
+E47	s	Yes
+A48	s	S3-BP-N05
+B48	s	Quality certification required
+C48	s	Multi-select dropdown
+D48	s	No
+E48	s	Yes
+A49	s	S3-BP-N06
+B49	s	Quantity needed
+C49	s	Numeric input + unit (S3-BP-N06-TU)
+D49	s	Yes
+E49	s	No
+A50	s	S3-BP-N07
+B50	s	Target unit price
+C50	s	Numeric input + currency (S3-BP-N07-CUR)
+D50	s	No
+E50	s	No
+A51	s	S3-BP-N08
+B51	s	Required delivery date
+C51	s	Date picker
+D51	s	Yes
+E51	s	No
+A52	s	S3-BP-N09
+B52	s	Delivery location — country
+C52	s	Dropdown
+D52	s	Yes
+E52	s	Yes
+A53	s	S3-BP-N09a
+B53	s	Delivery location — city
+C53	s	Dropdown
+D53	s	Yes
+E53	s	Populates per N09
+A54	s	S3-BP-N10
+B54	s	Supply preference
+C54	s	Dropdown
+D54	s	No
+E54	s	No
+A55	s	S3-BP-N11
+B55	s	Delivery format
+C55	s	Dropdown
+D55	s	No
+E55	s	No
+A56	s	S3-BP-N12
+B56	s	Minimum pool size to proceed
+C56	s	Dropdown
+D56	s	Yes
+E56	s	No
+A57	s	S3-BP-N13
+B57	s	Maximum pool size
+C57	s	Dropdown
+D57	s	No
+E57	s	No
+A58	s	S3-BP-N14
+B58	s	Preferred supplier location — country
+C58	s	Dropdown
+D58	s	No
+E58	s	Yes
+A59	s	S3-BP-N14a
+B59	s	Preferred supplier location — city
+C59	s	Dropdown
+D59	s	No
+E59	s	Populates per N14
+A61	s	S3-BP-N00 — Pool intent values: Initiating a new purchasing pool / Joining an existing pool / Exiting an existing pool commitment / Open to either
+A63	s	S3-BP-N01 — Material category values: Structural materials / MEP materials / Finishing materials / Waterproofing & insulation / Landscaping materials / Equipment & machinery / Technology & software / PPE & safety / Furniture & fit-out / Specialist materials / Other → free text
+A65	s	S3-BP-N02 — Sub-type values (conditional on N01):
+A67	s	N01
+B67	s	N02 options
+A68	s	Structural materials
+B68	s	Cement / Ready-mix concrete / Steel & rebar / Structural steel sections / Concrete blocks / AAC blocks / Timber & formwork / Sand & aggregate / Gravel / Other
+A69	s	MEP materials
+B69	s	Pipes & fittings (HDPE / PVC / GI) / Electrical cables & wiring / Cable trays & conduits / HVAC equipment / Ductwork / Plumbing fixtures / Fire protection materials / Low voltage systems / Other
+A70	s	Finishing materials
+B70	s	Tiles & flooring / Marble & stone / Porcelain / Paint & coatings / Gypsum & plasterboard / Doors & windows / Curtain wall / Ceiling systems / Aluminium & glazing / Other
+A71	s	Waterproofing & insulation
+B71	s	Waterproofing membranes / Thermal insulation / Acoustic insulation / Sealants & adhesives / Other
+A72	s	Landscaping materials
+B72	s	Pavers & kerbs / Turf & plants / Irrigation systems / Outdoor lighting / Other
+A73	s	Equipment & machinery
+B73	s	Heavy equipment / Tools & small equipment / Generators & power units / Pumps & compressors / Other
+A74	s	Technology & software
+B74	s	Software licences / Hardware & devices / Smart building systems / CCTV & security / Other
+A75	s	PPE & safety
+B75	s	Hard hats / Safety vests / Harnesses & fall protection / Safety signage / First aid / Fire extinguishers / Other
+A76	s	Furniture & fit-out
+B76	s	Office furniture / Loose furniture / Kitchen & pantry / Storage systems / Other
+A77	s	Specialist materials
+B77	s	Fire protection materials / Acoustic materials / Anti-static materials / Hazardous material containers / Other
+A79	s	→ All include "Other" → free text
+A81	s	S3-BP-N04 — Brand preference values: Any brand acceptable / Specific brand preferred → free text / Approved vendor list only / Equivalent acceptable / Other
+A83	s	S3-BP-N05 — Quality certification values: SASO (Saudi Standards) / CE marked / ASTM standards / BSI standards / ISO 9001 / EN standards / Gulf Conformity Mark (GCM) / No specific certification required / Other → free text
+A85	s	S3-BP-N06-TU — Quantity unit values: Units / Tonnes / Cubic metres (m³) / Linear metres (m) / Square metres (m²) / Bags / Rolls / Litres / Kilograms / Pallets / Containers / Other → free text
+A87	s	S3-BP-N07-CUR — Currency values: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A89	s	S3-BP-N09 — Delivery location country values: Full country list (same as S1-F03)
+A91	s	S3-BP-N09a — Delivery location city values: Conditional on N09. Same city taxonomy as S1-F04
+A93	s	S3-BP-N10 — Supply preference values: Local supply only / GCC manufacture preferred / Import acceptable / No preference / Other → free text
+A95	s	S3-BP-N11 — Delivery format values: Bulk delivery / Palletised / Containerised / Just-in-time delivery / Phased delivery / No preference / Other → free text
+A97	s	S3-BP-N12 — Minimum pool size values: 2 companies / 3 companies / 4 companies / 5 companies / 6 or more / Open — no minimum
+A99	s	S3-BP-N13 — Maximum pool size values: 3 companies / 4 companies / 5 companies / 6 companies / 10 companies / No maximum / To be agreed
+A101	s	S3-BP-N14 — Preferred supplier location country values: Saudi Arabia / UAE / Egypt / Qatar / Kuwait / Bahrain / Oman / China / Turkey / Europe (any) / International (any) / No preference / Other → free text
+A103	s	S3-BP-N14a — Preferred supplier location city values: Conditional on N14. Same city taxonomy as S1-F04
+A107	s	Deliverables (Need side only — optional)
+A109	s	Collapsed by default. User can specify quality standards, delivery conditions, or acceptance criteria.
+A113	s	Milestones (optional — both sides)
+A115	s	Collapsed by default. Useful for phased delivery schedules.
+A119	s	Hidden fields for Bulk Purchasing model
+A121	s	Entity establishment / Partner credentials / Skill level / Years experience / Swap duration / Pool governance

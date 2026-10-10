@@ -1,0 +1,496 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-TB-Wireframe
+state=visible dims=A1:Q120 max_row=120 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H12:H23 H28:H34 J12:J23 J28:J33 J38:J44 type=list formula1="No,Yes" formula2=None allow_blank=True
+sqref=C29 C58 type=decimal formula1=0 formula2=100000 allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Task-based Collaboration"
+B3	s	Scope & Work — Task-based Collaboration
+P3	s	Gate
+Q3	f	=$L$27
+B4	s	Define the task or service you are offering and what you need in return. The exchange mechanism is chosen at Step 4.
+P4	s	Readiness
+Q4	f	=$L$23
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Task-based        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  MODEL 6: TASK-BASED COLLABORATION
+D7	f	=TEXT($L$23,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$23*24,0))&REPT("░",24-ROUND($L$23*24,0))
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = Task-based Collaboration.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$31
+P9	s	Need intent
+Q9	f	=$C$41
+B10	s	SECTION A  —  OFFER SIDE  ·  THE TASK OR SERVICE YOU ARE PROVIDING
+G10	s	OFFER PICKER  —  O11 · RELEVANT CREDENTIALS  (tick all)
+I10	s	NEED PICKER  —  N12 · REQUIRED CREDENTIALS  (tick all)
+P10	s	Need category
+Q10	f	=$C$42
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Credential
+H11	s	Select
+I11	s	Credential
+J11	s	Select
+P11	s	Need sub-category
+Q11	f	=$C$44
+B12	s	S3-TB-O00 · Collaboration intent *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. New collaboration, extending an engagement, or open to discussion.
+G12	f	='Step 3-TB-Lists'!$X$6
+H12	s	No
+I12	f	='Step 3-TB-Lists'!$X$6
+J12	s	No
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$60
+B13	s	S3-TB-O01 · Service category *
+D13	f	=IF($C13="","● Required","✓ Complete")
+E13	s	Dropdown. Technical, professional, technology, logistics, training, admin.
+G13	f	='Step 3-TB-Lists'!$X$7
+H13	s	No
+I13	f	='Step 3-TB-Lists'!$X$7
+J13	s	No
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=$C$40
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($C$13="Other",IF($C14="","● Required","✓ Complete"),"— Hidden")
+E14	s	Free text. Appears only when O01 = Other.
+G14	f	='Step 3-TB-Lists'!$X$8
+H14	s	No
+I14	f	='Step 3-TB-Lists'!$X$8
+J14	s	No
+K14	s	This form active (Task-based)
+L14	f	=IF($L$13="Task-based Collaboration","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$79:$C$81)
+B15	s	S3-TB-O02 · Service sub-type *
+D15	f	=IF($C15="","● Required","✓ Complete")
+E15	s	Dropdown, filtered to the sub-types of the category above (109 sub-types in total).
+G15	f	='Step 3-TB-Lists'!$X$9
+H15	s	No
+I15	f	='Step 3-TB-Lists'!$X$9
+J15	s	No
+K15	s	Offer — completed
+L15	f	=IF($C12<>"",1,0)+IF($C13<>"",1,0)+IF($C15<>"",1,0)+IF($C19<>"",1,0)+IF($C20<>"",1,0)+IF($C21<>"",1,0)+IF($C25<>"",1,0)+IF($C27<>"",1,0)+IF($C29<>"",1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$86,$C$88,$C$90)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($C$15="Other",IF($C16="","● Required","✓ Complete"),"— Hidden")
+E16	s	Free text. Appears only when O02 = Other.
+G16	f	='Step 3-TB-Lists'!$X$10
+H16	s	No
+I16	f	='Step 3-TB-Lists'!$X$10
+J16	s	No
+K16	s	Need — completed
+L16	f	=IF($C40<>"",1,0)+IF($C41<>"",1,0)+IF($C42<>"",1,0)+IF($C44<>"",1,0)+IF($C48<>"",1,0)+IF($C50<>"",1,0)+IF($C54<>"",1,0)+IF($C56<>"",1,0)+IF($C58<>"",1,0)
+B17	s	S3-TB-O03 · Sector / project context
+D17	f	=IF($C17="","○ Optional","✓ Complete")
+E17	s	Dropdown. Optional — the sector this service is aimed at.
+G17	f	='Step 3-TB-Lists'!$X$11
+H17	s	No
+I17	f	='Step 3-TB-Lists'!$X$11
+J17	s	No
+K17	s	Offer — total
+L17	f	=9
+B18	s	»  O03 — specify "Other"
+D18	f	=IF($C$17="Other",IF($C18="","● Required","✓ Complete"),"— Hidden")
+E18	s	Free text. Appears only when O03 = Other.
+G18	f	='Step 3-TB-Lists'!$X$12
+H18	s	No
+I18	f	='Step 3-TB-Lists'!$X$12
+J18	s	No
+K18	s	Need — total
+L18	f	=9
+B19	s	S3-TB-O04 · Service description *
+D19	f	=IF($C19="","● Required","✓ Complete")
+E19	s	Text area. What exactly you deliver, and how.
+G19	f	='Step 3-TB-Lists'!$X$13
+H19	s	No
+I19	f	='Step 3-TB-Lists'!$X$13
+J19	s	No
+K19	s	Individual attributes — completed
+L19	f	=IF(NOT($C$40="Include individual professionals"),0,IF($C$70<>"",1,0)+IF($C$72<>"",1,0)+IF($C$75<>"",1,0))
+B20	s	S3-TB-O05 · Delivery mode *
+D20	f	=IF($C20="","● Required","✓ Complete")
+E20	s	Dropdown. On-site, remote, hybrid or flexible.
+G20	f	='Step 3-TB-Lists'!$X$14
+H20	s	No
+I20	f	='Step 3-TB-Lists'!$X$14
+J20	s	No
+K20	s	Individual attributes — total
+L20	f	=IF($C$40="Include individual professionals",3,0)
+B21	s	S3-TB-O06 · Service location — country *
+D21	f	=IF($C21="","● Required","✓ Complete")
+E21	s	Full country list from the shared Cities dataset.
+G21	f	='Step 3-TB-Lists'!$X$15
+H21	s	No
+I21	f	='Step 3-TB-Lists'!$X$15
+J21	s	No
+K21	s	Required — total
+L21	f	=18+$L$20+$L$24
+B22	s	»  O06 — specify "Other" country
+D22	f	=IF($C$21="Other (not listed)",IF($C22="","● Required","✓ Complete"),"— Hidden")
+E22	s	Free text. Appears only when country = Other (not listed).
+G22	f	='Step 3-TB-Lists'!$X$16
+H22	s	No
+I22	f	='Step 3-TB-Lists'!$X$16
+J22	s	No
+K22	s	Required — completed
+L22	f	=$L$15+$L$16+$L$19+$L$25
+B23	s	S3-TB-O06a · Service location — city
+D23	f	=IF($C$21="","— Locked (select country first)",IF($C$23="","○ Optional","✓ Complete"))
+E23	s	Optional. Populates from the country above.
+G23	f	='Step 3-TB-Lists'!$X$17
+H23	s	No
+I23	f	='Step 3-TB-Lists'!$X$17
+J23	s	No
+K23	s	Readiness
+L23	f	=IFERROR($L$22/$L$21,0)
+B24	s	»  O06a — specify "Other" city
+D24	f	=IF($C$23="Other",IF($C24="","● Required","✓ Complete"),"— Hidden")
+E24	s	Free text. Appears only when city = Other.
+K24	s	Conditional fields — active
+L24	f	=IF($C$13="Other",1,0)+IF($C$15="Other",1,0)+IF($C$17="Other",1,0)+IF($C$21="Other (not listed)",1,0)+IF($C$23="Other",1,0)+IF($C$25="Other",1,0)+IF($C$27="Specific date",1,0)+IF($C$29<>"",1,0)+IF(AND($C$31<>"",$C$31<>"To be agreed"),1,0)+IF(ISNUMBER(SEARCH("Other",$C$33)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$35)),1,0)+IF($C$42="Other",1,0)+IF($C$44="Other",1,0)+IF($C$46="Other",1,0)+IF($C$50="Other (not listed)",1,0)+IF($C$52="Other",1,0)+IF($C$54="Other",1,0)+IF($C$56="Specific date",1,0)+IF($C$58<>"",1,0)+IF(AND($C$60<>"",$C$60<>"To be agreed"),1,0)+IF(ISNUMBER(SEARCH("Other",$C$62)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$65)),1,0)+IF(AND($C$40="Include individual professionals",$C$70="Other"),1,0)+IF(AND($C$40="Include individual professionals",ISNUMBER(SEARCH("Other",$C$73))),1,0)
+B25	s	S3-TB-O07 · Engagement type offered *
+D25	f	=IF($C25="","● Required","✓ Complete")
+E25	s	Dropdown. One-off, project-based, retainer, fractional, part-time, full-time, advisory.
+K25	s	Conditional fields — completed
+L25	f	=IF(AND($C$13="Other",$C$14<>""),1,0)+IF(AND($C$15="Other",$C$16<>""),1,0)+IF(AND($C$17="Other",$C$18<>""),1,0)+IF(AND($C$21="Other (not listed)",$C$22<>""),1,0)+IF(AND($C$23="Other",$C$24<>""),1,0)+IF(AND($C$25="Other",$C$26<>""),1,0)+IF(AND($C$27="Specific date",$C$28<>""),1,0)+IF(AND($C$29<>"",$C$30<>""),1,0)+IF(AND(AND($C$31<>"",$C$31<>"To be agreed"),$C$32<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$33)),$C$34<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$35)),$C$36<>""),1,0)+IF(AND($C$42="Other",$C$43<>""),1,0)+IF(AND($C$44="Other",$C$45<>""),1,0)+IF(AND($C$46="Other",$C$47<>""),1,0)+IF(AND($C$50="Other (not listed)",$C$51<>""),1,0)+IF(AND($C$52="Other",$C$53<>""),1,0)+IF(AND($C$54="Other",$C$55<>""),1,0)+IF(AND($C$56="Specific date",$C$57<>""),1,0)+IF(AND($C$58<>"",$C$59<>""),1,0)+IF(AND(AND($C$60<>"",$C$60<>"To be agreed"),$C$61<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$62)),$C$63<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$65)),$C$66<>""),1,0)+IF(AND(AND($C$40="Include individual professionals",$C$70="Other"),$C$71<>""),1,0)+IF(AND(AND($C$40="Include individual professionals",ISNUMBER(SEARCH("Other",$C$73))),$C$74<>""),1,0)
+B26	s	»  O07 — specify "Other"
+D26	f	=IF($C$25="Other",IF($C26="","● Required","✓ Complete"),"— Hidden")
+E26	s	Free text. Appears only when O07 = Other.
+G26	s	OFFER PICKER  —  O12 · LANGUAGES OFFERED  (tick all)
+I26	s	NEED PICKER  —  N14 · LANGUAGE REQUIREMENT  (tick all)
+K26	s	Step 2 gate
+L26	f	='Step 2-Wireframe'!$L$19
+B27	s	S3-TB-O08 · Availability *
+D27	f	=IF($C27="","● Required","✓ Complete")
+E27	s	Dropdown. Immediate through flexible. "Specific date" opens a date picker below.
+G27	s	Language
+H27	s	Select
+I27	s	Language
+J27	s	Select
+K27	s	Step 4 gate
+L27	f	=IF(AND($L$22=$L$21,$L$26="YES",$L$14="YES"),"YES","NO")
+B28	s	»  O08 — specific start date
+D28	f	=IF($C$27="Specific date",IF($C28="","● Required","✓ Complete"),"— Hidden")
+E28	s	Date picker. Appears only when O08 = Specific date.
+G28	f	='Step 3-TB-Lists'!$Z$6
+H28	s	No
+I28	f	='Step 3-TB-Lists'!$AB$6
+J28	s	No
+B29	s	S3-TB-O09 · Estimated service duration *
+D29	f	=IF($C29="","● Required","✓ Complete")
+E29	s	Numeric input. How long the service runs for.
+G29	f	='Step 3-TB-Lists'!$Z$7
+H29	s	No
+I29	f	='Step 3-TB-Lists'!$AB$7
+J29	s	No
+B30	s	»  O09-TU — time unit
+D30	f	=IF($C$29<>"",IF($C30="","● Required","✓ Complete"),"— Hidden")
+E30	s	Hours / Days / Weeks / Months / Years. Required once a duration is entered.
+G30	f	='Step 3-TB-Lists'!$Z$8
+H30	s	No
+I30	f	='Step 3-TB-Lists'!$AB$8
+J30	s	No
+B31	s	S3-TB-O10 · Estimated service value
+D31	f	=IF($C31="","○ Optional","✓ Complete")
+E31	s	Range dropdown. Optional — compared against the Need-side budget in Section F.
+G31	f	='Step 3-TB-Lists'!$Z$9
+H31	s	No
+I31	f	='Step 3-TB-Lists'!$AB$9
+J31	s	No
+B32	s	»  O10-CUR — currency
+D32	f	=IF(AND($C$31<>"",$C$31<>"To be agreed"),IF($C32="","● Required","✓ Complete"),"— Hidden")
+E32	s	Currency for the value range above.
+G32	f	='Step 3-TB-Lists'!$Z$10
+H32	s	No
+I32	f	='Step 3-TB-Lists'!$AB$10
+J32	s	No
+B33	s	S3-TB-O11 · Relevant credentials
+C33	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212630EF60>
+D33	f	=IF(COUNTIF($H$12:$H$23,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$12:$H$23,"Yes")&" selected")
+E33	s	Multi-select. Tick credentials in the Offer picker rail on the right.
+G33	f	='Step 3-TB-Lists'!$Z$11
+H33	s	No
+I33	f	='Step 3-TB-Lists'!$AB$11
+J33	s	No
+B34	s	»  O11 — specify "Other"
+D34	f	=IF(ISNUMBER(SEARCH("Other",$C$33)),IF($C34="","● Required","✓ Complete"),"— Hidden")
+E34	s	Free text. Appears only when "Other" is ticked in O11.
+G34	f	='Step 3-TB-Lists'!$Z$12
+H34	s	No
+B35	s	S3-TB-O12 · Languages offered
+C35	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212630FC50>
+D35	f	=IF(COUNTIF($H$28:$H$34,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$28:$H$34,"Yes")&" selected")
+E35	s	Multi-select. Tick languages in the Offer picker rail.
+B36	s	»  O12 — specify "Other"
+D36	f	=IF(ISNUMBER(SEARCH("Other",$C$35)),IF($C36="","● Required","✓ Complete"),"— Hidden")
+E36	s	Free text. Appears only when "Other" is ticked in O12.
+I36	s	INDIVIDUAL PICKER  —  N00a-3 · INDIVIDUAL CREDENTIALS  (tick all)
+I37	s	Credential
+J37	s	Select
+B38	s	SECTION B  —  NEED SIDE  ·  THE TASK OR SERVICE YOU NEED
+I38	f	='Step 3-TB-Lists'!$AJ$6
+J38	s	No
+B39	s	Field
+C39	s	Your input
+D39	s	Status
+E39	s	Hint / validation rule
+I39	f	='Step 3-TB-Lists'!$AJ$7
+J39	s	No
+B40	s	S3-TB-N00 · Match with *
+D40	f	=IF($C40="","● Required","✓ Complete")
+E40	s	Single select. "Include individual professionals" opens the extra block in Section C.
+I40	f	='Step 3-TB-Lists'!$AJ$8
+J40	s	No
+B41	s	S3-TB-N01 · Collaboration intent *
+D41	f	=IF($C41="","● Required","✓ Complete")
+E41	s	Dropdown. New, extending, replacing a provider — or open to discussion.
+I41	f	='Step 3-TB-Lists'!$AJ$9
+J41	s	No
+B42	s	S3-TB-N02 · Service category needed *
+D42	f	=IF($C42="","● Required","✓ Complete")
+E42	s	Dropdown. Same six categories as the Offer side.
+I42	f	='Step 3-TB-Lists'!$AJ$10
+J42	s	No
+B43	s	»  N02 — specify "Other"
+D43	f	=IF($C$42="Other",IF($C43="","● Required","✓ Complete"),"— Hidden")
+E43	s	Free text. Appears only when N02 = Other.
+I43	f	='Step 3-TB-Lists'!$AJ$11
+J43	s	No
+B44	s	S3-TB-N03 · Service sub-type *
+D44	f	=IF($C44="","● Required","✓ Complete")
+E44	s	Dropdown, filtered to the sub-types of the category above.
+I44	f	='Step 3-TB-Lists'!$AJ$12
+J44	s	No
+B45	s	»  N03 — specify "Other"
+D45	f	=IF($C$44="Other",IF($C45="","● Required","✓ Complete"),"— Hidden")
+E45	s	Free text. Appears only when N03 = Other.
+B46	s	S3-TB-N04 · Sector / project context
+D46	f	=IF($C46="","○ Optional","✓ Complete")
+E46	s	Dropdown. Optional — the sector the work sits in.
+B47	s	»  N04 — specify "Other"
+D47	f	=IF($C$46="Other",IF($C47="","● Required","✓ Complete"),"— Hidden")
+E47	s	Free text. Appears only when N04 = Other.
+G47	s	DATE SCOPE  —  SPECIFIC DATES & MILESTONES
+B48	s	S3-TB-N05 · Scope description *
+D48	f	=IF($C48="","● Required","✓ Complete")
+E48	s	Text area. What you need done, and to what standard.
+G48	s	Month
+I48	s	Year
+B49	s	S3-TB-N06 · Delivery mode preference
+D49	f	=IF($C49="","○ Optional","✓ Complete")
+E49	s	Dropdown. On-site, remote, hybrid or flexible.
+B50	s	S3-TB-N07 · Service location — country *
+D50	f	=IF($C50="","● Required","✓ Complete")
+E50	s	Full country list from the shared Cities dataset.
+B51	s	»  N07 — specify "Other" country
+D51	f	=IF($C$50="Other (not listed)",IF($C51="","● Required","✓ Complete"),"— Hidden")
+E51	s	Free text. Appears only when country = Other (not listed).
+B52	s	S3-TB-N07a · Service location — city
+D52	f	=IF($C$50="","— Locked (select country first)",IF($C$52="","○ Optional","✓ Complete"))
+E52	s	Optional. Populates from the country above.
+B53	s	»  N07a — specify "Other" city
+D53	f	=IF($C$52="Other",IF($C53="","● Required","✓ Complete"),"— Hidden")
+E53	s	Free text. Appears only when city = Other.
+B54	s	S3-TB-N08 · Engagement type *
+D54	f	=IF($C54="","● Required","✓ Complete")
+E54	s	Dropdown. Same engagement types as the Offer side.
+B55	s	»  N08 — specify "Other"
+D55	f	=IF($C$54="Other",IF($C55="","● Required","✓ Complete"),"— Hidden")
+E55	s	Free text. Appears only when N08 = Other.
+B56	s	S3-TB-N09 · When do you need this? *
+D56	f	=IF($C56="","● Required","✓ Complete")
+E56	s	Dropdown. Immediately through flexible start. "Specific date" opens a date picker.
+B57	s	»  N09 — specific start date
+D57	f	=IF($C$56="Specific date",IF($C57="","● Required","✓ Complete"),"— Hidden")
+E57	s	Date picker. Appears only when N09 = Specific date.
+B58	s	S3-TB-N10 · Duration required *
+D58	f	=IF($C58="","● Required","✓ Complete")
+E58	s	Numeric input. How long you need the service for.
+B59	s	»  N10-TU — time unit
+D59	f	=IF($C$58<>"",IF($C59="","● Required","✓ Complete"),"— Hidden")
+E59	s	Hours / Days / Weeks / Months / Years. Required once a duration is entered.
+B60	s	S3-TB-N11 · Budget range
+D60	f	=IF($C60="","○ Optional","✓ Complete")
+E60	s	Range dropdown. Optional — compared against the Offer-side value in Section F.
+B61	s	»  N11-CUR — currency
+D61	f	=IF(AND($C$60<>"",$C$60<>"To be agreed"),IF($C61="","● Required","✓ Complete"),"— Hidden")
+E61	s	Currency for the budget range above.
+B62	s	S3-TB-N12 · Required credentials
+C62	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126320DD0>
+D62	f	=IF(COUNTIF($J$12:$J$23,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$12:$J$23,"Yes")&" selected")
+E62	s	Multi-select. Tick credentials in the Need picker rail on the right.
+B63	s	»  N12 — specify "Other"
+D63	f	=IF(ISNUMBER(SEARCH("Other",$C$62)),IF($C63="","● Required","✓ Complete"),"— Hidden")
+E63	s	Free text. Appears only when "Other" is ticked in N12.
+B64	s	S3-TB-N13 · Experience level required
+D64	f	=IF($C64="","○ Optional","✓ Complete")
+E64	s	Dropdown. Junior through expert, or not specified.
+B65	s	S3-TB-N14 · Language requirement
+C65	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126331AC0>
+D65	f	=IF(COUNTIF($J$28:$J$33,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$28:$J$33,"Yes")&" selected")
+E65	s	Multi-select. Tick required languages in the Need picker rail.
+B66	s	»  N14 — specify "Other"
+D66	f	=IF(ISNUMBER(SEARCH("Other",$C$65)),IF($C66="","● Required","✓ Complete"),"— Hidden")
+E66	s	Free text. Appears only when "Other" is ticked in N14.
+B68	s	SECTION C  —  INDIVIDUAL PROFESSIONAL ATTRIBUTES  ·  OPENS ONLY WHEN N00 INCLUDES INDIVIDUALS
+B69	s	Field
+C69	s	Your input
+D69	s	Status
+E69	s	Hint / validation rule
+B70	s	S3-TB-N00a-1 · Individual role / expertise needed *
+D70	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF($C$70="","● Required","✓ Complete"))
+E70	s	Dropdown. Same service taxonomy as N02.
+B71	s	»  N00a-1 — specify "Other"
+D71	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF($C$70="Other",IF($C$71="","● Required","✓ Complete"),"— Hidden"))
+E71	s	Free text. Appears only when the role = Other.
+B72	s	S3-TB-N00a-2 · Minimum experience level *
+D72	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF($C$72="","● Required","✓ Complete"))
+E72	s	Dropdown. Junior / mid-level / senior / expert.
+B73	s	S3-TB-N00a-3 · Required individual credentials
+C73	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126333950>
+D73	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF(COUNTIF($J$38:$J$44,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$38:$J$44,"Yes")&" selected"))
+E73	s	Multi-select. Tick credentials in the individual picker rail on the right.
+B74	s	»  N00a-3 — specify "Other"
+D74	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF(ISNUMBER(SEARCH("Other",$C$73)),IF($C$74="","● Required","✓ Complete"),"— Hidden"))
+E74	s	Free text. Appears only when "Other" is ticked.
+B75	s	S3-TB-N00a-4 · Availability required *
+D75	f	=IF(NOT($C$40="Include individual professionals"),"— Hidden (companies only)",IF($C$75="","● Required","✓ Complete"))
+E75	s	Dropdown. Immediate / within 1 month / flexible.
+B77	s	SECTION D  —  DELIVERABLES  ·  NEED SIDE  (collapsed by default — encouraged)
+B78	s	Field
+C78	s	Your input
+D78	s	Status
+E78	s	Hint / validation rule
+B79	s	S3-TB-D01 · Expected deliverable 1
+D79	f	=IF($C$79="","○ Optional","✓ Complete")
+E79	s	What should be delivered at the end of this task? Encouraged — sets clear expectations.
+B80	s	S3-TB-D01 · Expected deliverable 2
+D80	f	=IF($C$79="","— Locked",IF($C$80="","○ Optional","✓ Complete"))
+E80	s	Offered once the first is filled.
+B81	s	S3-TB-D01 · Expected deliverable 3
+D81	f	=IF($C$80="","— Locked",IF($C$81="","○ Optional","✓ Complete"))
+E81	s	The live platform allows unlimited rows.
+B82	s	S3-TB-D02 · Acceptance criteria
+D82	f	=IF($C$79="","— Locked (add a deliverable first)",IF($C$82="","○ Optional","✓ Complete"))
+E82	s	How the deliverable will be judged as accepted.
+B84	s	SECTION E  —  MILESTONES  ·  BOTH SIDES  (collapsed by default — optional)
+B85	s	Field
+C85	s	Your input
+D85	s	Status
+E85	s	Hint / validation rule
+B86	s	S3-TB-M01 · Milestone 1 — title
+D86	f	=IF($C$86="","○ Optional","✓ Complete")
+E86	s	Text. Useful for phased task delivery.
+B87	s	S3-TB-M02 · Milestone 1 — target date
+D87	f	=IF($C$86="","— Locked",IF($C$87="","○ Optional",IF(NOT(ISNUMBER($C$87)),"⚠ Not a valid date","✓ Complete")))
+E87	s	Date picker — uses the shared date scope panel on the right.
+B88	s	S3-TB-M01 · Milestone 2 — title
+D88	f	=IF($C$88="","○ Optional","✓ Complete")
+E88	s	Offered once the previous milestone has a title.
+B89	s	S3-TB-M02 · Milestone 2 — target date
+D89	f	=IF($C$88="","— Locked",IF($C$89="","○ Optional",IF(NOT(ISNUMBER($C$89)),"⚠ Not a valid date","✓ Complete")))
+E89	s	Date picker — uses the shared date scope panel on the right.
+B90	s	S3-TB-M01 · Milestone 3 — title
+D90	f	=IF($C$90="","○ Optional","✓ Complete")
+E90	s	Offered once the previous milestone has a title.
+B91	s	S3-TB-M02 · Milestone 3 — target date
+D91	f	=IF($C$90="","— Locked",IF($C$91="","○ Optional",IF(NOT(ISNUMBER($C$91)),"⚠ Not a valid date","✓ Complete")))
+E91	s	Date picker — uses the shared date scope panel on the right.
+B92	s	SECTION F  —  MATCHING FLAGS, BARTER NOTE & HIDDEN FIELDS
+B93	s	Item
+C93	s	Value
+D93	s	Status
+E93	s	Rule
+B94	s	Two-Way Match (Type 2) readiness
+C94	f	=IF(AND($L$15=$L$17,$L$16=$L$18),"Both sides complete","Offer "&$L$15&"/"&$L$17&" · Need "&$L$16&"/"&$L$18)
+D94	f	=IF(AND($L$15=$L$17,$L$16=$L$18),"◆ Type 2 / Type 4 eligible","● Incomplete")
+E94	s	Task-based posts with both sides complete are eligible for two-way and circular chain matches.
+B95	s	Barter pairing (informational)
+C95	f	=IF(AND($C$15<>"",$C$44<>""),"Pair ready: "&$C$15&"  ⇄  "&$C$44,"Complete both sub-types to form a barter pair")
+D95	f	=IF(AND($C$15<>"",$C$44<>""),"◆ Ready for Step 4","— Waiting")
+E95	s	If barter is selected at Step 4, the Offer side of this post is linked to the Need side as an explicit exchange pair. Partial barter + cash is specified at Step 4.
+B96	s	Service match consistency
+C96	f	=IF(OR($C$13="",$C$42=""),"Enter both categories",IF($C$13=$C$42,"Same category on both sides — consider a different counterpart service","Complementary — different categories"))
+D96	f	=IF(OR($C$13="",$C$42=""),"— Waiting",IF($C$13=$C$42,"◆ Review","✓ Complementary"))
+E96	s	In a task exchange the two sides are normally different services. Same-category pairs are allowed but flagged.
+B97	s	Location & delivery mode compatibility
+C97	f	=IF(OR($C$20="",$C$49=""),"Enter both delivery modes",IF(OR($C$20=$C$49,$C$20="Flexible",$C$49="Flexible"),"Compatible",IF(AND($C$20="Remote",$C$49="On-site"),"Incompatible — remote offer vs on-site need",IF(AND($C$20="On-site",$C$49="Remote"),"Incompatible — on-site offer vs remote need","Partly compatible — hybrid bridges the gap"))))
+D97	f	=IF(OR($C$20="",$C$49=""),"— Waiting",IF(LEFT($C$97,12)="Incompatible","⚠ Conflict","✓ Pass"))
+E97	s	Compares the Offer-side delivery mode against the Need-side preference.
+B98	s	Value vs budget alignment
+C98	f	=IF(OR('Step 3-TB-Lists'!$BH$6=0,'Step 3-TB-Lists'!$BH$7=0),"Enter both ranges",IF('Step 3-TB-Lists'!$BH$6='Step 3-TB-Lists'!$BH$7,"Same band",IF(ABS('Step 3-TB-Lists'!$BH$6-'Step 3-TB-Lists'!$BH$7)=1,"One band apart",ABS('Step 3-TB-Lists'!$BH$6-'Step 3-TB-Lists'!$BH$7)&" bands apart")))
+D98	f	=IF(OR('Step 3-TB-Lists'!$BH$6=0,'Step 3-TB-Lists'!$BH$7=0),"— Waiting",IF(ABS('Step 3-TB-Lists'!$BH$6-'Step 3-TB-Lists'!$BH$7)<=1,"✓ Aligned","⚠ Review"))
+E98	s	Compares the Offer-side service value (O10) against the Need-side budget (N11).
+B99	s	Individual professionals block
+C99	f	=IF($C$40="","—",IF($C$40="Include individual professionals","Open — "&$L$19&" of 3 required attributes complete","Closed — companies only"))
+D99	f	=IF($C$40="","— Waiting",IF($C$40="Include individual professionals",IF($L$19=3,"✓ Complete","● Incomplete"),"— Not applicable"))
+E99	s	Opens Section C and adds 3 mandatory attributes when individual professionals are in scope.
+B100	s	Hidden for the Task-based Collaboration model
+C100	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-TB-Lists'!$AN$6:$AN$10)
+D100	s	— Not rendered
+E100	s	These fields exist in other Step 3 model forms but are suppressed here.
+B102	s	SECTION G  —  CROSS-FIELD VALIDATION & COMPLETION
+B103	s	Check
+C103	s	Result
+D103	s	Status
+E103	s	Rule
+B104	s	Required fields completed
+C104	f	=$L$22&" of "&$L$21
+D104	f	=IF($L$22=$L$21,"✓ Complete","● Incomplete")
+E104	s	18 mandatory fields (9 Offer + 9 Need), plus 3 more when individual professionals are included, plus conditional fields.
+B105	s	Offer side complete
+C105	f	=$L$15&" of "&$L$17
+D105	f	=IF($L$15=$L$17,"✓ Pass","● Incomplete")
+E105	s	O00, O01, O02, O04, O05, O06, O07, O08, O09.
+B106	s	Need side complete
+C106	f	=$L$16&" of "&$L$18
+D106	f	=IF($L$16=$L$18,"✓ Pass","● Incomplete")
+E106	s	N00, N01, N02, N03, N05, N07, N08, N09, N10.
+B107	s	Individual attributes complete
+C107	f	=IF($C$40<>"Include individual professionals","Not applicable",$L$19&" of 3")
+D107	f	=IF($C$40<>"Include individual professionals","— N/A",IF($L$19=3,"✓ Pass","● Incomplete"))
+E107	s	N00a-1, N00a-2 and N00a-4 become mandatory when individuals are in scope.
+B108	s	Conditional fields resolved
+C108	f	=$L$25&" of "&$L$24
+D108	f	=IF($L$25=$L$24,"✓ Pass","● Pending")
+E108	s	Time units, currencies, specific dates and "Other" free texts opened by a selection.
+B109	s	Delivery mode compatibility
+C109	f	=IF(OR($C$20="",$C$49=""),"Pending",$C$97)
+D109	f	=IF(OR($C$20="",$C$49=""),"— Waiting",IF(LEFT($C$97,12)="Incompatible","⚠ Review","✓ Pass"))
+E109	s	Informational — an incompatible pair is flagged but does not block the step.
+B110	s	Step 2 model is Task-based Collaboration
+C110	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D110	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E110	s	This form is only valid when the Step 2 collaboration model is Task-based Collaboration.
+B111	s	Step 2 gate passed
+C111	f	=IF($L$26="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D111	f	=IF($L$26="YES","✓ Pass","⚠ Blocks Step 4")
+E111	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B112	s	Readiness meter
+C112	f	=TEXT($L$23,"0%")&" of required fields"
+D112	f	=IF($L$27="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E112	s	Optional fields, deliverables and milestones do not affect the meter.
+B114	s	NAVIGATION
+B115	s	◀  Back to Step 2
+C115	s	💾  Save Draft
+D115	f	=IF($L$27="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E115	s	Continue activates only when Section G shows every check passed.

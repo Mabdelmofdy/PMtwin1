@@ -1,0 +1,87 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step2
+state=visible dims=A1:E69 max_row=69 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 2 — Collaboration model
+A3	s	Screen title: Collaboration Model Screen subtitle: Tell us how you want to collaborate as an individual professional — we'll guide you to the right model and matching structure. Account type: Individual professional only. Matching structure: Auto-derived and displayed once collaboration model is selected.
+A7	s	Screen layout
+A11	s	Section A — Routing questions
+A13	s	Shown before model cards. Guides user to the right model without exposing all options at once.
+A15	s	Code
+B15	s	Field label
+C15	s	Type
+D15	s	Required
+E15	s	Condition
+A16	s	S2-F01
+B16	s	What is this collaboration about?
+C16	s	Single select cards
+D16	s	Yes
+E16	s	Always visible
+A18	s	S2-F01 — Routing question values:
+A20	s	Option
+B20	s	Label
+C20	s	Routes to
+A21	s	D
+B21	s	Providing or seeking a service or task-based collaboration
+C21	s	Task-based Collaboration
+A22	s	E
+B22	s	Finding qualified people for a project or task
+C22	s	Hiring
+A23	s	F
+B23	s	Developing expertise — mine or someone else's
+C23	s	Mentorship
+A26	s	Section B — Model selection
+A28	s	Displayed after routing, with the suggested model highlighted. User can confirm or override. No sub-model layer — the 3 individual models are specific enough.
+A30	s	Code
+B30	s	Field label
+C30	s	Type
+D30	s	Required
+E30	s	Condition
+A31	s	S2-F03
+B31	s	Collaboration model
+C31	s	Single select cards
+D31	s	Yes
+E31	s	Shown after S2-F01
+A33	s	S2-F03 — 3 model cards (individual path):
+A35	s	#
+B35	s	Model
+C35	s	Description
+D35	s	Example
+A36	n	1
+B36	s	Task-based Collaboration
+C36	s	Exchange or assign tasks and services
+D36	s	IT setup in exchange for legal services
+A37	n	2
+B37	s	Hiring
+C37	s	Engage a professional or consultant
+D37	s	Senior PM for a 6-month programme
+A38	n	3
+B38	s	Mentorship
+C38	s	Develop expertise — give or receive
+D38	s	PM mentorship in exchange for PropTech knowledge
+A40	s	Routing suggestion is highlighted. User can select a different model — "Choose a different model" expands full list.
+A44	s	Section C — Matching structure (read-only display)
+A46	s	Auto-derived from collaboration model selection. Displayed as an informational panel — not editable.
+A48	s	Code
+B48	s	Field label
+C48	s	Type
+D48	s	Condition
+A49	s	S2-F05
+B49	s	Recommended matching structure
+C49	s	Read-only label + explanation
+D49	s	Shown after S2-F03 is selected
+A51	s	S2-F05 — Matching structure values:
+A53	s	Condition
+B53	s	Label displayed
+A54	s	Single party each side
+B54	s	Straightforward Match (Type 1)
+A55	s	Both sides match both ways
+B55	s	Two-Way Match (Type 2) — higher match value
+A57	s	Explanation shown under label: "This is derived automatically from your model selection. Completing both sides of your opportunity improves your match type."
+A61	s	Step 2 completion criteria
+A63	s	S2-F01 and S2-F03 must be completed before Step 3 is accessible. There is no follow-up question on the individual path.
+A67	s	Navigation
+A69	s	Back: returns to Step 1 Save Draft: always available Continue: enabled once required fields complete → proceeds to Step 3

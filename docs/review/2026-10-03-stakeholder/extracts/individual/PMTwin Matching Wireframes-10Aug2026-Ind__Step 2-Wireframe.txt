@@ -1,0 +1,142 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 2-Wireframe
+state=visible dims=A1:N60 max_row=60 max_col=14
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+B3	s	Collaboration Model  ·  Individual professional
+B4	s	Tell us how you want to collaborate — we'll guide you to the right model and matching structure.
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form        ④  Exchange model        ⑤  Review & publish
+B7	s	STEP 2 OF 5  —  COLLABORATION MODEL
+D7	f	=TEXT($L$17,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$17*24,0))&REPT("░",24-ROUND($L$17*24,0))
+B8	s	Auto-save active. Individual path — three collaboration models are available. Fields marked * are mandatory.
+B10	s	SECTION A  —  ROUTING QUESTIONS
+G10	s	THE 3 INDIVIDUAL COLLABORATION MODELS
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Model
+H11	s	What it means
+I11	s	Typical example
+B12	s	S2-F01 · What is this collaboration about? *
+D12	f	=IF($C$12="","● Required","✓ Complete")
+E12	s	Single select cards. Routes you to one of the three individual models.
+G12	f	='Step 2-Lists'!$M$6
+H12	f	='Step 2-Lists'!$N$6
+I12	f	='Step 2-Lists'!$O$6
+K12	s	VALIDATION ENGINE (live)
+B13	s	S2-F02 · Follow-up question
+D13	f	=IF($L$14="No","— Hidden (not applicable)",IF($C$13="","● Required","✓ Complete"))
+E13	f	="Hidden — the individual path has no follow-up questions."
+G13	f	='Step 2-Lists'!$M$7
+H13	f	='Step 2-Lists'!$N$7
+I13	f	='Step 2-Lists'!$O$7
+K13	s	Routing option letter
+L13	f	=IFERROR(INDEX('Step 2-Lists'!$B$6:$B$11,MATCH($C$12,'Step 2-Lists'!$C$6:$C$11,0)),"")
+B14	s	»  Routing suggestion (derived)
+C14	f	=IF($C$12="","—",IF($L$14="Yes",IF($C$13="","Awaiting follow-up answer",IFERROR(INDEX('Step 2-Lists'!$I$6:$I$10,MATCH($C$13,'Step 2-Lists'!$H$6:$H$10,0)),"—")),IFERROR(INDEX('Step 2-Lists'!$D$6:$D$11,MATCH($C$12,'Step 2-Lists'!$C$6:$C$11,0)),"—")))
+D14	f	=IF($C$14="—","— Waiting",IF($C$14="Awaiting follow-up answer","● Pending","◆ Auto-set"))
+E14	s	Read-only. The suggested model is highlighted in the model panel on the right. You can confirm it or override it in Section B.
+G14	f	='Step 2-Lists'!$M$8
+H14	f	='Step 2-Lists'!$N$8
+I14	f	='Step 2-Lists'!$O$8
+K14	s	Follow-up required
+L14	f	=IF(OR($L$13="A",$L$13="B"),"Yes","No")
+K15	s	Required fields — total
+L15	f	=2+IF($L$14="Yes",1,0)
+B16	s	SECTION B  —  MODEL SELECTION
+K16	s	Required fields — completed
+L16	f	=IF($C$12<>"",1,0)+IF($C$18<>"",1,0)+IF($L$14="Yes",IF($C$13<>"",1,0),0)
+B17	s	Field
+C17	s	Your input
+D17	s	Status
+E17	s	Hint / validation rule
+K17	s	Readiness
+L17	f	=IFERROR($L$16/$L$15,0)
+B18	s	S2-F03 · Collaboration model *
+D18	f	=IF($C$18="","● Required","✓ Complete")
+E18	s	Single select cards. Suggested model pre-highlighted; you can choose either of the other two individual models.
+K18	s	Step 1 gate
+L18	f	='Step 1-Wireframe'!$L$17
+B19	s	»  What this model means
+C19	f	=IF($C$18="","—",IFERROR(INDEX('Step 2-Lists'!$N$6:$N$13,MATCH($C$18,'Step 2-Lists'!$M$6:$M$13,0)),"—"))
+D19	f	=IF($C$18="","— Waiting","◆ Auto-set")
+E19	s	Read-only description pulled from the model library.
+K19	s	Step 3 gate
+L19	f	=IF(AND($L$16=$L$15,$L$18="YES"),"YES","NO")
+B20	s	»  Typical example
+C20	f	=IF($C$18="","—",IFERROR(INDEX('Step 2-Lists'!$O$6:$O$13,MATCH($C$18,'Step 2-Lists'!$M$6:$M$13,0)),"—"))
+D20	f	=IF($C$18="","— Waiting","◆ Auto-set")
+E20	s	Read-only example pulled from the model library.
+B21	s	»  Routing agreement
+C21	f	=IF(OR($C$18="",$C$14="—",$C$14="Awaiting follow-up answer"),"—",IF($C$18=$C$14,"Matches routing suggestion","Overridden — you chose a different model"))
+D21	f	=IF($C$21="—","— Waiting",IF($C$21="Matches routing suggestion","✓ Aligned","◆ Override logged"))
+E21	s	Overriding is allowed and recorded — the platform keeps both the suggestion and your choice for match-quality analytics.
+G21	s	The card matching your routing suggestion is highlighted. Selecting a different model logs an override.
+B23	s	SECTION C  —  MATCHING STRUCTURE  (READ-ONLY)
+B24	s	Field
+C24	s	Derived value
+D24	s	Status
+E24	s	Hint / validation rule
+B25	s	S2-F05 · Recommended matching structure
+C25	f	=IF($C$18="","—",IFERROR(IF('Step 1-Wireframe'!$C$12="Need & Offer",INDEX('Step 2-Lists'!$Q$6:$Q$8,MATCH($C$18,'Step 2-Lists'!$M$6:$M$8,0)),INDEX('Step 2-Lists'!$P$6:$P$8,MATCH($C$18,'Step 2-Lists'!$M$6:$M$8,0))),"—"))
+D25	f	=IF($C$18="","— Waiting","◆ Auto-derived")
+E25	s	Not editable. Derived from the selected model, the Step 1 post type, and any pooling / chain variant.
+B26	s	»  Why this structure
+C26	s	This is derived automatically from your model selection. Completing both sides of your opportunity improves your match type.
+E26	s	Informational panel text shown under the structure label.
+B27	s	»  Variant detected
+C27	f	=IF($C$13="","—",IFERROR(INDEX('Step 2-Lists'!$J$6:$J$10,MATCH($C$13,'Step 2-Lists'!$H$6:$H$10,0)),"—"))
+D27	f	=IF($C$27="—","— None","◆ Auto-set")
+E27	s	Not used on the individual path — no sharing / pooling variants.
+B29	s	SECTION D  —  CARRIED FORWARD FROM STEP 1
+B30	s	Field
+C30	s	Value
+D30	s	Status
+E30	s	Source
+B31	s	Opportunity title (S1-F01)
+C31	f	=IF('Step 1-Wireframe'!$C$17="","—",'Step 1-Wireframe'!$C$17)
+D31	f	=IF('Step 1-Wireframe'!$C$17="","● Missing in Step 1","✓ Linked")
+E31	s	Live link to Step 1-Wireframe!C17.
+B32	s	Post type (S1-F00)
+C32	f	=IF('Step 1-Wireframe'!$C$12="","—",'Step 1-Wireframe'!$C$12)
+D32	f	=IF('Step 1-Wireframe'!$C$12="","● Missing in Step 1","✓ Linked")
+E32	s	Live link to Step 1-Wireframe!C12. "Need & Offer" upgrades the matching structure in Section C.
+B33	s	Primary location (S1-F03 / F04)
+C33	f	=IF('Step 1-Wireframe'!$C$22="","—",IF('Step 1-Wireframe'!$C$24="",'Step 1-Wireframe'!$C$22,'Step 1-Wireframe'!$C$24&", "&'Step 1-Wireframe'!$C$22))
+D33	f	=IF('Step 1-Wireframe'!$C$22="","● Missing in Step 1","✓ Linked")
+E33	s	Live link to Step 1 location fields (shared Cities dataset).
+B35	s	SECTION E  —  CROSS-FIELD VALIDATION & COMPLETION
+B36	s	Check
+C36	s	Result
+D36	s	Status
+E36	s	Rule
+B37	s	Required fields completed
+C37	f	=$L$16&" of "&$L$15
+D37	f	=IF($L$16=$L$15,"✓ Complete","● Incomplete")
+E37	s	S2-F01 and S2-F03 always required. S2-F02 required only when routing option A or B is chosen.
+B38	s	Follow-up question resolved
+C38	f	=IF($L$14="No","Not applicable",IF($C$13="","Pending","Answered"))
+D38	f	=IF($L$14="No","— N/A",IF($C$13="","● Pending","✓ Pass"))
+E38	s	The conditional follow-up must be answered before the model can be routed.
+B39	s	Model vs routing suggestion
+C39	f	=IF($C$21="—","Pending",$C$21)
+D39	f	=IF($C$21="—","— Waiting",IF($C$21="Matches routing suggestion","✓ Pass","◆ Override logged"))
+E39	s	Informational only — an override never blocks the step.
+B40	s	Step 1 gate passed
+C40	f	=IF($L$18="YES","Step 1 complete","Step 1 still incomplete")
+D40	f	=IF($L$18="YES","✓ Pass","⚠ Blocks Step 3")
+E40	s	Step 3 cannot unlock while any Step 1 required field is outstanding.
+B41	s	Readiness meter
+C41	f	=TEXT($L$17,"0%")&" of required fields"
+D41	f	=IF($L$19="YES","✓ Step 3 unlocked","● Step 3 locked")
+E41	s	Meter reflects required fields only — derived and read-only fields do not affect it.
+B43	s	NAVIGATION
+B44	s	◀  Back to Step 1
+C44	s	💾  Save Draft
+D44	f	=IF($L$19="YES","Continue to Step 3  ▶","Continue to Step 3  ▶  (disabled)")
+E44	s	Continue activates only when Section E shows every check passed.

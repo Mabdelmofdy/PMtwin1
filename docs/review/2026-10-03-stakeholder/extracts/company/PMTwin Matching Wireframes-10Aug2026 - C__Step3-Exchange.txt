@@ -1,0 +1,199 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-Exchange
+state=visible dims=A1:E120 max_row=120 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 4: Resource Exchange
+A5	s	Screen title: Scope & Work — Resource Exchange.
+A6	s	Screen subtitle: Define the resource you own and what you want to swap it for. Layout: Offer side (top) and Need side (bottom). Both required. Note: Both parties must own a resource. This model is a bilateral swap — no cash by default. Exchange mechanism confirmed at Step 4.
+A10	s	Offer side — "The resource you are offering to swap"
+A12	s	Code
+B12	s	Field label
+C12	s	Type
+D12	s	Required
+E12	s	Other trigger
+A13	s	S3-RE-O00
+B13	s	Collaboration intent
+C13	s	Dropdown
+D13	s	Yes
+E13	s	No
+A14	s	S3-RE-O01
+B14	s	Resource type
+C14	s	Dropdown
+D14	s	Yes
+E14	s	Yes
+A15	s	S3-RE-O02
+B15	s	Resource sub-type
+C15	s	Dropdown
+D15	s	Yes
+E15	s	Yes
+A16	s	S3-RE-O03
+B16	s	Resource description
+C16	s	Text area
+D16	s	No
+E16	s	No
+A17	s	S3-RE-O04
+B17	s	Resource location — country
+C17	s	Dropdown
+D17	s	Yes
+E17	s	Yes
+A18	s	S3-RE-O04a
+B18	s	Resource location — city
+C18	s	Dropdown
+D18	s	Yes
+E18	s	Populates per O04
+A19	s	S3-RE-O05
+B19	s	Availability for swap
+C19	s	Dropdown
+D19	s	Yes
+E19	s	No
+A20	s	S3-RE-O06
+B20	s	Swap duration available
+C20	s	Numeric input + time unit (S3-RE-O06-TU)
+D20	s	Yes
+E20	s	No
+A21	s	S3-RE-O07
+B21	s	Estimated resource value
+C21	s	Range dropdown + currency (S3-RE-O07-CUR)
+D21	s	No
+E21	s	No
+A22	s	S3-RE-O08
+B22	s	Resource condition
+C22	s	Dropdown
+D22	s	Yes
+E22	s	No
+A23	s	S3-RE-O09
+B23	s	Cash top-up offered to balance?
+C23	s	Single select
+D23	s	No
+E23	s	Yes
+A25	s	S3-RE-O00 — Collaboration intent values: Initiating a new resource exchange / Seeking to exit an existing exchange arrangement / Seeking to extend an existing exchange / Open to discussion
+A27	s	S3-RE-O01 — Resource type values: Heavy equipment / Space & facilities / Fleet & vehicles / Human capacity / Technology & software / Materials & inventory / Other → free text
+A29	s	S3-RE-O02 — Sub-type values (conditional on O01):
+A31	s	O01
+B31	s	O02 options
+A32	s	Heavy equipment
+B32	s	Excavator / Backhoe loader / Tower crane / Mobile crane / Concrete mixer / Concrete pump / Bulldozer / Grader / Compactor / Generator / Surveying equipment / Piling equipment / Scaffolding & formwork / Forklifts / Road construction equipment / Other
+A33	s	Space & facilities
+B33	s	Office space / Co-working space / Warehouse / Cold storage / Workshop & yard / Labour accommodation / Retail space / Laboratory / Data centre space / Other
+A34	s	Fleet & vehicles
+B34	s	Heavy trucks / Tipper trucks / Concrete mixer trucks / Light vehicles / Specialised transport / Staff buses / Marine vessels / Aerial work platforms / Other
+A35	s	Human capacity
+B35	s	Engineering professionals / Project management professionals / Commercial professionals / Design professionals / Technical & trade skills / Site supervisors / HSE professionals / Administrative staff / Other
+A36	s	Technology & software
+B36	s	Project management software / BIM software / Design software / ERP system access / Server capacity / Cloud storage / GIS software / Other
+A37	s	Materials & inventory
+B37	s	Construction materials / MEP materials / Finishing materials / Tools & small equipment / Other
+A39	s	→ All include "Other" → free text
+A41	s	S3-RE-O04 — Resource location country values: Full country list (same as S1-F03)
+A43	s	S3-RE-O04a — Resource location city values: Conditional on O04. Same city taxonomy as S1-F04
+A45	s	S3-RE-O05 — Availability values: Immediate / Within 1 month / 1–3 months / Specific period → date range picker / Flexible
+A47	s	S3-RE-O06-TU — Swap duration time unit values: Hours / Days / Weeks / Months
+A49	s	S3-RE-O07 — Estimated resource value range: Under $10K / $10K–$50K / $50K–$100K / $100K–$500K / Above $500K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A51	s	S3-RE-O08 — Resource condition values: New / unused / Like new / Good working condition / Operational with minor wear / Requires minor maintenance / Other → free text
+A53	s	S3-RE-O09 — Cash top-up offered values: Yes — willing to pay cash top-up / Yes — willing to receive cash top-up / No — pure resource swap only / To be agreed If Yes → estimated top-up amount + currency field opens
+A57	s	Need side — "The resource you want in exchange"
+A59	s	Code
+B59	s	Field label
+C59	s	Type
+D59	s	Required
+E59	s	Other trigger
+A60	s	S3-RE-N00
+B60	s	Collaboration intent
+C60	s	Dropdown
+D60	s	Yes
+E60	s	No
+A61	s	S3-RE-N01
+B61	s	Resource type needed
+C61	s	Dropdown
+D61	s	Yes
+E61	s	Yes
+A62	s	S3-RE-N02
+B62	s	Resource sub-type
+C62	s	Dropdown
+D62	s	Yes
+E62	s	Yes
+A63	s	S3-RE-N03
+B63	s	Resource specification
+C63	s	Text area
+D63	s	No
+E63	s	No
+A64	s	S3-RE-N04
+B64	s	Resource location — country
+C64	s	Dropdown
+D64	s	No
+E64	s	Yes
+A65	s	S3-RE-N04a
+B65	s	Resource location — city
+C65	s	Dropdown
+D65	s	No
+E65	s	Populates per N04
+A66	s	S3-RE-N05
+B66	s	Swap duration needed
+C66	s	Numeric input + time unit (S3-RE-N05-TU)
+D66	s	Yes
+E66	s	No
+A67	s	S3-RE-N06
+B67	s	When do you need the swap?
+C67	s	Dropdown
+D67	s	Yes
+E67	s	No
+A68	s	S3-RE-N07
+B68	s	Estimated value acceptable
+C68	s	Range dropdown + currency (S3-RE-N07-CUR)
+D68	s	No
+E68	s	No
+A69	s	S3-RE-N08
+B69	s	Cash top-up acceptable to balance values?
+C69	s	Single select
+D69	s	No
+E69	s	Yes
+A70	s	S3-RE-N09
+B70	s	Resource condition required
+C70	s	Dropdown
+D70	s	No
+E70	s	No
+A71	s	S3-RE-N10
+B71	s	Preferred owner location — country
+C71	s	Dropdown
+D71	s	No
+E71	s	Yes
+A72	s	S3-RE-N10a
+B72	s	Preferred owner location — city
+C72	s	Dropdown
+D72	s	No
+E72	s	Populates per N10
+A74	s	S3-RE-N00 — Collaboration intent values: Initiating a new resource exchange / Seeking to exit an existing exchange arrangement / Seeking to extend an existing exchange / Open to discussion
+A76	s	S3-RE-N01 — Resource type needed values: Heavy equipment / Space & facilities / Fleet & vehicles / Human capacity / Technology & software / Materials & inventory / Other → free text
+A78	s	S3-RE-N02 — Sub-type values (conditional on N01):
+A80	s	N01
+B80	s	N02 options
+A81	s	Heavy equipment
+B81	s	Excavator / Backhoe loader / Tower crane / Mobile crane / Concrete mixer / Concrete pump / Bulldozer / Grader / Compactor / Generator / Surveying equipment / Piling equipment / Scaffolding & formwork / Forklifts / Road construction equipment / Other
+A82	s	Space & facilities
+B82	s	Office space / Co-working space / Warehouse / Cold storage / Workshop & yard / Labour accommodation / Retail space / Laboratory / Data centre space / Other
+A83	s	Fleet & vehicles
+B83	s	Heavy trucks / Tipper trucks / Concrete mixer trucks / Light vehicles / Specialised transport / Staff buses / Marine vessels / Aerial work platforms / Other
+A84	s	Human capacity
+B84	s	Engineering professionals / Project management professionals / Commercial professionals / Design professionals / Technical & trade skills / Site supervisors / HSE professionals / Administrative staff / Other
+A85	s	Technology & software
+B85	s	Project management software / BIM software / Design software / ERP system access / Server capacity / Cloud storage / GIS software / Other
+A86	s	Materials & inventory
+B86	s	Construction materials / MEP materials / Finishing materials / Tools & small equipment / Other
+A88	s	→ All include "Other" → free text
+A90	s	S3-RE-N05-TU — Swap duration time unit values: Hours / Days / Weeks / Months
+A92	s	S3-RE-N06 — When do you need the swap? values: Immediate / Within 1 month / 1–3 months / 3–6 months / Specific period → date range picker / Flexible
+A94	s	S3-RE-N07 — Estimated value acceptable range: Under $10K / $10K–$50K / $50K–$100K / $100K–$500K / Above $500K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A96	s	S3-RE-N08 — Cash top-up acceptable values: Yes — willing to pay cash to balance / Yes — willing to receive cash to balance / No — pure resource swap only / To be agreed If Yes → estimated top-up amount + currency field opens
+A98	s	S3-RE-N09 — Resource condition required values: New / unused / Like new / Good working condition / Operational with minor wear / Any condition acceptable / To be agreed
+A100	s	S3-RE-N10 — Preferred owner location country values: Same country preferred / Gulf region / Any location / Specific country → dropdown (full country list)
+A102	s	S3-RE-N10a — Preferred owner location city values: Conditional on N10. Same city taxonomy as S1-F04
+A106	s	Deliverables (Need side only — optional)
+A108	s	Collapsed by default. User adds conditions or expected state of the received resource.
+A112	s	Milestones (optional — both sides)
+A114	s	Collapsed by default.
+A118	s	Hidden fields for Resource Exchange model
+A120	s	Entity establishment / Number of partners / Project stage / Skill level / Material category / Pool size

@@ -1,0 +1,72 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Exchange Matrix
+state=visible dims=A1:G15 max_row=15 max_col=7
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Exchange mechanism compatibility matrix
+A3	s	Status: Draft — needs validation before finalising Step 4 spec Note: Some combinations flagged as ✗ may be valid edge cases (e.g., barter in hiring — medical insurance for part-time work). Review each ✗ before locking.
+B5	s	Cash
+C5	s	Barter
+D5	s	Profit Sharing
+E5	s	Revenue Sharing
+F5	s	Equity
+G5	s	Custom
+A6	s	JV
+B6	s	✓
+C6	s	○
+D6	s	✓
+E6	s	✓
+F6	s	✓
+G6	s	✓
+A7	s	Co-ownership
+B7	s	✓
+C7	s	✗
+D7	s	○
+E7	s	✓
+F7	s	✓
+G7	s	✓
+A8	s	Resource Sharing
+B8	s	✓
+C8	s	✓
+D8	s	○
+E8	s	○
+F8	s	○
+G8	s	✓
+A9	s	Resource Exchange
+B9	s	○
+C9	s	✓
+D9	s	✗
+E9	s	✗
+F9	s	✗
+G9	s	✓
+A10	s	Bulk Purchasing
+B10	s	✓
+C10	s	✗
+D10	s	○
+E10	s	○
+F10	s	✗
+G10	s	✓
+A11	s	Task-based
+B11	s	✓
+C11	s	✓
+D11	s	○
+E11	s	○
+F11	s	○
+G11	s	✓
+A12	s	Hiring
+B12	s	✓
+C12	s	○
+D12	s	○
+E12	s	○
+F12	s	○
+G12	s	✓
+A13	s	Mentorship
+B13	s	✓
+C13	s	✓
+D13	s	○
+E13	s	○
+F13	s	✓
+G13	s	✓
+A15	s	✓ Valid / ○ Edge case (shown, flagged) / ✗ Not applicable (hidden)

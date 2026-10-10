@@ -1,0 +1,248 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-JV
+state=visible dims=A1:E152 max_row=152 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 1: JV (project-based)
+A5	s	Screen title: Scope & Work — Joint Venture Screen subtitle: Define what you bring and what you are looking for in a JV partner. Layout: Two sections on the same screen — Offer side (top) and Need side (bottom). Both required.
+A9	s	Offer side — "What you bring to this JV"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-JV-O00
+B12	s	Collaboration intent
+C12	s	Dropdown
+D12	s	Yes
+E12	s	No
+A13	s	S3-JV-O01
+B13	s	What are you bringing to this JV?
+C13	s	Multi-select dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-JV-O02
+B14	s	Specifically, what does this cover?
+C14	s	Dropdown
+D14	s	Yes
+E14	s	Yes
+A15	s	S3-JV-O03
+B15	s	Project type
+C15	s	Dropdown
+D15	s	Yes
+E15	s	Yes
+A16	s	S3-JV-O04
+B16	s	Project stage
+C16	s	Dropdown
+D16	s	Yes
+E16	s	No
+A17	s	S3-JV-O05
+B17	s	Project location — country
+C17	s	Dropdown
+D17	s	Yes
+E17	s	Yes
+A18	s	S3-JV-O05a
+B18	s	Project location — city
+C18	s	Dropdown
+D18	s	No
+E18	s	Populates per O05
+A19	s	S3-JV-O06
+B19	s	Your company credentials & registration
+C19	s	Multi-select dropdown
+D19	s	No
+E19	s	Yes
+A20	s	S3-JV-O07
+B20	s	New entity required
+C20	s	Single select
+D20	s	No
+E20	s	Yes
+A21	s	S3-JV-O08
+B21	s	Number of partners sought
+C21	s	Dropdown
+D21	s	Yes
+E21	s	No
+A22	s	S3-JV-O09
+B22	s	Estimated project value
+C22	s	Range dropdown + currency (S3-JV-O09-CUR)
+D22	s	No
+E22	s	No
+A23	s	S3-JV-O10
+B23	s	Expected JV duration
+C23	s	Dropdown
+D23	s	No
+E23	s	No
+A25	s	S3-JV-O00 — Collaboration intent values: Offering to initiate a new JV / Offering to join an existing JV / Offering to take over an existing JV position / Offering an exit from an existing JV position / Open to discussion
+A27	s	S3-JV-O01 — What are you bringing? values: Market access & local presence / Technical execution capacity / Engineering credentials & accreditation / Financial capital & capacity / Project opportunity or pipeline / Regulatory relationships / Industry-specific expertise / International credentials / Technology & digital capability / Sustainability & ESG credentials / Other → free text
+A29	s	S3-JV-O02 — Sub-category values (conditional on O01):
+A31	s	O01 selection
+B31	s	O02 options
+A32	s	Market access & local presence
+B32	s	Local company registration / Existing client network / Government & regulatory relationships / Procurement process knowledge / Sponsorship & PRO relationships / GCC market presence / Other
+A33	s	Technical execution capacity
+B33	s	Engineering design / Project management / Construction execution / Digital & BIM / Specialist technical / MEP / Civil & structural / Other
+A34	s	Engineering credentials
+B34	s	RICS / CIOB / PE licence / ISO certified / MOMRA approved / Muqawil registered / ARAMCO Accreditation / RIBA accreditation / Other international accreditation / Other
+A35	s	Financial capital & capacity
+B35	s	Project financing capability / Bank guarantee & bonding / Working capital contribution / Equity stake / Other
+A36	s	Project opportunity or pipeline
+B36	s	Pre-bid opportunity / Awarded project / Giga-project pipeline / Vision 2030 project / Public sector tender / Private sector opportunity / Other
+A37	s	Regulatory relationships
+B37	s	MOMRA / Muqawil / Municipality / Saudi Aramco / PIF Authority / NEOM Authority / Other government body / Other
+A38	s	Industry-specific expertise
+B38	s	Real estate development / Contracting / Consulting / PMC / Supply chain / Hospitality / Healthcare / Education / Operation & Maintenance / Logistics / Other
+A39	s	International credentials
+B39	s	US / UK / European accreditation / FIDIC expertise / NEC expertise / International tendering experience / Other
+A40	s	Technology & digital capability
+B40	s	BIM / Smart building / PropTech / Project management systems / Digital twin / Other
+A41	s	Sustainability & ESG
+B41	s	LEED / BREEAM / Green building / Carbon reduction / ESG reporting / Other
+A43	s	→ All include "Other" → free text
+A45	s	S3-JV-O03 — Project type values: Residential development / Commercial development / Mixed-use development / Infrastructure (roads, utilities, transport) / Industrial / Hospitality & tourism / Healthcare facilities / Education facilities / Giga-project (NEOM, Red Sea, Qiddiya, Diriyah) / Smart city / Logistics & warehousing / Data centre / Retrofit & renovation / Other → free text
+A47	s	S3-JV-O04 — Project stage values: Pre-bid / opportunity identification / Active bid / tender stage / Awarded / execution ready / In planning / feasibility / Early stage / concept / Existing project seeking partner / Snagging / Defect Liability Period (DLP) / Open to any stage
+A49	s	S3-JV-O05 — Project location country values: Full country list (same as S1-F03)
+A51	s	S3-JV-O05a — Project location city values: Conditional on O05. Same city taxonomy as S1-F04
+A53	s	S3-JV-O06 — Company credentials values: Muqawil registered / RICS / CIOB / PE licence / ISO certified / PMTwin vetted / MOMRA approved / Saudi Council of Engineers / UAE Engineering licence / PIF approved / None / Other → free text
+A55	s	S3-JV-O07 — New entity required values: Yes / No / To be agreed If Yes → entity type: SPV / Consortium / Limited partnership / Joint company / Contractual JV / To be agreed / Other → free text
+A57	s	S3-JV-O08 — Number of partners sought values: 1 partner / 2 partners / 3 or more / Open Note: 3 or more flags for Group Match (Type 3)
+A59	s	S3-JV-O09 — Estimated project value range values: Under $1M / $1M–$5M / $5M–$20M / $20M–$100M / $100M–$500M / Above $500M / Prefer not to state Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A61	s	S3-JV-O10 — Expected JV duration values: Short-term (under 1 year) / Medium-term (1–3 years) / Long-term (3–5 years) / Extended (5+ years) / Project-based (defined end date) / Open-ended / To be agreed
+A65	s	Need side — "What you are looking for in this JV"
+A67	s	Code
+B67	s	Field label
+C67	s	Type
+D67	s	Required
+E67	s	Other trigger
+A68	s	S3-JV-N00
+B68	s	Collaboration intent
+C68	s	Dropdown
+D68	s	Yes
+E68	s	No
+A69	s	S3-JV-N01
+B69	s	What do you need from a JV partner?
+C69	s	Multi-select dropdown
+D69	s	Yes
+E69	s	Yes
+A70	s	S3-JV-N02
+B70	s	Specifically, what should they bring?
+C70	s	Dropdown
+D70	s	Yes
+E70	s	Yes
+A71	s	S3-JV-N03
+B71	s	Project type
+C71	s	Dropdown
+D71	s	Yes
+E71	s	Yes
+A72	s	S3-JV-N04
+B72	s	Project stage
+C72	s	Dropdown
+D72	s	Yes
+E72	s	No
+A73	s	S3-JV-N05
+B73	s	Preferred partner location — country
+C73	s	Multi-select dropdown
+D73	s	Yes
+E73	s	Yes
+A74	s	S3-JV-N05a
+B74	s	Preferred partner location — city
+C74	s	Dropdown
+D74	s	No
+E74	s	Populates per country selected in N05
+A75	s	S3-JV-N06
+B75	s	Minimum partner requirements
+C75	s	Multi-select dropdown
+D75	s	No
+E75	s	Yes
+A76	s	S3-JV-N07
+B76	s	JV structure preference
+C76	s	Dropdown
+D76	s	No
+E76	s	Yes
+A77	s	S3-JV-N08
+B77	s	Number of partners sought
+C77	s	Dropdown
+D77	s	Yes
+E77	s	No
+A78	s	S3-JV-N09
+B78	s	Estimated project value
+C78	s	Range dropdown + currency (S3-JV-N09-CUR)
+D78	s	No
+E78	s	No
+A79	s	S3-JV-N10
+B79	s	Expected JV duration
+C79	s	Dropdown
+D79	s	No
+E79	s	No
+A81	s	S3-JV-N00 — Collaboration intent values: Initiating a new JV / Seeking to join an existing JV / Seeking to acquire an existing JV position / Seeking to exit from an existing JV position / Open to discussion
+A83	s	S3-JV-N01 — What do you need from a JV partner? values: Market access & local presence / Technical execution capacity / Engineering credentials & accreditation / Financial capital & capacity / Project opportunity or pipeline / Regulatory relationships / Industry-specific expertise / International credentials / Technology & digital capability / Sustainability & ESG credentials / Other → free text
+A85	s	S3-JV-N02 — Sub-category values (conditional on N01):
+A87	s	N01 selection
+B87	s	N02 options
+A88	s	Market access & local presence
+B88	s	Local company registration / Existing client network / Government & regulatory relationships / Procurement process knowledge / Sponsorship & PRO relationships / GCC market presence / Other
+A89	s	Technical execution capacity
+B89	s	Engineering design / Project management / Construction execution / Digital & BIM / Specialist technical / MEP / Civil & structural / Other
+A90	s	Engineering credentials
+B90	s	RICS / CIOB / PE licence / ISO certified / MOMRA approved / Muqawil registered / ARAMCO Accreditation / RIBA accreditation / Other international accreditation / Other national accreditation/ Other
+A91	s	Financial capital & capacity
+B91	s	Project financing capability / Bank guarantee & bonding / Working capital contribution / Equity stake / Other
+A92	s	Project opportunity or pipeline
+B92	s	Pre-bid opportunity / Awarded project / Giga-project pipeline / Vision 2030 project / Public sector tender / Private sector opportunity / Other
+A93	s	Regulatory relationships
+B93	s	MOMRA / Muqawil / Municipality / Saudi Aramco / PIF Authority / Other government body / Other
+A94	s	Industry-specific expertise
+B94	s	Real estate development / Contracting / Consulting / PMC / Supply chain / Hospitality / Healthcare / Education / Operation & Maintainace / Logistics / Other
+A95	s	International credentials
+B95	s	US / UK / European accreditation / FIDIC expertise / NEC expertise / International tendering experience / Other
+A96	s	Technology & digital capability
+B96	s	BIM / Smart building / PropTech / Project management systems / Digital twin / Other
+A97	s	Sustainability & ESG
+B97	s	LEED / BREEAM / Green building / Carbon reduction / ESG reporting / Other
+A99	s	→ All include "Other" → free text
+A101	s	S3-JV-N03 — Project type values: Residential development / Commercial development / Mixed-use development / Infrastructure (roads, utilities, transport) / Industrial / Hospitality & tourism / Healthcare facilities / Education facilities / Giga-project (NEOM, Red Sea, Qiddiya, Diriyah) / Smart city / Logistics & warehousing / Data centre / Retrofit & renovation / Other → free text
+A103	s	S3-JV-N04 — Project stage values:
+A104	s	Pre-bid / opportunity identification / Active bid / tender stage / Awarded / execution ready / In planning / feasibility / Early stage / concept / Existing project seeking partner Snaging / Defect Liability Period DLP / Open to any stage
+A106	s	S3-JV-N05 — Preferred partner location values:
+A107	s	Saudi Arabia / UAE / Egypt / Qatar / Kuwait / Bahrain / Oman / Jordan / UK / USA / China / Europe (any) / Asia (any) / International (any) / Other → free text
+A108	s	Multi-select — can select multiple countries
+A110	s	S3-JV-N05a — Preferred partner location — city values: Conditional on N05 country selection. Appears per country selected. Uses same city taxonomy as Step 1 (S1-F04):
+A112	s	Gulf countries and Egypt: comprehensive city list (same as S1-F04)
+A114	s	All other countries: top 5 cities + Other (GeoNames database)
+A116	s	If multiple countries selected in N05: city dropdown appears for each country separately Developer note: apply same validation logic as S1-F04
+A118	s	S3-JV-N06 — Minimum partner requirements values: Muqawil registered / RICS / CIOB / PE licence / ISO certified / PMTwin vetted / Minimum 5 years sector experience / Minimum 10 years sector experience / Proven track record in project type / Legal entity required / Minimum financial capacity / None / Other → free text
+A120	s	S3-JV-N07 — JV structure preference values: SPV / Special Purpose Vehicle / Consortium (unincorporated) / Limited partnership / Joint company / Contractual JV (no new entity) / To be agreed / Other → free text
+A122	s	S3-JV-N08 — Number of partners sought values: 1 partner / 2 partners / 3 or more / Open
+A124	s	S3-JV-N09 — Estimated project value range values: Under $1M / $1M–$5M / $5M–$20M / $20M–$100M / $100M–$500M / Above $500M / Prefer not to state Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A126	s	S3-JV-N10 — Expected JV duration values: Short-term (under 1 year) / Medium-term (1–3 years) / Long-term (3–5 years) / Extended (5+ years) / Project-based (defined end date) / Open-ended / To be agreed
+A130	s	Deliverables (Need side only — encouraged, not required)
+A132	s	Code
+B132	s	Field label
+C132	s	Type
+D132	s	Required
+A133	s	S3-JV-D01
+B133	s	What do you expect your partner to deliver?
+C133	s	Text — add multiple
+D133	s	No
+A134	s	S3-JV-D02
+B134	s	Acceptance criteria
+C134	s	Text
+D134	s	No
+A136	s	Collapsed by default. Label: "Add expected deliverables (recommended — helps partners assess fit)"
+A140	s	Milestones (optional — both sides)
+A142	s	Code
+B142	s	Field label
+C142	s	Type
+D142	s	Required
+A143	s	S3-JV-M01
+B143	s	Milestone title
+C143	s	Text
+D143	s	No
+A144	s	S3-JV-M02
+B144	s	Target date
+C144	s	Date picker
+D144	s	No
+A146	s	Collapsed by default. Label: "Add milestones (optional)" User can add multiple milestones.
+A150	s	Hidden fields for JV model
+A152	s	Quantity needed / Participants needed / Material category / Skill level / Years experience / Pool size

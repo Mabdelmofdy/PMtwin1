@@ -1,0 +1,201 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-Cownr
+state=visible dims=A1:E116 max_row=116 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 2: Co-ownership
+A5	s	Screen title: Scope & Work — Co-ownership Screen subtitle: Define the asset you are sharing ownership of and what you bring or seek in a co-ownership arrangement. Layout: Two sections — Offer side (top) and Need side (bottom). Both required.
+A9	s	Offer side — "What you are offering in this co-ownership"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-CO-O00
+B12	s	Collaboration intent
+C12	s	Dropdown
+D12	s	Yes
+E12	s	No
+A13	s	S3-CO-O01
+B13	s	Asset type
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-CO-O02
+B14	s	Asset description
+C14	s	Text area
+D14	s	Yes
+E14	s	No
+A15	s	S3-CO-O03
+B15	s	Asset location — country
+C15	s	Dropdown
+D15	s	Yes
+E15	s	Yes
+A16	s	S3-CO-O03a
+B16	s	Asset location — city
+C16	s	Dropdown
+D16	s	Yes
+E16	s	Populates per O03
+A17	s	S3-CO-O04
+B17	s	Estimated asset value
+C17	s	Range dropdown + currency (S3-CO-O04-CUR)
+D17	s	No
+E17	s	No
+A18	s	S3-CO-O05
+B18	s	Ownership share you are offering
+C18	s	Dropdown
+D18	s	Yes
+E18	s	No
+A19	s	S3-CO-O06
+B19	s	Your contribution type
+C19	s	Multi-select dropdown
+D19	s	Yes
+E19	s	Yes
+A20	s	S3-CO-O07
+B20	s	Entity structure
+C20	s	Dropdown
+D20	s	No
+E20	s	Yes
+A21	s	S3-CO-O08
+B21	s	Expected ownership duration
+C21	s	Dropdown
+D21	s	No
+E21	s	No
+A22	s	S3-CO-O09
+B22	s	Exit provisions offered
+C22	s	Multi-select dropdown
+D22	s	No
+E22	s	Yes
+A24	s	S3-CO-O00 — Collaboration intent values: Offering a stake in a new co-ownership arrangement / Offering to sell / exit an existing co-ownership stake / Offering to acquire an additional stake in existing arrangement / Open to discussion
+A26	s	S3-CO-O01 — Asset type values: Real estate — residential (apartment / villa / compound) / Real estate — commercial (office / retail / hotel) / Real estate — mixed use / Real estate — industrial (warehouse / factory) / Land / development plot / Heavy equipment / Technology platform / Company / business / SPV / holding entity / Infrastructure asset / Other → free text
+A28	s	S3-CO-O03 — Asset location country values: Full country list (same as S1-F03)
+A30	s	S3-CO-O03a — Asset location city values: Conditional on O03. Same city taxonomy as S1-F04
+A32	s	S3-CO-O04 — Estimated asset value range: Under $100K / $100K–$500K / $500K–$1M / $1M–$5M / $5M–$20M / $20M–$100M / Above $100M / Prefer not to state Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A34	s	S3-CO-O05 — Ownership share offered values: Up to 10% / 10–25% / 25–49% / 50% (equal) / 51–75% / Above 75% / To be agreed
+A36	s	S3-CO-O06 — Contribution type values: Capital / equity contribution / Land contribution / Asset in-kind / Development expertise / Management & operations capability / Technical expertise / Market access & relationships / Financing / debt capacity / Regulatory approvals & permits / Construction execution capacity / Other → free text
+A38	s	S3-CO-O07 — Entity structure values: SPV / Special Purpose Vehicle / Joint company / Limited partnership / Contractual arrangement (no new entity) / To be agreed / Other → free text
+A40	s	S3-CO-O08 — Expected ownership duration values: Short-term — exit within 1–2 years / Medium-term (3–5 years) / Long-term (5–10 years) / Indefinite hold / To be agreed
+A42	s	S3-CO-O09 — Exit provisions offered values: Buy-out provisions available / Right of first refusal / Open to IPO / listing / Open to third-party sale / No exit provisions / To be agreed / Other → free text
+A46	s	Need side — "What you are looking for in a co-ownership arrangement"
+A48	s	Code
+B48	s	Field label
+C48	s	Type
+D48	s	Required
+E48	s	Other trigger
+A49	s	S3-CO-N00
+B49	s	Collaboration intent
+C49	s	Dropdown
+D49	s	Yes
+E49	s	No
+A50	s	S3-CO-N01
+B50	s	Asset type you want to co-own
+C50	s	Dropdown
+D50	s	Yes
+E50	s	Yes
+A51	s	S3-CO-N02
+B51	s	Asset location — country
+C51	s	Multi-select dropdown
+D51	s	Yes
+E51	s	Yes
+A52	s	S3-CO-N02a
+B52	s	Asset location — city
+C52	s	Dropdown
+D52	s	No
+E52	s	Populates per N02
+A53	s	S3-CO-N03
+B53	s	What should your co-owner bring?
+C53	s	Multi-select dropdown
+D53	s	Yes
+E53	s	Yes
+A54	s	S3-CO-N04
+B54	s	Preferred co-owner location — country
+C54	s	Multi-select dropdown
+D54	s	Yes
+E54	s	Yes
+A55	s	S3-CO-N04a
+B55	s	Preferred co-owner location — city
+C55	s	Dropdown
+D55	s	No
+E55	s	Populates per N04
+A56	s	S3-CO-N05
+B56	s	Ownership share you are seeking
+C56	s	Dropdown
+D56	s	Yes
+E56	s	No
+A57	s	S3-CO-N06
+B57	s	Number of co-owners sought
+C57	s	Dropdown
+D57	s	Yes
+E57	s	No
+A58	s	S3-CO-N07
+B58	s	Entity structure preference
+C58	s	Dropdown
+D58	s	No
+E58	s	Yes
+A59	s	S3-CO-N08
+B59	s	Minimum co-owner requirements
+C59	s	Multi-select dropdown
+D59	s	No
+E59	s	Yes
+A60	s	S3-CO-N09
+B60	s	Estimated asset value
+C60	s	Range dropdown + currency (S3-CO-N09-CUR)
+D60	s	No
+E60	s	No
+A61	s	S3-CO-N10
+B61	s	Expected ownership duration
+C61	s	Dropdown
+D61	s	No
+E61	s	No
+A62	s	S3-CO-N11
+B62	s	Exit strategy preference
+C62	s	Multi-select dropdown
+D62	s	No
+E62	s	Yes
+A64	s	S3-CO-N00 — Collaboration intent values: Entering a new co-ownership arrangement / Seeking to acquire an existing co-ownership stake / Seeking to exit from an existing co-ownership position / Open to discussion
+A66	s	S3-CO-N01 — Asset type values: Real estate — residential (apartment / villa / compound) / Real estate — commercial (office / retail / hotel) / Real estate — mixed use / Real estate — industrial (warehouse / factory) / Land / development plot / Heavy equipment / Technology platform / Company / business / SPV / holding entity / Infrastructure asset / Other → free text
+A68	s	S3-CO-N02 — Asset location — country values: Full country list (same as S1-F03) — multi-select
+A70	s	S3-CO-N02a — Asset location — city values: Conditional on N02. Same city taxonomy as S1-F04 (Gulf + Egypt comprehensive, others top 5 + Other)
+A72	s	S3-CO-N03 — What should your co-owner bring? values: Capital / equity contribution / Land contribution / Asset in-kind / Development expertise / Management & operations capability / Technical expertise / Market access & relationships / Financing / debt capacity / Regulatory approvals & permits / Construction execution capacity / Legal & compliance expertise / International credentials / Other → free text
+A74	s	S3-CO-N04 — Preferred co-owner location — country values: Saudi Arabia / UAE / Egypt / Qatar / Kuwait / Bahrain / Oman / Jordan / UK / USA / China / Europe (any) / Asia (any) / International (any) / Other → free text Multi-select
+A76	s	S3-CO-N04a — Preferred co-owner location — city values: Conditional on N04. Same city taxonomy as S1-F04
+A78	s	S3-CO-N05 — Ownership share seeking values: Minority stake (under 25%) / Minority stake (25–49%) / Equal share (50%) / Majority stake (51–75%) / Above 75% / To be agreed
+A80	s	S3-CO-N06 — Number of co-owners sought values: 1 co-owner / 2 co-owners / 3 or more / Open
+A82	s	S3-CO-N07 — Entity structure preference values: SPV / Special Purpose Vehicle / Joint company / Limited partnership / Contractual arrangement (no new entity) / To be agreed / Other → free text
+A84	s	S3-CO-N08 — Minimum co-owner requirements values: PMTwin vetted / Muqawil registered / Minimum capital threshold / Legal entity required / Proven track record in asset type / Minimum 5 years sector experience / Minimum 10 years sector experience / Sector-specific credentials / None / Other → free text
+A86	s	S3-CO-N09 — Estimated asset value range values: Under $100K / $100K–$500K / $500K–$1M / $1M–$5M / $5M–$20M / $20M–$100M / Above $100M / Prefer not to state Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A88	s	S3-CO-N10 — Expected ownership duration values: Short-term — exit within 1–2 years / Medium-term (3–5 years) / Long-term (5–10 years) / Indefinite hold / To be agreed
+A90	s	S3-CO-N11 — Exit strategy preference values: Open to buy-out provisions / Right of first refusal / Open to IPO / listing / Open to third-party sale / No exit provisions required / To be agreed / Other → free text
+A94	s	Deliverables (Need side only — encouraged, not required)
+A96	s	Code
+B96	s	Field label
+C96	s	Type
+D96	s	Required
+A97	s	S3-CO-D01
+B97	s	What do you expect your co-owner to contribute or deliver?
+C97	s	Text — add multiple
+D97	s	No
+A98	s	S3-CO-D02
+B98	s	Acceptance criteria
+C98	s	Text
+D98	s	No
+A100	s	Collapsed by default.
+A104	s	Milestones (optional — both sides)
+A106	s	Code
+B106	s	Field label
+C106	s	Type
+D106	s	Required
+A107	s	S3-CO-M01
+B107	s	Milestone title
+C107	s	Text
+D107	s	No
+A108	s	S3-CO-M02
+B108	s	Target date
+C108	s	Date picker
+D108	s	No
+A110	s	Collapsed by default.
+A114	s	Hidden fields for Co-ownership model
+A116	s	Routing question (sharing vs pooling) / Skill level / Years experience / Material category / Task scope

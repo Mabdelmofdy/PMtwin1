@@ -1,0 +1,381 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-JV-Lists
+state=visible dims=B2:BC84 max_row=84 max_col=55
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 1: JV (project-based)
+B3	s	Every Offer-side and Need-side value set for the JV scope & work form. Edit here and the wireframe follows.
+B5	s	Collaboration intent — Offer (S3-JV-O00)
+D5	s	Collaboration intent — Need (S3-JV-N00)
+F5	s	Contribution categories (O01 / N01)
+H5	s	Category (O01 / N01)
+I5	s	Sub-option (O02 / N02)
+K5	s	Project type (O03 / N03)
+M5	s	Project stage (O04 / N04)
+O5	s	Company credentials (O06)
+Q5	s	New entity required (O07)
+S5	s	Entity type / JV structure (O07 / N07)
+U5	s	Number of partners sought (O08 / N08)
+W5	s	Project value range (O09 / N09)
+Y5	s	Currency (O09-CUR / N09-CUR)
+AA5	s	Expected JV duration (O10 / N10)
+AC5	s	Minimum partner requirements (N06)
+AE5	s	Preferred partner location (N05)
+AG5	s	Hidden fields for the JV model
+AI5	s	Month (milestone date picker)
+AK5	s	Year (milestone date picker)
+AM5	s	O02 source — filtered by ticked O01
+AO5	s	N02 source — filtered by ticked N01
+AQ5	s	O05a city source (from shared Cities sheet)
+AS5	s	N05a city source (first ticked N05 country)
+AU5	s	Milestone date options
+AW5	s	Ticked O01 categories (helper)
+AY5	s	Ticked N01 categories (helper)
+BA5	s	Ticked N05 countries (helper)
+BC5	s	Active N05a country
+B6	s	Offering to initiate a new JV
+D6	s	Initiating a new JV
+F6	s	Market access & local presence
+H6	s	Market access & local presence
+I6	s	Local company registration
+K6	s	Residential development
+M6	s	Pre-bid / opportunity identification
+O6	s	Muqawil registered
+Q6	s	Yes
+S6	s	SPV / Special Purpose Vehicle
+U6	s	1 partner
+W6	s	Under $1M
+Y6	s	USD ($)
+AA6	s	Short-term (under 1 year)
+AC6	s	Muqawil registered
+AE6	s	Saudi Arabia
+AG6	s	Quantity needed
+AI6	s	January
+AK6	n	2026
+AM6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0E1E0>
+AO6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CC50>
+AQ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CC80>
+AS6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CCB0>
+AU6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CCE0>
+AW6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CDA0>
+AY6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CDD0>
+BA6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0CE00>
+BC6	f	=IFERROR(IF($BA$6="","",$BA$6),"")
+B7	s	Offering to join an existing JV
+D7	s	Seeking to join an existing JV
+F7	s	Technical execution capacity
+H7	s	Market access & local presence
+I7	s	Existing client network
+K7	s	Commercial development
+M7	s	Active bid / tender stage
+O7	s	RICS
+Q7	s	No
+S7	s	Consortium (unincorporated)
+U7	s	2 partners
+W7	s	$1M–$5M
+Y7	s	SAR (ر.س)
+AA7	s	Medium-term (1–3 years)
+AC7	s	RICS
+AE7	s	UAE
+AG7	s	Participants needed
+AI7	s	February
+AK7	n	2027
+AU7	f	=
+B8	s	Offering to take over an existing JV position
+D8	s	Seeking to acquire an existing JV position
+F8	s	Engineering credentials & accreditation
+H8	s	Market access & local presence
+I8	s	Government & regulatory relationships
+K8	s	Mixed-use development
+M8	s	Awarded / execution ready
+O8	s	CIOB
+Q8	s	To be agreed
+S8	s	Limited partnership
+U8	s	3 or more
+W8	s	$5M–$20M
+Y8	s	AED (د.إ)
+AA8	s	Long-term (3–5 years)
+AC8	s	CIOB
+AE8	s	Egypt
+AG8	s	Material category
+AI8	s	March
+AK8	n	2028
+AU8	f	=
+B9	s	Offering an exit from an existing JV position
+D9	s	Seeking to exit from an existing JV position
+F9	s	Financial capital & capacity
+H9	s	Market access & local presence
+I9	s	Procurement process knowledge
+K9	s	Infrastructure (roads, utilities, transport)
+M9	s	In planning / feasibility
+O9	s	PE licence
+S9	s	Joint company
+U9	s	Open
+W9	s	$20M–$100M
+Y9	s	EGP (ج.م)
+AA9	s	Extended (5+ years)
+AC9	s	PE licence
+AE9	s	Qatar
+AG9	s	Skill level
+AI9	s	April
+AK9	n	2029
+AU9	f	=
+B10	s	Open to discussion
+D10	s	Open to discussion
+F10	s	Project opportunity or pipeline
+H10	s	Market access & local presence
+I10	s	Sponsorship & PRO relationships
+K10	s	Industrial
+M10	s	Early stage / concept
+O10	s	ISO certified
+S10	s	Contractual JV (no new entity)
+W10	s	$100M–$500M
+Y10	s	QAR (ر.ق)
+AA10	s	Project-based (defined end date)
+AC10	s	ISO certified
+AE10	s	Kuwait
+AG10	s	Years experience
+AI10	s	May
+AK10	n	2030
+AU10	f	=
+F11	s	Regulatory relationships
+H11	s	Market access & local presence
+I11	s	GCC market presence
+K11	s	Hospitality & tourism
+M11	s	Existing project seeking partner
+O11	s	PMTwin vetted
+S11	s	To be agreed
+W11	s	Above $500M
+Y11	s	KWD (د.ك)
+AA11	s	Open-ended
+AC11	s	PMTwin vetted
+AE11	s	Bahrain
+AG11	s	Pool size
+AI11	s	June
+AK11	n	2031
+AU11	f	=
+F12	s	Industry-specific expertise
+H12	s	Market access & local presence
+I12	s	Other
+K12	s	Healthcare facilities
+M12	s	Snagging / Defect Liability Period (DLP)
+O12	s	MOMRA approved
+S12	s	Other
+W12	s	Prefer not to state
+Y12	s	BHD (د.ب)
+AA12	s	To be agreed
+AC12	s	Minimum 5 years sector experience
+AE12	s	Oman
+AI12	s	July
+AK12	n	2032
+AU12	f	=
+F13	s	International credentials
+H13	s	Technical execution capacity
+I13	s	Engineering design
+K13	s	Education facilities
+M13	s	Open to any stage
+O13	s	Saudi Council of Engineers
+Y13	s	OMR (ر.ع)
+AC13	s	Minimum 10 years sector experience
+AE13	s	Jordan
+AI13	s	August
+AK13	n	2033
+AU13	f	=
+F14	s	Technology & digital capability
+H14	s	Technical execution capacity
+I14	s	Project management
+K14	s	Giga-project (NEOM, Red Sea, Qiddiya, Diriyah)
+O14	s	UAE Engineering licence
+Y14	s	EUR (€)
+AC14	s	Proven track record in project type
+AE14	s	UK
+AI14	s	September
+AK14	n	2034
+AU14	f	=
+F15	s	Sustainability & ESG credentials
+H15	s	Technical execution capacity
+I15	s	Construction execution
+K15	s	Smart city
+O15	s	PIF approved
+Y15	s	GBP (£)
+AC15	s	Legal entity required
+AE15	s	USA
+AI15	s	October
+AK15	n	2035
+AU15	f	=
+F16	s	Other
+H16	s	Technical execution capacity
+I16	s	Digital & BIM
+K16	s	Logistics & warehousing
+O16	s	None
+Y16	s	Other
+AC16	s	Minimum financial capacity
+AE16	s	China
+AI16	s	November
+AK16	n	2036
+AU16	f	=
+H17	s	Technical execution capacity
+I17	s	Specialist technical
+K17	s	Data centre
+O17	s	Other
+AC17	s	None
+AE17	s	Europe (any)
+AI17	s	December
+AU17	f	=
+H18	s	Technical execution capacity
+I18	s	MEP
+K18	s	Retrofit & renovation
+AC18	s	Other
+AE18	s	Asia (any)
+AU18	f	=
+H19	s	Technical execution capacity
+I19	s	Civil & structural
+K19	s	Other
+AE19	s	International (any)
+AU19	f	=
+H20	s	Technical execution capacity
+I20	s	Other
+AE20	s	Other
+AU20	f	=
+H21	s	Engineering credentials & accreditation
+I21	s	RICS
+AU21	f	=
+H22	s	Engineering credentials & accreditation
+I22	s	CIOB
+AU22	f	=
+H23	s	Engineering credentials & accreditation
+I23	s	PE licence
+AU23	f	=
+H24	s	Engineering credentials & accreditation
+I24	s	ISO certified
+AU24	f	=
+H25	s	Engineering credentials & accreditation
+I25	s	MOMRA approved
+AU25	f	=
+H26	s	Engineering credentials & accreditation
+I26	s	Muqawil registered
+AU26	f	=
+H27	s	Engineering credentials & accreditation
+I27	s	ARAMCO Accreditation
+AU27	f	=
+H28	s	Engineering credentials & accreditation
+I28	s	RIBA accreditation
+AU28	f	=
+H29	s	Engineering credentials & accreditation
+I29	s	Other international accreditation
+AU29	f	=
+H30	s	Engineering credentials & accreditation
+I30	s	Other national accreditation
+AU30	f	=
+H31	s	Engineering credentials & accreditation
+I31	s	Other
+AU31	f	=
+H32	s	Financial capital & capacity
+I32	s	Project financing capability
+AU32	f	=
+H33	s	Financial capital & capacity
+I33	s	Bank guarantee & bonding
+AU33	f	=
+H34	s	Financial capital & capacity
+I34	s	Working capital contribution
+AU34	f	=
+H35	s	Financial capital & capacity
+I35	s	Equity stake
+AU35	f	=
+H36	s	Financial capital & capacity
+I36	s	Other
+H37	s	Project opportunity or pipeline
+I37	s	Pre-bid opportunity
+H38	s	Project opportunity or pipeline
+I38	s	Awarded project
+H39	s	Project opportunity or pipeline
+I39	s	Giga-project pipeline
+H40	s	Project opportunity or pipeline
+I40	s	Vision 2030 project
+H41	s	Project opportunity or pipeline
+I41	s	Public sector tender
+H42	s	Project opportunity or pipeline
+I42	s	Private sector opportunity
+H43	s	Project opportunity or pipeline
+I43	s	Other
+H44	s	Regulatory relationships
+I44	s	MOMRA
+H45	s	Regulatory relationships
+I45	s	Muqawil
+H46	s	Regulatory relationships
+I46	s	Municipality
+H47	s	Regulatory relationships
+I47	s	Saudi Aramco
+H48	s	Regulatory relationships
+I48	s	PIF Authority
+H49	s	Regulatory relationships
+I49	s	NEOM Authority
+H50	s	Regulatory relationships
+I50	s	Other government body
+H51	s	Regulatory relationships
+I51	s	Other
+H52	s	Industry-specific expertise
+I52	s	Real estate development
+H53	s	Industry-specific expertise
+I53	s	Contracting
+H54	s	Industry-specific expertise
+I54	s	Consulting
+H55	s	Industry-specific expertise
+I55	s	PMC
+H56	s	Industry-specific expertise
+I56	s	Supply chain
+H57	s	Industry-specific expertise
+I57	s	Hospitality
+H58	s	Industry-specific expertise
+I58	s	Healthcare
+H59	s	Industry-specific expertise
+I59	s	Education
+H60	s	Industry-specific expertise
+I60	s	Operation & Maintenance
+H61	s	Industry-specific expertise
+I61	s	Logistics
+H62	s	Industry-specific expertise
+I62	s	Other
+H63	s	International credentials
+I63	s	US accreditation
+H64	s	International credentials
+I64	s	UK accreditation
+H65	s	International credentials
+I65	s	European accreditation
+H66	s	International credentials
+I66	s	FIDIC expertise
+H67	s	International credentials
+I67	s	NEC expertise
+H68	s	International credentials
+I68	s	International tendering experience
+H69	s	International credentials
+I69	s	Other
+H70	s	Technology & digital capability
+I70	s	BIM
+H71	s	Technology & digital capability
+I71	s	Smart building
+H72	s	Technology & digital capability
+I72	s	PropTech
+H73	s	Technology & digital capability
+I73	s	Project management systems
+H74	s	Technology & digital capability
+I74	s	Digital twin
+H75	s	Technology & digital capability
+I75	s	Other
+H76	s	Sustainability & ESG credentials
+I76	s	LEED
+H77	s	Sustainability & ESG credentials
+I77	s	BREEAM
+H78	s	Sustainability & ESG credentials
+I78	s	Green building
+H79	s	Sustainability & ESG credentials
+I79	s	Carbon reduction
+H80	s	Sustainability & ESG credentials
+I80	s	ESG reporting
+H81	s	Sustainability & ESG credentials
+I81	s	Other
+H82	s	Other
+I82	s	Other
+H84	s	Shared by O02 and N02. Where your spec differed slightly between sides, this table holds the union (incl. NEOM Authority and Other national accreditation).

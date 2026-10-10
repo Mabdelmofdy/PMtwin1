@@ -1,0 +1,352 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-ME-Lists
+state=visible dims=B2:BF74 max_row=74 max_col=58
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 8: Mentorship
+B3	s	Capability-building model. Any engagement with a deliverable work product belongs in Task-based Collaboration.
+B5	s	Collaboration intent — Offer (O00)
+D5	s	Collaboration intent — Need (N01)
+F5	s	Mentorship domain (O01 / N02 / N00a-1)
+H5	s	Mentorship format (O04 / N05 / N00a-4)
+J5	s	Availability — Offer (O06)
+L5	s	When do you want to start? (N07)
+N5	s	Session frequency (O07 / N09)
+P5	s	Credentials — Offer (O08)
+R5	s	Required credentials (N11)
+T5	s	Individual credentials (N00a-3)
+V5	s	Years of experience in domain (O09)
+X5	s	Minimum mentor experience (N10 / N00a-2)
+Z5	s	Languages offered (O10)
+AB5	s	Language preference (N12)
+AD5	s	Rate / budget range (O11 / N13)
+AF5	s	Currency (O11-CUR / N13-CUR)
+AH5	s	Duration time unit (N08-TU)
+AJ5	s	Match with (N00)
+AL5	s	Hidden fields for the Mentorship model
+AN5	s	Month (date scope)
+AP5	s	Year (date scope)
+AR5	s	Mentorship domain
+AS5	s	Specific area (O02 / N03)
+AU5	s	O02 specific-area source
+AW5	s	N03 specific-area source
+AY5	s	O05a session city source
+BA5	s	N06a session city source
+BC5	s	Date options (periods & milestones)
+BE5	s	Comparison rank helpers
+B6	s	Offering new mentorship
+D6	s	Seeking a new mentorship
+F6	s	Technical domain
+H6	s	One-to-one sessions
+J6	s	Immediate
+L6	s	Immediately
+N6	s	Weekly
+P6	s	RICS
+R6	s	RICS
+T6	s	RICS
+V6	s	3–7 years
+X6	s	3–7 years
+Z6	s	Arabic
+AB6	s	Arabic
+AD6	s	Free / goodwill
+AF6	s	USD ($)
+AH6	s	Weeks
+AJ6	s	Companies only
+AL6	s	Asset type
+AN6	s	January
+AP6	n	2026
+AR6	s	Technical domain
+AS6	s	Structural engineering
+AU6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126470140>
+AW6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126471AF0>
+AY6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126470BC0>
+BA6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126470B90>
+BC6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126470B60>
+BE6	s	Offer rate rank (O11)
+BF6	f	=IFERROR(MATCH('Step 3-ME-Wireframe'!$C$32,$AD$6:$AD$12,0),0)
+B7	s	Continuing an existing mentorship relationship
+D7	s	Extending an existing mentorship relationship
+F7	s	Business domain
+H7	s	Group sessions
+J7	s	Within 1 month
+L7	s	Within 2 weeks
+N7	s	Bi-weekly
+P7	s	CIOB
+R7	s	CIOB
+T7	s	CIOB
+V7	s	7–15 years
+X7	s	7–15 years
+Z7	s	English
+AB7	s	English
+AD7	s	Under $500
+AF7	s	SAR (ر.س)
+AH7	s	Months
+AJ7	s	Individual professionals only
+AL7	s	Pool size
+AN7	s	February
+AP7	n	2027
+AR7	s	Technical domain
+AS7	s	MEP systems (mechanical)
+BC7	f	=
+BE7	s	Need budget rank (N13)
+BF7	f	=IFERROR(MATCH('Step 3-ME-Wireframe'!$C$59,$AD$6:$AD$12,0),0)
+B8	s	Open to discussion
+D8	s	Changing mentor
+F8	s	Leadership
+H8	s	Embedded in project
+J8	s	Flexible
+L8	s	Within 1 month
+N8	s	Monthly
+P8	s	PE licence
+R8	s	PE licence
+T8	s	PE licence
+V8	s	15–25 years
+X8	s	15–25 years
+Z8	s	Arabic & English
+AB8	s	Arabic & English
+AD8	s	$500–$1K
+AF8	s	AED (د.إ)
+AH8	s	Years
+AJ8	s	Both
+AL8	s	Material category
+AN8	s	March
+AP8	n	2028
+AR8	s	Technical domain
+AS8	s	MEP systems (electrical)
+BC8	f	=
+BE8	s	Offer experience rank (O09)
+BF8	f	=IFERROR(MATCH('Step 3-ME-Wireframe'!$C$29,$V$6:$V$9,0),0)
+D9	s	Open to discussion
+F9	s	Digital & technology
+H9	s	Online
+J9	s	Specific period
+L9	s	1–3 months
+N9	s	Ad-hoc
+P9	s	PMP
+R9	s	PMP
+T9	s	PMP
+V9	s	25+ years
+X9	s	25+ years
+Z9	s	French
+AB9	s	French
+AD9	s	$1K–$3K
+AF9	s	EGP (ج.م)
+AL9	s	Entity establishment
+AN9	s	April
+AP9	n	2029
+AR9	s	Technical domain
+AS9	s	MEP systems (plumbing)
+BC9	f	=
+BE9	s	Need min experience rank (N10)
+BF9	f	=IFERROR(MATCH('Step 3-ME-Wireframe'!$C$55,$X$6:$X$10,0),0)
+F10	s	Finance & commercial
+H10	s	In-person
+L10	s	Flexible
+N10	s	To be agreed
+P10	s	MBA
+R10	s	MBA
+T10	s	MBA
+X10	s	Not specified
+Z10	s	Mandarin
+AB10	s	Mandarin
+AD10	s	$3K–$5K
+AF10	s	QAR (ر.ق)
+AL10	s	Swap duration
+AN10	s	May
+AP10	n	2030
+AR10	s	Technical domain
+AS10	s	Civil engineering
+BC10	f	=
+F11	s	Career development
+H11	s	Hybrid
+L11	s	Specific date
+P11	s	PMTwin vetted
+R11	s	PMTwin vetted
+T11	s	PMTwin vetted
+Z11	s	Hindi
+AB11	s	Other
+AD11	s	Above $5K
+AF11	s	KWD (د.ك)
+AL11	s	Quantity
+AN11	s	June
+AP11	n	2031
+AR11	s	Technical domain
+AS11	s	Geotechnical engineering
+BC11	f	=
+F12	s	Other
+H12	s	Flexible
+P12	s	Other
+R12	s	None
+T12	s	Other
+Z12	s	Other
+AD12	s	To be agreed
+AF12	s	BHD (د.ب)
+AL12	s	Budget contribution
+AN12	s	July
+AP12	n	2032
+AR12	s	Technical domain
+AS12	s	Environmental engineering
+BC12	f	=
+R13	s	Other
+AF13	s	OMR (ر.ع)
+AN13	s	August
+AP13	n	2033
+AR13	s	Technical domain
+AS13	s	Fire protection engineering
+BC13	f	=
+AF14	s	EUR (€)
+AN14	s	September
+AP14	n	2034
+AR14	s	Technical domain
+AS14	s	Project management
+BC14	f	=
+AF15	s	GBP (£)
+AN15	s	October
+AP15	n	2035
+AR15	s	Technical domain
+AS15	s	Construction management
+BC15	f	=
+AF16	s	Other
+AN16	s	November
+AP16	n	2036
+AR16	s	Technical domain
+AS16	s	Planning & scheduling
+BC16	f	=
+AN17	s	December
+AR17	s	Technical domain
+AS17	s	Quantity surveying
+BC17	f	=
+AR18	s	Technical domain
+AS18	s	Contract management
+BC18	f	=
+AR19	s	Technical domain
+AS19	s	BIM & digital construction
+BC19	f	=
+AR20	s	Technical domain
+AS20	s	Commissioning
+BC20	f	=
+AR21	s	Technical domain
+AS21	s	Facilities management
+BC21	f	=
+AR22	s	Technical domain
+AS22	s	HSE
+BC22	f	=
+AR23	s	Technical domain
+AS23	s	Quality management
+BC23	f	=
+AR24	s	Technical domain
+AS24	s	Other
+BC24	f	=
+AR25	s	Business domain
+AS25	s	Business development
+BC25	f	=
+AR26	s	Business domain
+AS26	s	Gulf market navigation
+BC26	f	=
+AR27	s	Business domain
+AS27	s	Investment & funding
+BC27	f	=
+AR28	s	Business domain
+AS28	s	Company scaling
+BC28	f	=
+AR29	s	Business domain
+AS29	s	Procurement & supply chain
+BC29	f	=
+AR30	s	Business domain
+AS30	s	Tendering & bid management
+BC30	f	=
+AR31	s	Business domain
+AS31	s	Client relationship management
+BC31	f	=
+AR32	s	Business domain
+AS32	s	JV & partnership management
+BC32	f	=
+AR33	s	Business domain
+AS33	s	Real estate development
+BC33	f	=
+AR34	s	Business domain
+AS34	s	Property investment
+BC34	f	=
+AR35	s	Business domain
+AS35	s	Market entry strategy
+BC35	f	=
+AR36	s	Business domain
+AS36	s	Entrepreneurship
+AR37	s	Business domain
+AS37	s	Other
+AR38	s	Leadership
+AS38	s	Team management
+AR39	s	Leadership
+AS39	s	Executive leadership
+AR40	s	Leadership
+AS40	s	Strategic planning
+AR41	s	Leadership
+AS41	s	Conflict resolution
+AR42	s	Leadership
+AS42	s	Negotiation skills
+AR43	s	Leadership
+AS43	s	Stakeholder management
+AR44	s	Leadership
+AS44	s	Change management
+AR45	s	Leadership
+AS45	s	People management
+AR46	s	Leadership
+AS46	s	Presentation & communication
+AR47	s	Leadership
+AS47	s	Emotional intelligence
+AR48	s	Leadership
+AS48	s	Other
+AR49	s	Digital & technology
+AS49	s	PropTech
+AR50	s	Digital & technology
+AS50	s	Digital transformation
+AR51	s	Digital & technology
+AS51	s	BIM
+AR52	s	Digital & technology
+AS52	s	Data analytics
+AR53	s	Digital & technology
+AS53	s	Smart building
+AR54	s	Digital & technology
+AS54	s	IoT
+AR55	s	Digital & technology
+AS55	s	Software implementation
+AR56	s	Digital & technology
+AS56	s	Cybersecurity
+AR57	s	Digital & technology
+AS57	s	Digital marketing
+AR58	s	Digital & technology
+AS58	s	Social media & content
+AR59	s	Digital & technology
+AS59	s	Other
+AR60	s	Finance & commercial
+AS60	s	Financial management
+AR61	s	Finance & commercial
+AS61	s	Project finance
+AR62	s	Finance & commercial
+AS62	s	Cost control
+AR63	s	Finance & commercial
+AS63	s	Commercial management
+AR64	s	Finance & commercial
+AS64	s	Investor relations
+AR65	s	Finance & commercial
+AS65	s	Budgeting & forecasting
+AR66	s	Finance & commercial
+AS66	s	Other
+AR67	s	Career development
+AS67	s	Career planning
+AR68	s	Career development
+AS68	s	Professional development
+AR69	s	Career development
+AS69	s	Work-life balance
+AR70	s	Career development
+AS70	s	Professional branding
+AR71	s	Career development
+AS71	s	Academic guidance
+AR72	s	Career development
+AS72	s	Interview & CV preparation
+AR73	s	Career development
+AS73	s	Other
+AR74	s	Other
+AS74	s	Other

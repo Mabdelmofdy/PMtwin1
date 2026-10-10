@@ -1,0 +1,226 @@
+# PM-Twin_Wireframes_Core_CR_Review.docx
+
+[p1|Title] PM-Twin Matching Wireframes
+[p2|Normal] Project comparison, core impact and proposed change requests | 30 September 2026
+[p3|Heading 2] Review conclusion
+[p4|Normal] The five-stage opportunity journey remains aligned with the project. The proposed eight-model company interface and three-model individual interface are not a cosmetic replacement: they change taxonomy, model-specific data, commercial compatibility, relationship eligibility and some matching assumptions. Preserve the current domain rules while agreeing the new presentation and any intentional rule changes.
+[p5|Heading 2] Evidence and limits
+[p6|Normal] Reviewed: Companyflow workbook (42 sheets), Individual workbook (24 sheets), supplied Project Master Context & Handover, and selected source files in Just2Pay-Fintech/PMtwin. Repository main resolved to d113b3b9a4da198d7c2f872d465b805730e1ce55 during this review. This is a source-level comparison, not a new execution of UAT or deployment verification. Workbook formulas were inspected structurally; they were not recalculated in Excel. Original attachments and product code were not changed.
+[p7|Normal] A signed SOW, approved requirements baseline and formal change history were not supplied. The classifications below describe technical impact and proposed scope treatment. They do not establish contractual billing entitlement. An August 10 filename alone does not prove that the requirements are new.
+[p8|Heading 2] Classification used
+[p9|Heading 2] Highest priority decisions
+[p10|List Bullet] Eight cards as a new UI over existing models, or a replacement of the 5-family / 13-submodel domain?
+[p11|List Bullet] Which commercial matrix is authoritative: live or suggested, and which company/individual differences are intentional?
+[p12|List Bullet] Are single-sided company posts permitted? Company model forms require both sides while Step 1 offers Need and Offer.
+[p13|List Bullet] Do individuals lose access to all models except Task-based, Hiring and Mentorship?
+[p14|List Bullet] Are topology changes, global matching, scheduled publishing and cross-model barter part of the approved scope?
+[p15|Heading 1] 1. Model mapping and scope impact
+[p16|Normal] The current registry contains five main collaboration families and thirteen submodels. The following is an analytical mapping; several rows are not one-to-one conversions.
+[p17|Normal] M01 | Submodel removal is a core decision
+[p18|Normal] Step 2 explicitly says there is no submodel layer. Current matching treats model/submodel mismatch as hard incompatibility, and current commercial filtering reads subModelType. Hiding the selector is feasible only if a deterministic mapping still retains the needed distinction. Removing the domain layer requires schema, adapters, migration and regression work.
+[p19|Normal] Evidence: Company Step2 A47; Individual Step2 A28; registry-data.ts; allowed-components.ts.
+[p20|Normal] M02 | Existing models are absent as distinct choices
+[p21|Normal] Strategic Alliance and Competition/RFP have no explicit proposed card. Consortium, SPV and Strategic JV are only implicit in JV/entity fields. Customer must say retain, map, retire or replace. Preserve old opportunities, matches, agreements and contracts.
+[p22|Normal] Evidence: Step2 A55:A62; registry-data.ts.
+[p23|Normal] M03 | Individual model access becomes narrower
+[p24|Normal] The individual workbook exposes three models only. Current applicability includes individual participation in strategic alliance, resource/equipment sharing and other relationships. Confirm creation permissions separately from response/participation permissions.
+[p25|Normal] Evidence: Individual Step2; applicability-data.ts.
+[p26|Heading 1] 2. Steps 1 and 2: identity, routing and geography
+[p27|Normal] F01 | Five stages and existing actions are aligned
+[p28|Normal] Opportunity, Collaboration, Scope & Work, Commercial Structure and Review & Publish already exist. Drafts, autosave status, error navigation, read-only summaries and publish matching have current counterparts. Their revised layout is an enhancement of current capabilities.
+[p29|Normal] Evidence: Both Workflow Map sheets; current create/steps components and opportunity-form-footer.tsx.
+[p30|Normal] F02 | Company Need/Offer rules contradict the model forms
+[p31|Normal] Step 1 permits Need, Offer and Need & Offer. Company JV, Co-ownership, Sharing, Exchange, Bulk Purchasing, Task-based, Hiring and Mentorship forms require both sides. Individual forms activate the selected side. Define per model whether a post is single-sided, compulsorily bilateral, or represents contribution plus requirements.
+[p32|Normal] Evidence: Company Step1-Details A19:A23; model specification introductions; Individual model introductions.
+[p33|Normal] F03 | Guided routing is a new interface behavior
+[p34|Normal] Routing questions and suggested cards with manual override are not in the inspected CollaborationStep, which currently offers main-model and submodel cards. Add routing as UI logic only after approving the mapping. Clear or reconcile obsolete answers when users override the suggestion.
+[p35|Normal] Evidence: Company Step2 A11:A64; collaboration-step.tsx.
+[p36|Normal] F04 | Global country lists do not complete global matching
+[p37|Normal] Cities contains 198 country rows; Step1-Details claims 195. Stable country/city IDs, aliases, Other-city handling, multi-country selections and coverage expansion need a shared reference model. Region options such as Europe or International must not be treated as city-bearing countries. GeoNames is recommended in the spec, not an already-approved integration.
+[p38|Normal] Evidence: Cities A2:A199; Step1-Details A48:A93; company country/preference fields.
+[p39|Normal] F05 | Resolve multiple location meanings
+[p40|Normal] Primary opportunity location, asset/project/service location, delivery location and preferred partner location are distinct. Define which enters Location Fit and how remote/hybrid/global coverage applies. The current adapter derives one location plus expanded coverage scopes; it does not specify the proposed per-field precedence.
+[p41|Normal] Evidence: S1-F03:F05; Step 3 location fields; opportunity-post-adapter.ts.
+[p42|Normal] F06 | Duration bands need precise timeline semantics
+[p43|Normal] Immediate, Within 1 month, Flexible, To be agreed and 12+ months do not identify one exact date interval. Define start versus engagement duration, latest start, deadline and end date. Preserve inclusive boundary overlap and the current rule that missing/incomplete timelines score zero. Do not silently invent end dates.
+[p44|Normal] Evidence: Both Step1-Details A100:A104; handover sections 3 and 5.
+[p45|Normal] F07 | Field limits and authority need confirmation
+[p46|Normal] 100-character titles and 300-character short descriptions require a truncation/legacy-data policy. PMTwin vetted is listed among selectable credentials, but actual vetted status must derive from the platform. Declare self-reported credentials separately from verified evidence.
+[p47|Normal] Evidence: S1-F01/F02; Step 3 credential lists.
+[p48|Heading 1] 3. Step 3: model-specific data and relationship rules
+[p49|Normal] D01 | Capture attributes separately for each side
+[p50|Normal] Offer and Need use different categories, values, currencies, locations and availability. Current collaborationAttributes and normalized skills/services need explicit per-side mapping. Writing new dropdowns into one shared attribute bag risks overwriting or treating offered capacity as requirements.
+[p51|Normal] Evidence: All Step 3 forms; opportunity-wizard-readiness.ts; opportunity-post-adapter.ts.
+[p52|Normal] D02 | Co-ownership requires a dedicated domain mapping
+[p53|Normal] Ownership share offered/sought, contribution, entity, co-owner count and exit provisions go beyond changing a label. Define whether a card maps to an existing JV/SPV or creates a new submodel. Ownership ranges are indicative; enforce exact allocation and total limits only at the appropriate agreement stage.
+[p54|Normal] Evidence: Step3-Cownr S3-CO-O05/O06/O09; N05/N06/N11.
+[p55|Normal] D03 | Pool discovery is not a pool operations module
+[p56|Normal] Sharing pools and buying pools define minimum/maximum members, governance, quantities and contributions. Specify participant counting, min <= max, allocation of scarce capacity, compatible units and group score. Booking, pooled procurement execution and settlement are additional CRs only if required; dropdown values alone do not request those modules.
+[p57|Normal] Evidence: Step3-Sharing pooling variant; Step3-BP N06/N12/N13; registry-data.ts.
+[p58|Normal] D04 | Resource exchange and top-up need direction
+[p59|Normal] Define owned-resource eligibility, resource condition, swap duration, pay-versus-receive cash direction and consistency of top-up terms between the two sides. Existing barter/circular capabilities can be reused, but separate taxonomy and fields must be normalized.
+[p60|Normal] Evidence: Step3-Exchange O09/N08; S4 barter structure.
+[p61|Normal] D05 | Hiring needs actor-aware semantics
+[p62|Normal] The company Hiring form says a company offers compensation, but its Offer fields ask professional discipline, years of experience and visa status. The individual Need seeks an engagement rather than a worker. Two Needs must not match just because both say Hiring. Distinguish employer/client demand from professional expertise and job preferences.
+[p63|Normal] Evidence: Step3-Hiring A5 and Offer fields; Individual Step3-ind-hiring; applicability-data.ts.
+[p64|Normal] D06 | Target relationships differ from the current registry
+[p65|Normal] Proposed Hiring allows Companies only / Individuals only / Both; professional_hiring currently supports B2P/P2B and consultant_hiring B2B/B2P/P2B. Proposed company Mentorship includes B2B, while its current applicability lists P2P/B2P/P2B. Each extension requires explicit eligibility decisions.
+[p66|Normal] Evidence: Company Hiring N00; company Mentorship A5/N00; applicability-data.ts.
+[p67|Normal] D07 | Mentorship learning outcomes must stay distinct
+[p68|Normal] The workbook restricts mentorship to capability building and directs work-product engagements to Task-based. Define learning outcomes and optional milestones without conflating them with structured work deliverables or changing existing records automatically.
+[p69|Normal] Evidence: Step8-Mentorship A5/A121:A123; Individual Step3-ind-mentor A5 and wireframe B59.
+[p70|Normal] D08 | Dropdown relationships require canonical IDs
+[p71|Normal] Use shared category/specialisation IDs across company and individual forms, with per-selection children for multi-select parents. Normalize Arabic & English to two language IDs; define None exclusivity, Other text validation and range boundaries. Required language/credential/experience must have explicit hard-filter versus preference semantics.
+[p72|Normal] Evidence: Step 1/3 Lists; JV O01 multi-select versus O02 single dropdown; language/credential lists.
+[p73|Heading 1] 4. Commercial structure: confirmed differences
+[p74|Normal] Revenue Sharing is already a commercial component, and Hybrid is derived in the current implementation. Showing six component choices does not require adding a sixth exchangeMode. The proposed compatibility changes are the material issue.
+[p75|Normal] C01 | Edge cases are enabled business rules
+[p76|Normal] The workbook treats the circle symbol as selectable and informational, never blocking. It therefore enables a commercial mechanism rather than merely describing it. Approve the full matrix by model and actor type, including intentional restrictions.
+[p77|Normal] Evidence: Step 4-Lists F6:L13; Step 4-Wireframe E15; individual F6:L8; allowed-components.ts.
+[p78|Normal] C02 | Custom changes meaning and has an internal contradiction
+[p79|Normal] The text says Custom activates compatible mechanisms, has no free-text field and makes no section individually required. Current code has a distinct custom component. Workbook M18/M19 activate Cash/Barter under Custom and M24/M25 then require their fields. Decide explicit enabled components, Custom detail, and publish validation.
+[p80|Normal] Evidence: Commercial STR A142:A144; Step 4-Wireframe M18:M25; current commercial component handling.
+[p81|Normal] C03 | Indicative commercial fields cannot replace binding deal terms
+[p82|Normal] The sheet makes profit/revenue/equity fields optional and uses percentage bands or To be agreed. Preserve indicative opportunity terms separately from exact negotiated terms, calculation bases, settlement and governance. Reuse commercial-to-negotiation/agreement adapters; do not discard current detail.
+[p83|Normal] Evidence: Commercial STR A107:A136; handover commercial/UAT rules; current commercial validation.
+[p84|Normal] C04 | Barter ratio is currently unsafe as a cross-currency figure
+[p85|Normal] The prototype divides a numeric offer value by a USD midpoint of a Need band, with no currency conversion. It mixes monthly bands and project totals, assigns arbitrary midpoints to open-ended bands, and treats zero as uncalculable despite Free/goodwill. Restrict to comparable currency/unit/period or define conversion and uncertainty. The 0.85-1.15 label is informational, not a new matching score.
+[p86|Normal] Evidence: Step 4-Lists AP6:AQ40 and AT9:AT11; Step 4-Wireframe C35.
+[p87|Heading 1] 5. Matching, readiness and post-publish impact
+[p88|Normal] E01 | Fields and dropdowns are not a complete matching specification
+[p89|Normal] Each proposed field needs: canonical path, type, side, applicability, required-on-publish rule, filter/score/display role, normalization, comparison formula, missing-data treatment and explanation. Categories remain a soft factor unless a new rule is approved. New dropdowns must not accidentally become hard filters.
+[p90|Normal] Evidence: All workbook attribute tables; handover sections 3-5; matching defaults/hard constraints.
+[p91|Normal] E02 | Need & Offer does not prove a match topology
+[p92|Normal] The company Step 2 prototype upgrades Resource Exchange to Type 4 when both sides are posted. A circular match still requires an actual compatible chain. Group matches need real role/member coverage and consent. Current task_based registry allows one_way, while the proposal presents two-way. Treat displayed type as eligibility, not a guaranteed discovery or higher score.
+[p93|Normal] Evidence: Company Step 2-Lists P6:R13; Step 2-Wireframe C25; registry-data.ts; detect-model.ts.
+[p94|Normal] E03 | Individual topology restrictions are an intentional policy change
+[p95|Normal] The individual workbook limits the path to Type 1/2 and removes pooling/chain variants. This is separate from offering only three model cards and may restrict current mixed or multi-party relationships. Confirm whether it applies to posting, participation, or both.
+[p96|Normal] Evidence: Individual Step2 A54:A55; Step 2-Lists R6:R8; current applicability.
+[p97|Normal] E04 | Readiness differs from matching score and from current readiness
+[p98|Normal] The sheet uses 60% base +15% dual declaration +10% deliverables +5% milestones +5% value +5% coverage. Current readiness engine uses requiredRatio*80 + recommendedRatio*20 and publishReady requires all core-required fields and score >=80. The proposed publish gate uses required fields across Steps 1-4, regardless of optional bonuses. Specify the intended change and fairness for single-sided/model-specific posts.
+[p99|Normal] Evidence: Step 5-Lists E6:F11; Step 5-Wireframe J20:J27; readiness-engine.ts; opportunity-wizard-readiness.ts.
+[p100|Normal] E05 | Keep established matching weights unless expressly revised
+[p101|Normal] Current weights: Skill 25%, Exchange 20%, Value 20%, Budget 10%, Timeline 10%, Location 10%, Reputation 5%; matching threshold 50%. The workbooks do not specify replacement match-score weights. Readiness bonuses must not be copied into these weights.
+[p102|Normal] Evidence: packages/matching/src/config/defaults.ts; Step5 A79:A93.
+[p103|Normal] E06 | Re-evaluation and history remain required
+[p104|Normal] New matching attributes must enter the matching fingerprint only when relevant, with unordered sets canonicalized. Preserve self-match exclusion, published-only discovery and existing expired/superseded history. Do not silently alter Accepted, Confirmed or Negotiation behavior.
+[p105|Normal] Evidence: Handover sections 6-8 and 18; new model/attribute mapping.
+[p106|Normal] E07 | Scheduled publishing needs operational scope
+[p107|Normal] Schedule publish is explicit in both Step5 sheets, but no schedule implementation appears in the inspected current create footer/review components or repository paths. If not previously scoped, propose a separate CR for timezone, cancel/edit, server revalidation, authorization, idempotent publish and match triggering at execution time. It depends on real backend persistence/workers.
+[p108|Normal] Evidence: Step5 S5-F13; current opportunity-form-footer.tsx/review-publish-step.tsx; inspected tree. Not a whole-code absence proof.
+[p109|Heading 1] 6. Workbook inconsistencies and missing decisions
+[p110|Normal] Q01 | Live matrix and suggested revision conflict
+[p111|Normal] Company Step 4 has separate matrices. Suggested changes are Co-ownership Barter hidden -> edge case, Bulk Purchasing Barter hidden -> edge case, Mentorship Equity valid -> edge case. Only live matrix is wired. The individual file retains the same company-related note at N15 although those models are absent.
+[p112|Normal] Evidence: Step 4-Lists F6:L13 versus N6:T13; N15 in both files.
+[p113|Normal] Q02 | Same conceptual field has different IDs in duplicate specs
+[p114|Normal] Companyflow contains additional individual specifications alongside the separate Individual workbook. For example company Step8-Mentorship-Ind maps O01 to domain; Individual Step3-ind-mentor maps O00 to intent and O01 to domain with later IDs shifted. Establish one authoritative schema version and a mapping for duplicates.
+[p115|Normal] Evidence: Company Step8-Mentorship-Ind; Individual Step3-ind-mentor; Step3-TaskBColl-Ind.
+[p116|Normal] Q03 | Conditional trigger values do not always exist in their dropdown
+[p117|Normal] Company Mentorship N00 offers Companies only / Individual professionals only / Both, but the text triggers extra fields on Include individual professionals. Task-based wording also differs between company and individual sheets. Use ID-based conditions for individual-only or both.
+[p118|Normal] Evidence: Step8-Mentorship A71; Step3-TaskBColl A75; Individual task spec A77.
+[p119|Normal] Q04 | Geographic datasets and terminology need cleanup
+[p120|Normal] The sheet claims a full ISO/195-country list while Cities has 198 country rows. City lists mix cities, regions and development zones. SPV / Special Purpose Vehicle may be interpreted as duplicate options. Use stable identifiers, approved labels, aliases and hierarchy instead of exact free-text matching.
+[p121|Normal] Evidence: Cities; Step1-Details A48/A60; Co-ownership entity structure lists.
+[p122|Normal] Q05 | Prototype gates are not server validation
+[p123|Normal] COUNTA-style completeness checks can accept text without checking numeric/date validity or conditional consistency. Publish must validate Other text, positive quantities, range order, country-city relation, min/max pool, deadline order and commercial combination on the server. No stored error cells or missing quoted-sheet references were found; this is not proof that every formula is correct.
+[p124|Normal] Evidence: Model wireframe gates; Step 4 gate; structural workbook inspection.
+[p125|Normal] Q06 | The reference data is not training or historical outcomes
+[p126|Normal] Lists are vocabularies and field options, not labeled successful/unsuccessful matches. They support structured rule-based matching; they do not establish a trained AI model, quality target or evaluation dataset. Request representative input pairs/groups and expected outcomes before tuning.
+[p127|Normal] Evidence: Step 1/3/4 Lists; both workbook contents.
+[p128|Normal] Q07 | Visibility and confidentiality require a display contract
+[p129|Normal] Step1 says all posts are visible only to vetted subscribing members; Step5 says the review is exactly what potential matches see. Current commercial presentation redacts monetary details for marketplace audiences. Confirm browse/view/respond access and which financial or personal fields are public, members-only or participant-only.
+[p130|Normal] Evidence: Step1-Details A112; Step5 A3; commercial-structure/visibility.ts.
+[p131|Normal] Q08 | Existing UAT decisions are still outstanding
+[p132|Normal] ISS-13 concerns a paymentSchedule on a Cash negotiation offer, not simply the Step 4 opportunity payment timing. ISS-14 concerns agreement completion while a contract is active. Neither is resolved by these pre-publish spreadsheets. Keep Naira decisions independent of Walid wireframe approval.
+[p133|Normal] Evidence: Handover sections 14-17.
+[p134|Heading 1] 7. Proposed CR packages and implementation order
+[p135|Normal] CR-07 contains two distinct features and should be split into separate estimates if both are requested. Step1-Details A23 explicitly proposes linking separate posts via barter when their models differ. Current model mismatch is hard incompatible; a link need not permit cross-model matching unless the customer explicitly intends that change.
+[p136|Heading 2] Implementation sequence
+[p137|List Number] Approve a versioned comparison matrix: keep/change/new, with SOW references and named decision owners.
+[p138|List Number] Freeze model mapping, actor relationships, single/both-side rules and commercial matrix before changing forms.
+[p139|List Number] Create a field dictionary and migration mapping, preserving legacy model identities and active deal history.
+[p140|List Number] Implement a thin company/individual slice end to end: save, reload, publish, match explanation and agreement carry-forward.
+[p141|List Number] Verify company-company, company-individual and individual-individual paths; include reciprocal hiring semantics, incompatible submodels, global coverage, missing dates and cross-currency cases.
+[p142|List Number] Run regression for all retained 13 submodels, equity/profit/custom flows, group/circular discovery, archived/republished opportunities and existing UAT decisions.
+[p143|List Number] Separate backend production readiness from wireframe CRs; no estimate is credible until persistence, authorization and worker boundaries are accounted for.
+[p144|Heading 2] Minimum client walkthrough questions
+[p145|Normal] Which approved baseline is superseded? Are eight/three models final? What happens to absent submodels and existing records? Which fields are hard conditions versus preferences? Are single-sided company posts legal? Which matrix/version is final? Does Custom require any sections? Which markets/currencies are in release one? Do groups/circular paths apply to individuals? Is scheduled publish in scope? Does linked barter bypass model mismatch? Which fields may counterparties see?
+[p146|Heading 2] Review status
+[p147|Normal] Review completed with documented technical findings and proposed CR groupings. No implementation, commit, push, deployment, AWS mutation or modification of the original workbooks was performed. Contractual CR approval and new product rules remain customer decisions.
+[p148|Heading 1] 8. Evidence index
+[p149|Normal] Workbook references above use sheet names and field IDs. Company and Individual refer to the two attached PMTwin Matching Wireframes-10Aug2026 workbooks. Source reads were pinned to the same repository revision.
+[p150|Normal] Collaboration taxonomy and topology eligibility
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/collaboration-models/src/registry/registry-data.ts
+[p151|Normal] Party relationships and ownership policy
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/collaboration-models/src/registry/applicability-data.ts
+[p152|Normal] Current collaboration interface
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/components/opportunities/create/steps/collaboration-step.tsx
+[p153|Normal] Current basic opportunity interface
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/components/opportunities/create/steps/opportunity-step.tsx
+[p154|Normal] Commercial component filtering
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/domain/opportunity-commercial-structure/allowed-components.ts
+[p155|Normal] Commercial draft validation
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/domain/opportunity-commercial-structure/validation.ts
+[p156|Normal] Commercial confidentiality
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/domain/opportunity-commercial-structure/visibility.ts
+[p157|Normal] Canonical readiness formula and gate
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/collaboration-models/src/readiness/readiness-engine.ts
+[p158|Normal] Wizard readiness mapping
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/domain/opportunity-readiness/opportunity-wizard-readiness.ts
+[p159|Normal] Matching configuration
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/matching/src/config/defaults.ts
+[p160|Normal] Matching topology routing
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/matching/src/routing/detect-model.ts
+[p161|Normal] Matching role and skill hard constraints
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/packages/matching/src/constraints/hard-constraints.ts
+[p162|Normal] Web opportunity to matching adapter
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/services/matching/opportunity-post-adapter.ts
+[p163|Normal] Review summaries and structured counts
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/components/opportunities/create/steps/review-publish-step.tsx
+[p164|Normal] Wizard actions
+https://github.com/Just2Pay-Fintech/PMtwin/blob/d113b3b9a4da198d7c2f872d465b805730e1ce55/web/src/components/opportunities/create/opportunity-form-footer.tsx
+[p165|Normal] Additional baseline: PM-Twin_Project_Master_Context_Handover.docx, sections 2-8, 11-18. Its earlier test/UAT claims were treated as supplied historical evidence and were not re-run in this review.
+
+## TABLES
+
+
+### TABLE 1 rows=5 cols=2
+
+R1: Class || Meaning
+R2: Aligned / existing || Present in the handover or inspected implementation; verify exact field parity before declaring completion.
+R3: Core adjustment || Changes to a current capability, data mapping, validation or matching rule. Core impact can still require a CR.
+R4: CR candidate || New behavior or material replacement of a baseline; estimate after customer confirmation and SOW review.
+R5: Clarification / workbook correction || Resolve contradictory specifications before implementation; not automatically a paid CR.
+
+### TABLE 2 rows=9 cols=3
+
+R1: Proposed card || Current counterpart || Impact
+R2: JV || consortium, project_jv, spv, strategic_jv || Existing family; flattening loses distinct legal/commercial/topology rules unless retained internally.
+R3: Co-ownership || equipment_sharing covers shared asset use/ownership; JV/SPV cover some equity structures || No dedicated co-ownership key. Real estate, company stakes and exit provisions are a material extension.
+R4: Resource Sharing || equipment_sharing, resource_sharing || Existing capability with new sharing/pooling variants and pool constraints.
+R5: Resource Exchange || resource_sharing; equipment_sharing || Existing exchange behavior, but no separate resource_exchange key. Splitting requires mapping/migration.
+R6: Bulk Purchasing || bulk_purchasing || Existing submodel; richer product, quantity, delivery and pool fields.
+R7: Task-based Collaboration || task_based; service_exchange in adjacent use cases || Existing task model; bilateral offers and broader compensation need explicit mapping.
+R8: Hiring || professional_hiring, consultant_hiring || Do not merge employment and consulting validation/commercial rules without a decision.
+R9: Mentorship || mentorship || Existing model; expanded domains and compensation/relationship eligibility differ.
+
+### TABLE 3 rows=7 cols=3
+
+R1: Area || Current baseline || Workbook difference
+R2: JV || Rules differ for Consortium, Project JV, SPV and Strategic JV || One JV row allows Cash and edge-case Barter. Cash must not leak to Strategic JV/SPV.
+R3: Task-based || Cash, Barter, Revenue Sharing, Custom || Adds Profit Sharing and Equity as edge cases.
+R4: Resource Sharing || Cash, Barter, Revenue Sharing, Custom || Adds Profit Sharing and Equity as edge cases.
+R5: Bulk Purchasing || Cash, Revenue Sharing, Custom || Adds Profit Sharing; suggested matrix also adds Barter.
+R6: Hiring || Professional and Consultant have different Barter eligibility || Merged row offers Barter, Profit Sharing and Equity as edge cases.
+R7: Mentorship || Cash, Barter, Revenue Sharing, Custom || Company adds Profit Sharing/Equity; individual removes Profit/Revenue Sharing and allows Equity.
+
+### TABLE 4 rows=8 cols=3
+
+R1: Package || Proposed classification || Core touchpoints
+R2: CR-01 Guided 8/3-model wizard || UI enhancement; taxonomy replacement is a separate core decision || Collaboration registry, applicability, field forms, validation, stored model mapping.
+R3: CR-02 Co-ownership and pool details || Material capability/data extension || Ownership/share/exit model, resource/pool attributes, group constraints; no assumed booking/settlement module.
+R4: CR-03 Matching normalization and topology rules || Core change where proposed rules differ || Per-side adapters, role semantics, canonical taxonomy, timelines, quantities, currencies, fingerprint and explanations.
+R5: CR-04 Commercial matrix and Custom semantics || Core change || Allowed components, opportunity validation, commercial serialization, negotiation/agreement adapters.
+R6: CR-05 Global taxonomy and access policy || Data expansion; scope depends on approved markets/policies || Location coverage, country-city IDs, optional GeoNames integration, permissions and confidentiality.
+R7: CR-06 New readiness formula || Core validation/UX change || Readiness evaluator, publish gate, recommendations, model-specific fairness.
+R8: CR-07 Scheduled publishing / linked barter posts || Separate feature candidates || Backend scheduler and linked-post relations; cross-model matching policy and lifecycle.

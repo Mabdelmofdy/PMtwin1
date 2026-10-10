@@ -1,0 +1,157 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Workflow Map
+state=visible dims=A1:J53 max_row=53 max_col=10
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+B3	s	Workflow Map  ·  Individual professional
+B4	s	Live overview of all five steps, the three individual Step 3 model forms, and the exchange-mechanism matrix.
+B6	s	SECTION 1  —  THE FIVE STEPS  (live status)
+B7	s	Step
+C7	s	Screen
+D7	s	Wireframe sheet
+E7	s	Readiness
+F7	s	Gate
+B8	s	① Step 1
+C8	s	Opportunity basics
+D8	s	Step 1-Wireframe
+E8	f	='Step 1-Wireframe'!$L$15
+F8	f	=IF('Step 1-Wireframe'!$L$17="YES","✓ Pass","● Open")
+B9	s	② Step 2
+C9	s	Collaboration model
+D9	s	Step 2-Wireframe
+E9	f	='Step 2-Wireframe'!$L$17
+F9	f	=IF('Step 2-Wireframe'!$L$19="YES","✓ Pass","● Open")
+B10	s	③ Step 3
+C10	s	Scope & work — 3 model forms
+D10	s	see Section 2
+E10	f	=IF('Step 5-Lists'!$Z$10="",0,'Step 5-Lists'!$Z$10)
+F10	f	=IF(IF('Step 5-Lists'!$Z$9="","NO",'Step 5-Lists'!$Z$9)="YES","✓ Pass","● Open")
+B11	s	④ Step 4
+C11	s	Commercial structure
+D11	s	Step 4-Wireframe
+E11	f	='Step 4-Wireframe'!$M$26
+F11	f	=IF('Step 4-Wireframe'!$M$27="YES","✓ Pass","● Open")
+B12	s	⑤ Step 5
+C12	s	Review & publish
+D12	s	Step 5-Wireframe
+E12	f	='Step 5-Wireframe'!$J$26
+F12	f	=IF('Step 5-Wireframe'!$J$27="YES","✓ Pass","● Open")
+B14	s	SECTION 2  —  STEP 3 MODEL FORMS  (the active one is highlighted)
+B15	s	No.
+C15	s	Collaboration model
+D15	s	Wireframe sheet
+E15	s	Lists sheet
+F15	s	Active
+B16	n	1
+C16	s	Task-based Collaboration
+D16	s	Step 3-TB-Wireframe
+E16	s	Step 3-TB-Lists
+F16	f	=IF('Step 2-Wireframe'!$C$18=$C16,"◆ ACTIVE","—")
+B17	n	2
+C17	s	Hiring
+D17	s	Step 3-HI-Wireframe
+E17	s	Step 3-HI-Lists
+F17	f	=IF('Step 2-Wireframe'!$C$18=$C17,"◆ ACTIVE","—")
+B18	n	3
+C18	s	Mentorship
+D18	s	Step 3-ME-Wireframe
+E18	s	Step 3-ME-Lists
+F18	f	=IF('Step 2-Wireframe'!$C$18=$C18,"◆ ACTIVE","—")
+B20	s	SECTION 3  —  EXCHANGE MECHANISM MATRIX  (live — the row for the active model is highlighted)
+B21	s	Collaboration model
+C21	s	Cash
+D21	s	Barter
+E21	s	Profit Sharing
+F21	s	Revenue Sharing
+G21	s	Equity
+H21	s	Custom
+B22	f	='Step 4-Lists'!$F$6
+C22	f	='Step 4-Lists'!$G$6
+D22	f	='Step 4-Lists'!$H$6
+E22	f	='Step 4-Lists'!$I$6
+F22	f	='Step 4-Lists'!$J$6
+G22	f	='Step 4-Lists'!$K$6
+H22	f	='Step 4-Lists'!$L$6
+B23	f	='Step 4-Lists'!$F$7
+C23	f	='Step 4-Lists'!$G$7
+D23	f	='Step 4-Lists'!$H$7
+E23	f	='Step 4-Lists'!$I$7
+F23	f	='Step 4-Lists'!$J$7
+G23	f	='Step 4-Lists'!$K$7
+H23	f	='Step 4-Lists'!$L$7
+B24	f	='Step 4-Lists'!$F$8
+C24	f	='Step 4-Lists'!$G$8
+D24	f	='Step 4-Lists'!$H$8
+E24	f	='Step 4-Lists'!$I$8
+F24	f	='Step 4-Lists'!$J$8
+G24	f	='Step 4-Lists'!$K$8
+H24	f	='Step 4-Lists'!$L$8
+B26	s	✓ shown & valid   ·   ○ shown, flagged as an edge case   ·   ✗ hidden entirely.  Edit the live matrix on Step 4-Lists F6:L13; my suggested revision sits alongside it in N6:T13.
+B28	s	SECTION 4  —  CROSS-STEP DEPENDENCIES
+B29	s	From
+C29	s	To
+D29	s	What flows
+E29	s	Live value
+B30	s	Step 1 · S1-F00 post type
+C30	s	Step 2 · S2-F05
+D30	s	"Need & Offer" upgrades the matching structure
+E30	f	=IF('Step 1-Wireframe'!$C$12="","—",'Step 1-Wireframe'!$C$12)
+B31	s	Step 1 · S1-F03 / F04 location
+C31	s	Step 2 + Step 3
+D31	s	Carried forward; all city lists come from the shared Cities sheet
+E31	f	=IF('Step 1-Wireframe'!$C$22="","—",'Step 1-Wireframe'!$C$24&", "&'Step 1-Wireframe'!$C$22)
+B32	s	Step 2 · S2-F01 / F02 routing
+C32	s	Step 2 · S2-F03
+D32	s	Routing answer suggests the collaboration model
+E32	f	=IF('Step 2-Wireframe'!$C$14="—","—",'Step 2-Wireframe'!$C$14)
+B33	s	Step 2 · S2-F03 model
+C33	s	Step 3
+D33	s	Decides which of the 3 model forms activates
+E33	f	=IF('Step 2-Wireframe'!$C$18="","—",'Step 2-Wireframe'!$C$18)
+B34	s	Step 2 · S2-F03 model
+C34	s	Step 4 · S4-F01
+D34	s	Filters which exchange mechanisms are shown
+E34	f	=IF('Step 4-Lists'!$AT$12=0,"—",'Step 4-Lists'!$AT$12&" of 6 available")
+B35	s	Step 3 · need value
+C35	s	Step 4 · S4-F09b
+D35	s	Feeds the barter balance ratio
+E35	f	=IF('Step 4-Lists'!$AT$8="","—",'Step 4-Lists'!$AT$8)
+B36	s	Steps 1–4 gates
+C36	s	Step 5 · publish
+D36	s	Every gate must pass before publishing unlocks
+E36	f	=IF('Step 5-Wireframe'!$J$17=0,"Clear to publish",'Step 5-Wireframe'!$J$17&" step(s) blocking")
+B37	s	Step 3 summary feeds
+C37	s	Step 5 · Sections B & C
+D37	s	Each model sheet exposes a fixed feed at P2:Q15
+E37	f	=IF('Step 5-Lists'!$Z$8="","— no model active","Reading feed from "&'Step 5-Lists'!$Q$6)
+B39	s	SECTION 5  —  SHEET INDEX
+B40	s	Sheet
+C40	s	Role
+D40	s	Notes
+B41	s	Cities
+C41	s	Shared reference — 198 countries
+D41	s	Step-agnostic. Gulf + Egypt detailed; elsewhere top 5 + nationwide + Other. Every city dropdown in every step reads this.
+B42	s	Step 1-Lists / Step 1-Wireframe
+C42	s	Step 1 — opportunity basics
+D42	s	Post type, title, description, location, coverage picker, timeline.
+B43	s	Step 2-Lists / Step 2-Wireframe
+C43	s	Step 2 — collaboration model
+D43	s	Routing questions, 3 model cards, matching structure derivation.
+B44	s	Step 3-[MODEL]-Lists / -Wireframe
+C44	s	Step 3 — 3 model forms
+D44	s	6 sheets. Each has a Step 5 summary feed at P2:Q15.
+B45	s	Step 4-Lists / Step 4-Wireframe
+C45	s	Step 4 — commercial structure
+D45	s	Live compatibility matrix + suggested revision; barter balance calculator.
+B46	s	Step 5-Lists / Step 5-Wireframe
+C46	s	Step 5 — review & publish
+D46	s	Feed grid for all 3 models; readiness scoring weights.
+B47	s	Workflow Map
+C47	s	This sheet
+D47	s	Live overview. No inputs — everything here is derived.
+B48	s	Step1-Details … Step5
+C48	s	Your original specs
+D48	s	Untouched source documents. Not wired into anything.

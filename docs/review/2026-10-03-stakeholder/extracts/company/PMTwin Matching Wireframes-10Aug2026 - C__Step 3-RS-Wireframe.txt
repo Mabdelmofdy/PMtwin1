@@ -1,0 +1,443 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-RS-Wireframe
+state=visible dims=A1:Q128 max_row=128 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=C29 type=whole formula1=0 formula2=1000000 allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Resource Sharing"
+B3	s	Scope & Work — Resource Sharing
+P3	s	Gate
+Q3	f	=$L$28
+B4	s	Define the resource you are sharing or pooling and what you seek in return.
+P4	s	Readiness
+Q4	f	=$L$23
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Resource Sharing        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=IF($L$15="A",$C$17,IF($L$15="B",$C$54,""))
+P6	s	Offer category
+Q6	f	=IF($L$15="A",$C$18,IF($L$15="B",$C$55,""))
+B7	s	STEP 3 OF 5  —  MODEL 3: RESOURCE SHARING
+D7	f	=TEXT($L$23,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$23*24,0))&REPT("░",24-ROUND($L$23*24,0))
+P7	s	Offer sub-category
+Q7	f	=IF($L$15="A",$C$20,IF($L$15="B",$C$57,""))
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = Resource Sharing.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=""
+P9	s	Need intent
+Q9	f	=IF($L$15="A",$C$36,IF($L$15="B",$C$71,""))
+B10	s	SECTION 0  —  DIFFERENTIATING QUESTION  ·  ANSWER THIS FIRST
+G10	s	RESOURCE TAXONOMY  —  TYPES & SUB-TYPES
+P10	s	Need category
+Q10	f	=IF($L$15="A",$C$37,IF($L$15="B",$C$72,""))
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Resource type
+H11	s	Sub-types
+I11	s	First sub-options
+P11	s	Need sub-category
+Q11	f	=IF($L$15="A",$C$39,IF($L$15="B",$C$74,""))
+B12	s	S3-RS-Q01 · How does this resource arrangement work? *
+D12	f	=IF($C$12="","● Required","✓ Complete")
+E12	s	Single select. This answer decides which variant loads — everything below is gated on it.
+G12	f	='Step 3-RS-Lists'!$H$6
+H12	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G12)
+I12	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126058DD0>
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=""
+B13	s	»  Variant loaded (derived)
+C13	f	=IF($C$12="","—",IFERROR(INDEX('Step 3-RS-Lists'!$E$6:$E$7,MATCH($C$12,'Step 3-RS-Lists'!$D$6:$D$7,0)),"—"))
+D13	f	=IF($C$12="","— Waiting","◆ Auto-set")
+E13	s	Read-only. Variant A = Sharing (one owner, others use). Variant B = Pooling (multiple contributors).
+G13	f	='Step 3-RS-Lists'!$H$7
+H13	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G13)
+I13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605AAB0>
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=""
+G14	f	='Step 3-RS-Lists'!$H$8
+H14	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G14)
+I14	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126058680>
+K14	s	This form active (Resource Sharing)
+L14	f	=IF($L$13="Resource Sharing","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$92:$C$93)
+B15	s	SECTION A  —  VARIANT A · SHARING  ·  OFFER SIDE — THE RESOURCE YOU ARE MAKING AVAILABLE
+G15	f	='Step 3-RS-Lists'!$H$9
+H15	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G15)
+I15	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126033E90>
+K15	s	Active variant
+L15	f	=IF($C$12='Step 3-RS-Lists'!$D$6,"A",IF($C$12='Step 3-RS-Lists'!$D$7,"B",""))
+P15	s	Milestones
+Q15	f	=COUNTA($C$98,$C$100,$C$102)
+B16	s	Field
+C16	s	Your input
+D16	s	Status
+E16	s	Hint / validation rule
+G16	f	='Step 3-RS-Lists'!$H$10
+H16	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G16)
+I16	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FC59D0>
+K16	s	Q01 answered
+L16	f	=IF($C$12="","NO","YES")
+B17	s	S3-RS-O00 · Collaboration intent *
+D17	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C17="","● Required","✓ Complete"))
+E17	s	Dropdown. Making a resource available, exiting an arrangement, or open to discussion.
+G17	f	='Step 3-RS-Lists'!$H$11
+H17	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G17)
+I17	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FEA0C0>
+K17	s	Offer — completed
+L17	f	=IF($L$15="A",IF($C17<>"",1,0)+IF($C18<>"",1,0)+IF($C20<>"",1,0)+IF($C23<>"",1,0)+IF($C25<>"",1,0)+IF($C27<>"",1,0)+IF($C28<>"",1,0),IF($L$15="B",IF($C54<>"",1,0)+IF($C55<>"",1,0)+IF($C57<>"",1,0)+IF($C60<>"",1,0)+IF($C62<>"",1,0)+IF($C64<>"",1,0)+IF($C65<>"",1,0),0))
+B18	s	S3-RS-O01 · Resource type *
+D18	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C18="","● Required","✓ Complete"))
+E18	s	Dropdown. Space, heavy equipment, fleet, human capacity, technology, materials.
+G18	f	='Step 3-RS-Lists'!$H$12
+H18	f	=COUNTIF('Step 3-RS-Lists'!$AQ$6:$AQ$70,$G18)
+I18	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260B9190>
+K18	s	Need — completed
+L18	f	=IF($L$15="A",IF($C36<>"",1,0)+IF($C37<>"",1,0)+IF($C39<>"",1,0)+IF($C42<>"",1,0)+IF($C47<>"",1,0)+IF($C48<>"",1,0),IF($L$15="B",IF($C71<>"",1,0)+IF($C72<>"",1,0)+IF($C74<>"",1,0)+IF($C76<>"",1,0)+IF($C81<>"",1,0)+IF($C82<>"",1,0)+IF($C83<>"",1,0)+IF($C87<>"",1,0),0))
+B19	s	»  O01 — specify "Other"
+D19	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$18="Other",IF($C19="","● Required","✓ Complete"),"— Hidden"))
+E19	s	Free text. Appears only when O01 = Other.
+K19	s	Offer — total
+L19	f	=IF($L$15="",0,7)
+B20	s	S3-RS-O02 · Resource sub-type *
+D20	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C20="","● Required","✓ Complete"))
+E20	s	Dropdown, filtered to the sub-types of the resource type above.
+K20	s	Need — total
+L20	f	=IF($L$15="A",6,IF($L$15="B",8,0))
+B21	s	»  O02 — specify "Other"
+D21	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$20="Other",IF($C21="","● Required","✓ Complete"),"— Hidden"))
+E21	s	Free text. Appears only when O02 = Other.
+G21	s	VARIANT ROUTER
+K21	s	Required — total
+L21	f	=IF($L$15="",0,$L$19+$L$20+$L$26)
+B22	s	S3-RS-O03 · Resource description
+D22	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C22="","○ Optional","✓ Complete"))
+E22	s	Text area. Optional — specification, make / model, condition notes.
+G22	s	Q01 answer
+H22	s	Variant loaded
+I22	s	Matching structure
+K22	s	Required — completed
+L22	f	=$L$17+$L$18+$L$27
+B23	s	S3-RS-O04 · Resource location — country *
+D23	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C23="","● Required","✓ Complete"))
+E23	s	Full country list from the shared Cities dataset.
+G23	f	='Step 3-RS-Lists'!$D$6
+H23	f	='Step 3-RS-Lists'!$E$6
+I23	f	='Step 3-RS-Lists'!$F$6
+K23	s	Readiness
+L23	f	=IFERROR($L$22/$L$21,0)
+B24	s	»  O04 — specify "Other" country
+D24	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$23="Other (not listed)",IF($C24="","● Required","✓ Complete"),"— Hidden"))
+E24	s	Free text. Appears only when country = Other (not listed).
+G24	f	='Step 3-RS-Lists'!$D$7
+H24	f	='Step 3-RS-Lists'!$E$7
+I24	f	='Step 3-RS-Lists'!$F$7
+K24	s	Step 2 gate
+L24	f	='Step 2-Wireframe'!$L$19
+B25	s	S3-RS-O04a · Resource location — city *
+D25	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$23="","— Locked (select country first)",IF($C$25="","● Required","✓ Complete")))
+E25	s	Required. Populates from the country above.
+K25	s	Group match flag
+L25	f	=IF($L$15="B","YES","NO")
+B26	s	»  O04a — specify "Other" city
+D26	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$25="Other",IF($C26="","● Required","✓ Complete"),"— Hidden"))
+E26	s	Free text. Appears only when city = Other.
+G26	s	Active now
+H26	f	=IF($C$12="","— none selected",$C$13)
+K26	s	Conditional fields — active
+L26	f	=IF($L$15="A",IF($C$18="Other",1,0)+IF($C$20="Other",1,0)+IF($C$23="Other (not listed)",1,0)+IF($C$25="Other",1,0)+IF($C$31="Other",1,0)+IF($C$29<>"",1,0)+IF($C$37="Other",1,0)+IF($C$39="Other",1,0)+IF($C$42="Other (not listed)",1,0)+IF($C$44="Other",1,0)+IF($C$49="Other",1,0),IF($L$15="B",IF($C$55="Other",1,0)+IF($C$57="Other",1,0)+IF($C$60="Other (not listed)",1,0)+IF($C$62="Other",1,0)+IF($C$66="Other",1,0)+IF($C$72="Other",1,0)+IF($C$74="Other",1,0)+IF($C$76="Other (not listed)",1,0)+IF($C$78="Other",1,0)+IF($C$85="Other",1,0)+IF($C$87="Other",1,0),0))
+B27	s	S3-RS-O05 · Availability *
+D27	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C27="","● Required","✓ Complete"))
+E27	s	Dropdown. Full-time through flexible.
+K27	s	Conditional fields — completed
+L27	f	=IF($L$15="A",IF(AND($C$18="Other",$C$19<>""),1,0)+IF(AND($C$20="Other",$C$21<>""),1,0)+IF(AND($C$23="Other (not listed)",$C$24<>""),1,0)+IF(AND($C$25="Other",$C$26<>""),1,0)+IF(AND($C$31="Other",$C$32<>""),1,0)+IF(AND($C$29<>"",$C$30<>""),1,0)+IF(AND($C$37="Other",$C$38<>""),1,0)+IF(AND($C$39="Other",$C$40<>""),1,0)+IF(AND($C$42="Other (not listed)",$C$43<>""),1,0)+IF(AND($C$44="Other",$C$45<>""),1,0)+IF(AND($C$49="Other",$C$50<>""),1,0),IF($L$15="B",IF(AND($C$55="Other",$C$56<>""),1,0)+IF(AND($C$57="Other",$C$58<>""),1,0)+IF(AND($C$60="Other (not listed)",$C$61<>""),1,0)+IF(AND($C$62="Other",$C$63<>""),1,0)+IF(AND($C$66="Other",$C$67<>""),1,0)+IF(AND($C$72="Other",$C$73<>""),1,0)+IF(AND($C$74="Other",$C$75<>""),1,0)+IF(AND($C$76="Other (not listed)",$C$77<>""),1,0)+IF(AND($C$78="Other",$C$79<>""),1,0)+IF(AND($C$85="Other",$C$86<>""),1,0)+IF(AND($C$87="Other",$C$88<>""),1,0),0))
+B28	s	S3-RS-O06 · Availability period *
+D28	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C28="","● Required","✓ Complete"))
+E28	s	Dropdown. Under 1 month through ongoing.
+G28	s	MILESTONE DATE SCOPE
+K28	s	Step 4 gate
+L28	f	=IF(AND($L$16="YES",$L$22=$L$21,$L$21>0,$L$24="YES",$L$14="YES"),"YES","NO")
+B29	s	S3-RS-O07 · Capacity available
+D29	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C29="","○ Optional","✓ Complete"))
+E29	s	Numeric input. Optional — how much of the resource is available.
+G29	s	Month
+I29	s	Year
+B30	s	S3-RS-O07 · Capacity unit
+D30	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$29="","— Locked (enter capacity first)",IF($C$30="","● Required","✓ Complete")))
+E30	s	Unit for the capacity figure above.
+B31	s	S3-RS-O08 · Resource condition
+D31	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C31="","○ Optional","✓ Complete"))
+E31	s	Dropdown. New through requires minor maintenance.
+B32	s	»  O08 — specify "Other"
+D32	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$31="Other",IF($C32="","● Required","✓ Complete"),"— Hidden"))
+E32	s	Free text. Appears only when O08 = Other.
+B34	s	SECTION B  —  VARIANT A · SHARING  ·  NEED SIDE — THE RESOURCE YOU NEED ACCESS TO
+B35	s	Field
+C35	s	Your input
+D35	s	Status
+E35	s	Hint / validation rule
+B36	s	S3-RS-N00 · Collaboration intent *
+D36	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C36="","● Required","✓ Complete"))
+E36	s	Dropdown. Seeking access, exiting an arrangement, or open to discussion.
+B37	s	S3-RS-N01 · Resource type needed *
+D37	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C37="","● Required","✓ Complete"))
+E37	s	Dropdown. Same taxonomy as the Offer side.
+B38	s	»  N01 — specify "Other"
+D38	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$37="Other",IF($C38="","● Required","✓ Complete"),"— Hidden"))
+E38	s	Free text. Appears only when N01 = Other.
+B39	s	S3-RS-N02 · Resource sub-type *
+D39	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C39="","● Required","✓ Complete"))
+E39	s	Dropdown, filtered to the sub-types of the resource type above.
+B40	s	»  N02 — specify "Other"
+D40	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$39="Other",IF($C40="","● Required","✓ Complete"),"— Hidden"))
+E40	s	Free text. Appears only when N02 = Other.
+B41	s	S3-RS-N03 · Resource specification
+D41	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C41="","○ Optional","✓ Complete"))
+E41	s	Text area. Optional — required spec, capacity, standard.
+B42	s	S3-RS-N04 · Resource location — country *
+D42	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C42="","● Required","✓ Complete"))
+E42	s	Full country list from the shared Cities dataset.
+B43	s	»  N04 — specify "Other" country
+D43	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$42="Other (not listed)",IF($C43="","● Required","✓ Complete"),"— Hidden"))
+E43	s	Free text. Appears only when country = Other (not listed).
+B44	s	S3-RS-N04a · Resource location — city
+D44	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$42="","— Locked (select country first)",IF($C$44="","○ Optional","✓ Complete")))
+E44	s	Optional. Populates from the country above.
+B45	s	»  N04a — specify "Other" city
+D45	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$44="Other",IF($C45="","● Required","✓ Complete"),"— Hidden"))
+E45	s	Free text. Appears only when city = Other.
+B46	s	S3-RS-N05 · Usage requirements
+D46	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C46="","○ Optional","✓ Complete"))
+E46	s	Text area. Optional — how, when and where you intend to use it.
+B47	s	S3-RS-N06 · Availability required *
+D47	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C47="","● Required","✓ Complete"))
+E47	s	Dropdown. Full-time through flexible.
+B48	s	S3-RS-N07 · Duration needed *
+D48	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C48="","● Required","✓ Complete"))
+E48	s	Dropdown. Under 1 month through ongoing.
+B49	s	S3-RS-N09 · Owner location preference
+D49	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C49="","○ Optional","✓ Complete"))
+E49	s	Dropdown. Same city, same country, Gulf region, any location.
+B50	s	»  N09 — specify "Other"
+D50	f	=IF(NOT($L$15="A"),"— Variant not active",IF($C$49="Other",IF($C50="","● Required","✓ Complete"),"— Hidden"))
+E50	s	Free text. Appears only when N09 = Other.
+B52	s	SECTION C  —  VARIANT B · POOLING  ·  OFFER SIDE — WHAT YOU ARE CONTRIBUTING TO THE POOL
+B53	s	Field
+C53	s	Your input
+D53	s	Status
+E53	s	Hint / validation rule
+B54	s	S3-RP-O00 · Pool intent *
+D54	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C54="","● Required","✓ Complete"))
+E54	s	Dropdown. Initiating, joining, exiting a pool — or open to discussion.
+B55	s	S3-RP-O01 · Resource type you are contributing *
+D55	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C55="","● Required","✓ Complete"))
+E55	s	Dropdown. Same resource taxonomy as Variant A.
+B56	s	»  O01 — specify "Other"
+D56	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$55="Other",IF($C56="","● Required","✓ Complete"),"— Hidden"))
+E56	s	Free text. Appears only when RP-O01 = Other.
+B57	s	S3-RP-O02 · Resource sub-type *
+D57	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C57="","● Required","✓ Complete"))
+E57	s	Dropdown, filtered to the sub-types of the resource type above.
+B58	s	»  O02 — specify "Other"
+D58	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$57="Other",IF($C58="","● Required","✓ Complete"),"— Hidden"))
+E58	s	Free text. Appears only when RP-O02 = Other.
+B59	s	S3-RP-O03 · Contribution description
+D59	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C59="","○ Optional","✓ Complete"))
+E59	s	Text area. Optional — what exactly you are putting into the pool.
+B60	s	S3-RP-O04 · Contribution location — country *
+D60	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C60="","● Required","✓ Complete"))
+E60	s	Full country list from the shared Cities dataset.
+B61	s	»  O04 — specify "Other" country
+D61	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$60="Other (not listed)",IF($C61="","● Required","✓ Complete"),"— Hidden"))
+E61	s	Free text. Appears only when country = Other (not listed).
+B62	s	S3-RP-O04a · Contribution location — city *
+D62	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$60="","— Locked (select country first)",IF($C$62="","● Required","✓ Complete")))
+E62	s	Required. Populates from the country above.
+B63	s	»  O04a — specify "Other" city
+D63	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$62="Other",IF($C63="","● Required","✓ Complete"),"— Hidden"))
+E63	s	Free text. Appears only when city = Other.
+B64	s	S3-RP-O05 · Availability *
+D64	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C64="","● Required","✓ Complete"))
+E64	s	Dropdown. Full-time through flexible.
+B65	s	S3-RP-O06 · Availability period *
+D65	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C65="","● Required","✓ Complete"))
+E65	s	Dropdown. Under 1 month through ongoing.
+B66	s	S3-RP-O07 · Resource condition
+D66	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C66="","○ Optional","✓ Complete"))
+E66	s	Dropdown. New through operational with minor wear.
+B67	s	»  O07 — specify "Other"
+D67	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$66="Other",IF($C67="","● Required","✓ Complete"),"— Hidden"))
+E67	s	Free text. Appears only when RP-O07 = Other.
+B69	s	SECTION D  —  VARIANT B · POOLING  ·  NEED SIDE — WHAT YOU NEED FROM THE POOL
+B70	s	Field
+C70	s	Your input
+D70	s	Status
+E70	s	Hint / validation rule
+B71	s	S3-RP-N00 · Pool intent *
+D71	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C71="","● Required","✓ Complete"))
+E71	s	Dropdown. Initiating, joining, exiting a pool — or open to discussion.
+B72	s	S3-RP-N01 · Resource type needed from pool *
+D72	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C72="","● Required","✓ Complete"))
+E72	s	Dropdown. Same resource taxonomy as Variant A.
+B73	s	»  N01 — specify "Other"
+D73	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$72="Other",IF($C73="","● Required","✓ Complete"),"— Hidden"))
+E73	s	Free text. Appears only when RP-N01 = Other.
+B74	s	S3-RP-N02 · Resource sub-type *
+D74	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C74="","● Required","✓ Complete"))
+E74	s	Dropdown, filtered to the sub-types of the resource type above.
+B75	s	»  N02 — specify "Other"
+D75	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$74="Other",IF($C75="","● Required","✓ Complete"),"— Hidden"))
+E75	s	Free text. Appears only when RP-N02 = Other.
+B76	s	S3-RP-N03 · Pool location — country *
+D76	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C76="","● Required","✓ Complete"))
+E76	s	Full country list from the shared Cities dataset.
+B77	s	»  N03 — specify "Other" country
+D77	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$76="Other (not listed)",IF($C77="","● Required","✓ Complete"),"— Hidden"))
+E77	s	Free text. Appears only when country = Other (not listed).
+B78	s	S3-RP-N03a · Pool location — city
+D78	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$76="","— Locked (select country first)",IF($C$78="","○ Optional","✓ Complete")))
+E78	s	Optional. Populates from the country above.
+B79	s	»  N03a — specify "Other" city
+D79	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$78="Other",IF($C79="","● Required","✓ Complete"),"— Hidden"))
+E79	s	Free text. Appears only when city = Other.
+B80	s	S3-RP-N04 · Usage requirements
+D80	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C80="","○ Optional","✓ Complete"))
+E80	s	Text area. Optional — how you intend to use the pooled resource.
+B81	s	S3-RP-N05 · Usage frequency *
+D81	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C81="","● Required","✓ Complete"))
+E81	s	Dropdown. Daily through on-demand.
+B82	s	S3-RP-N06 · Duration of pool membership *
+D82	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C82="","● Required","✓ Complete"))
+E82	s	Dropdown. Under 1 month through ongoing.
+B83	s	S3-RP-N07 · Minimum pool size *
+D83	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C83="","● Required","✓ Complete"))
+E83	s	Dropdown. 2 parties through 6 or more. Drives the Group Match flag.
+B84	s	S3-RP-N08 · Maximum pool size
+D84	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C84="","○ Optional","✓ Complete"))
+E84	s	Dropdown. Optional cap on pool membership.
+B85	s	S3-RP-N09 · Pool governance preference
+D85	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C85="","○ Optional","✓ Complete"))
+E85	s	Dropdown. Scheduling, proportional usage, rotation, booking system.
+B86	s	»  N09 — specify "Other"
+D86	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$85="Other",IF($C86="","● Required","✓ Complete"),"— Hidden"))
+E86	s	Free text. Appears only when RP-N09 = Other.
+B87	s	S3-RP-N10 · Your contribution to the pool *
+D87	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C87="","● Required","✓ Complete"))
+E87	s	Dropdown. What you bring to the pool in return for access.
+B88	s	»  N10 — specify "Other"
+D88	f	=IF(NOT($L$15="B"),"— Variant not active",IF($C$87="Other",IF($C88="","● Required","✓ Complete"),"— Hidden"))
+E88	s	Free text. Appears only when RP-N10 = Other.
+B90	s	SECTION E  —  DELIVERABLES / CONDITIONS  ·  NEED SIDE  (collapsed by default — optional)
+B91	s	Field
+C91	s	Your input
+D91	s	Status
+E91	s	Hint / validation rule
+B92	s	S3-RS-D01 · Expected deliverable / condition 1
+D92	f	=IF($C$92="","○ Optional","✓ Complete")
+E92	s	Add expected deliverables or conditions of use if needed.
+B93	s	S3-RS-D01 · Expected deliverable / condition 2
+D93	f	=IF($C$92="","— Locked",IF($C$93="","○ Optional","✓ Complete"))
+E93	s	Offered once the first is filled.
+B94	s	S3-RS-D02 · Acceptance criteria
+D94	f	=IF($C$92="","— Locked (add a deliverable first)",IF($C$94="","○ Optional","✓ Complete"))
+E94	s	How you will judge the condition as met.
+B96	s	SECTION F  —  MILESTONES  ·  BOTH SIDES  (collapsed by default — optional)
+B97	s	Field
+C97	s	Your input
+D97	s	Status
+E97	s	Hint / validation rule
+B98	s	S3-RS-M01 · Milestone 1 — title
+D98	f	=IF($C$98="","○ Optional","✓ Complete")
+E98	s	Text. Add milestones (optional). User can add multiple.
+B99	s	S3-RS-M02 · Milestone 1 — target date
+D99	f	=IF($C$98="","— Locked",IF($C$99="","○ Optional",IF(NOT(ISNUMBER($C$99)),"⚠ Not a valid date","✓ Complete")))
+E99	s	Date picker — pick from the dropdown. Milestone date scope panel sets month / year.
+B100	s	S3-RS-M01 · Milestone 2 — title
+D100	f	=IF($C$100="","○ Optional","✓ Complete")
+E100	s	Offered once the previous milestone has a title.
+B101	s	S3-RS-M02 · Milestone 2 — target date
+D101	f	=IF($C$100="","— Locked",IF($C$101="","○ Optional",IF(NOT(ISNUMBER($C$101)),"⚠ Not a valid date","✓ Complete")))
+E101	s	Date picker — pick from the dropdown. Milestone date scope panel sets month / year.
+B102	s	S3-RS-M01 · Milestone 3 — title
+D102	f	=IF($C$102="","○ Optional","✓ Complete")
+E102	s	Offered once the previous milestone has a title.
+B103	s	S3-RS-M02 · Milestone 3 — target date
+D103	f	=IF($C$102="","— Locked",IF($C$103="","○ Optional",IF(NOT(ISNUMBER($C$103)),"⚠ Not a valid date","✓ Complete")))
+E103	s	Date picker — pick from the dropdown. Milestone date scope panel sets month / year.
+B104	s	SECTION G  —  MATCHING FLAGS & HIDDEN FIELDS
+B105	s	Item
+C105	s	Value
+D105	s	Status
+E105	s	Rule
+B106	s	Variant → matching structure
+C106	f	=IF($C$12="","—",IFERROR(INDEX('Step 3-RS-Lists'!$F$6:$F$7,MATCH($C$12,'Step 3-RS-Lists'!$D$6:$D$7,0)),"—"))
+D106	f	=IF($C$12="","— Waiting","◆ Auto-derived")
+E106	s	Sharing resolves to a Type 1 match; Pooling resolves to a Type 3 Group Match. Feeds Step 2 Section C.
+B107	s	Group Match (Type 3) flag
+C107	f	=IF($L$25="YES","Raised — pooling variant"&IF($C$83<>""," · min pool "&$C$83,""),"Not raised")
+D107	f	=IF($L$25="YES","◆ Type 3 candidate","— None")
+E107	s	Raised automatically whenever Variant B (Pooling) is selected.
+B108	s	Two-Way Match (Type 2) readiness
+C108	f	=IF($C$12="","—",IF(AND($L$17=$L$19,$L$18=$L$20),"Both sides complete","Offer "&$L$17&"/"&$L$19&" · Need "&$L$18&"/"&$L$20))
+D108	f	=IF($C$12="","— Waiting",IF(AND($L$17=$L$19,$L$18=$L$20),"✓ Type 2 eligible","● Incomplete"))
+E108	s	Counts only the active variant's mandatory fields.
+B109	s	Hidden for the Resource Sharing model
+C109	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-RS-Lists'!$AK$6:$AK$10)
+D109	s	— Not rendered
+E109	s	These fields exist in other Step 3 model forms but are suppressed here.
+B111	s	SECTION H  —  CROSS-FIELD VALIDATION & COMPLETION
+B112	s	Check
+C112	s	Result
+D112	s	Status
+E112	s	Rule
+B113	s	Differentiating question answered
+C113	f	=IF($C$12="","Pending",$C$13)
+D113	f	=IF($C$12="","● Required","✓ Pass")
+E113	s	Q01 must be answered before either variant can be completed.
+B114	s	Required fields completed
+C114	f	=IF($C$12="","0 of 0",$L$22&" of "&$L$21)
+D114	f	=IF(AND($C$12<>"",$L$22=$L$21),"✓ Complete","● Incomplete")
+E114	s	Variant A = 13 mandatory (7 Offer + 6 Need). Variant B = 15 mandatory (7 Offer + 8 Need).
+B115	s	Active variant — Offer side
+C115	f	=IF($C$12="","—",$L$17&" of "&$L$19)
+D115	f	=IF(AND($C$12<>"",$L$17=$L$19),"✓ Pass","● Incomplete")
+E115	s	Only the variant selected in Q01 is counted.
+B116	s	Active variant — Need side
+C116	f	=IF($C$12="","—",$L$18&" of "&$L$20)
+D116	f	=IF(AND($C$12<>"",$L$18=$L$20),"✓ Pass","● Incomplete")
+E116	s	The other variant's fields are greyed out and ignored.
+B117	s	Conditional fields resolved
+C117	f	=$L$27&" of "&$L$26
+D117	f	=IF($L$27=$L$26,"✓ Pass","● Pending")
+E117	s	Every conditional field opened by a selection in the active variant must be filled.
+B118	s	Step 2 model is Resource Sharing
+C118	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D118	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E118	s	This form is only valid when the Step 2 collaboration model is Resource Sharing.
+B119	s	Step 2 variant agreement
+C119	f	=IF(OR($C$12="",'Step 2-Wireframe'!$C$27="—",'Step 2-Wireframe'!$C$27=""),"Not yet comparable",IF(OR(AND($L$15="A",'Step 2-Wireframe'!$C$27="Sharing variant"),AND($L$15="B",'Step 2-Wireframe'!$C$27="Pooling variant")),"Matches Step 2 follow-up","Differs from Step 2 follow-up"))
+D119	f	=IF(OR($C$12="",'Step 2-Wireframe'!$C$27="—",'Step 2-Wireframe'!$C$27=""),"— Waiting",IF(OR(AND($L$15="A",'Step 2-Wireframe'!$C$27="Sharing variant"),AND($L$15="B",'Step 2-Wireframe'!$C$27="Pooling variant")),"✓ Pass","◆ Override logged"))
+E119	s	Compares Q01 here against the sharing / pooling variant detected in Step 2. Informational — never blocks.
+B120	s	Step 2 gate passed
+C120	f	=IF($L$24="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D120	f	=IF($L$24="YES","✓ Pass","⚠ Blocks Step 4")
+E120	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B121	s	Readiness meter
+C121	f	=TEXT($L$23,"0%")&" of required fields"
+D121	f	=IF($L$28="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E121	s	Optional fields, deliverables and milestones do not affect the meter.
+B123	s	NAVIGATION
+B124	s	◀  Back to Step 2
+C124	s	💾  Save Draft
+D124	f	=IF($L$28="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E124	s	Continue activates only when Section H shows every check passed.

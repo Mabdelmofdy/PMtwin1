@@ -1,0 +1,456 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 3-HI-Lists
+state=visible dims=A1:AP203 max_row=203 max_col=42
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Hiring (Individual)
+B3	s	Single source of truth for every dropdown on 'Step 3-HI-Wireframe'. Edit values here and the wireframe updates. Grey helper columns are live formulas — do not type in them.
+X4	s	O02 / N04 — SPECIALISATION TAXONOMY (by discipline) — draft, edit freely
+B5	s	O01 / N03 — Professional discipline
+C5	s	O03 — Years of experience
+D5	s	O04 — Professional credentials
+E5	s	O05 — Engagement type offered
+F5	s	O06 — Availability
+G5	s	O07 — Work location preference
+H5	s	O08 — Rate expected
+I5	s	O08 / N08 — Currency
+J5	s	O09 / N09 — Rate unit
+K5	s	O10 — Notice period
+L5	s	O11 — Work permit / visa status
+M5	s	O12 — Languages
+N5	s	O13 / N02 — Sector
+O5	s	N01 — Engagement type seeking
+P5	s	N05 — Work location preference
+Q5	s	N06 — Availability to start
+R5	s	N07 — Engagement duration
+S5	s	N08 — Rate range
+T5	s	N10 — Match with
+U5	s	Country (same as S1-F03)
+V5	s	Yes / No (picker)
+X5	s	Engineering
+Y5	s	Project management
+Z5	s	Commercial
+AA5	s	Design
+AB5	s	Digital & technology
+AC5	s	Operations & HSE
+AD5	s	Real estate
+AE5	s	Finance & accounting
+AF5	s	Legal & compliance
+AG5	s	Administration
+AH5	s	Sales & business development
+AI5	s	Other
+AK5	s	HELPER · O02 options (live)
+AL5	s	HELPER · O07b options (live)
+AM5	s	HELPER · N04 options (live)
+AN5	s	HELPER · N05b options (live)
+B6	s	Engineering
+C6	s	0–3 years
+D6	s	RICS
+E6	s	Full-time
+F6	s	Immediate
+G6	s	On-site
+H6	s	Under $500/month
+I6	s	USD ($)
+J6	s	Per hour
+K6	s	Immediate
+L6	s	Valid KSA work permit
+M6	s	Arabic
+N6	s	Residential development
+O6	s	Full-time position
+P6	s	On-site
+Q6	s	Immediately
+R6	s	Short-term (under 3 months)
+S6	s	Under $500/month
+T6	s	Companies only
+U6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221273A00B0>
+V6	s	Yes
+X6	s	Civil & structural
+Y6	s	Programme management
+Z6	s	Quantity surveying
+AA6	s	Architecture
+AB6	s	BIM management
+AC6	s	Health & safety
+AD6	s	Development management
+AE6	s	Project finance
+AF6	s	Construction law
+AG6	s	Document control
+AH6	s	Business development
+AI6	s	Other
+AK6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221273470B0>
+AL6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127347080>
+AM6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127346840>
+AN6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127346810>
+B7	s	Project management
+C7	s	3–7 years
+D7	s	CIOB
+E7	s	Part-time
+F7	s	Within 2 weeks
+G7	s	Remote
+H7	s	$500–$2K/month
+I7	s	SAR (ر.س)
+J7	s	Per day
+K7	s	Up to 2 weeks
+L7	s	Valid UAE work permit
+M7	s	English
+N7	s	Commercial development
+O7	s	Part-time engagement
+P7	s	Remote
+Q7	s	Within 2 weeks
+R7	s	Medium-term (3–12 months)
+S7	s	$500–$2K/month
+T7	s	Individual professionals only
+U7	s	United Arab Emirates
+V7	s	No
+X7	s	MEP
+Y7	s	Project controls & planning
+Z7	s	Contracts management
+AA7	s	Interior design
+AB7	s	Software development
+AC7	s	Quality assurance & control
+AD7	s	Asset management
+AE7	s	Financial planning & analysis
+AF7	s	Real estate law
+AG7	s	Office management
+AH7	s	Bid & tender management
+B8	s	Commercial
+C8	s	7–15 years
+D8	s	PE licence
+E8	s	Project-based
+F8	s	Within 1 month
+G8	s	Hybrid
+H8	s	$2K–$5K/month
+I8	s	AED (د.إ)
+J8	s	Per month
+K8	s	Up to 1 month
+L8	s	Valid GCC permit
+M8	s	Arabic & English
+N8	s	Mixed-use
+O8	s	Project-based
+P8	s	Hybrid
+Q8	s	Within 1 month
+R8	s	Long-term (12+ months)
+S8	s	$2K–$5K/month
+T8	s	Both
+U8	s	Qatar
+X8	s	Geotechnical
+Y8	s	PMO
+Z8	s	Procurement
+AA8	s	Landscape
+AB8	s	Data & analytics
+AC8	s	Facilities management
+AD8	s	Valuation
+AE8	s	Accounting & audit
+AF8	s	Regulatory compliance
+AG8	s	HR & recruitment
+AH8	s	Marketing
+B9	s	Design
+C9	s	15+ years
+D9	s	PMP
+E9	s	Fractional
+F9	s	1–3 months
+G9	s	Flexible
+H9	s	$5K–$10K/month
+I9	s	EGP (ج.م)
+J9	s	Per project
+K9	s	Up to 3 months
+L9	s	Valid Egyptian work permit
+M9	s	French
+N9	s	Infrastructure
+O9	s	Fractional
+P9	s	Open to any
+Q9	s	1–3 months
+R9	s	Permanent
+S9	s	$5K–$10K/month
+U9	s	Kuwait
+X9	s	Infrastructure & transport
+Y9	s	Construction management
+Z9	s	Claims & disputes
+AA9	s	Urban planning
+AB9	s	PropTech
+AC9	s	Environmental & sustainability
+AD9	s	Leasing & sales
+AE9	s	Tax
+AF9	s	Corporate governance
+AG9	s	Executive support
+AH9	s	Key account management
+B10	s	Digital & technology
+D10	s	PRINCE2
+E10	s	Retainer
+F10	s	Flexible
+H10	s	$10K–$20K/month
+I10	s	QAR (ر.ق)
+J10	s	To be agreed
+K10	s	Flexible
+L10	s	Requires visa sponsorship
+M10	s	Mandarin
+N10	s	Industrial
+O10	s	Retainer
+P10	s	Other
+Q10	s	Flexible
+R10	s	Open to any
+S10	s	$10K–$20K/month
+U10	s	Bahrain
+X10	s	Building services
+Y10	s	Stakeholder management
+Z10	s	Estimating
+AA10	s	BIM & design coordination
+AB10	s	IT infrastructure
+AC10	s	Site operations
+AD10	s	Property management
+AE10	s	Treasury
+AF10	s	Other
+AG10	s	Other
+AH10	s	Other
+B11	s	Operations & HSE
+D11	s	MBA
+E11	s	Advisory
+F11	s	Specific date
+H11	s	Above $20K/month
+I11	s	KWD (د.ك)
+L11	s	Open to relocation
+M11	s	Hindi
+N11	s	Hospitality
+O11	s	Advisory
+Q11	s	Specific date
+R11	s	To be agreed
+S11	s	Above $20K/month
+U11	s	Oman
+X11	s	Cost engineering
+Y11	s	Risk management
+Z11	s	Other
+AA11	s	Other
+AB11	s	Cybersecurity
+AC11	s	Other
+AD11	s	Other
+AE11	s	Other
+B12	s	Real estate
+D12	s	PMTwin vetted
+E12	s	Secondment
+H12	s	Per project
+I12	s	BHD (د.ب)
+L12	s	Other
+M12	s	Other
+N12	s	Healthcare
+O12	s	Secondment
+S12	s	To be agreed
+U12	s	Egypt
+X12	s	Other
+Y12	s	Other
+AB12	s	Other
+B13	s	Finance & accounting
+D13	s	MOMRA approved
+E13	s	Other
+H13	s	To be agreed
+I13	s	OMR (ر.ع)
+N13	s	Education
+O13	s	Open to any
+U13	s	Morocco
+B14	s	Legal & compliance
+D14	s	Saudi Council of Engineers
+I14	s	EUR (€)
+N14	s	Giga-project
+O14	s	Other
+U14	s	Algeria
+B15	s	Administration
+D15	s	UAE Engineering licence
+I15	s	GBP (£)
+N15	s	Retail
+U15	s	Tunisia
+B16	s	Sales & business development
+D16	s	LEED AP
+I16	s	Other
+N16	s	General business
+U16	s	Libya
+B17	s	Other
+D17	s	BREEAM Assessor
+N17	s	Other
+U17	s	Sudan
+D18	s	Other
+U18	s	Jordan
+U19	s	Lebanon
+U20	s	Iraq
+U21	s	Syria
+U22	s	Yemen
+U23	s	Palestine
+U24	s	Turkey
+U25	s	Iran
+U26	s	Israel
+U27	s	Afghanistan
+U28	s	Albania
+U29	s	Andorra
+U30	s	Angola
+U31	s	Antigua and Barbuda
+U32	s	Argentina
+U33	s	Armenia
+U34	s	Australia
+U35	s	Austria
+U36	s	Azerbaijan
+U37	s	Bahamas
+U38	s	Bangladesh
+U39	s	Barbados
+U40	s	Belarus
+U41	s	Belgium
+U42	s	Belize
+U43	s	Benin
+U44	s	Bhutan
+U45	s	Bolivia
+U46	s	Bosnia and Herzegovina
+U47	s	Botswana
+U48	s	Brazil
+U49	s	Brunei
+U50	s	Bulgaria
+U51	s	Burkina Faso
+U52	s	Burundi
+U53	s	Cambodia
+U54	s	Cameroon
+U55	s	Canada
+U56	s	Cape Verde
+U57	s	Central African Republic
+U58	s	Chad
+U59	s	Chile
+U60	s	China
+U61	s	Colombia
+U62	s	Comoros
+U63	s	Congo (Republic)
+U64	s	Congo (DR)
+U65	s	Costa Rica
+U66	s	Côte d'Ivoire
+U67	s	Croatia
+U68	s	Cuba
+U69	s	Cyprus
+U70	s	Czechia
+U71	s	Denmark
+U72	s	Djibouti
+U73	s	Dominica
+U74	s	Dominican Republic
+U75	s	Ecuador
+U76	s	El Salvador
+U77	s	Equatorial Guinea
+U78	s	Eritrea
+U79	s	Estonia
+U80	s	Eswatini
+U81	s	Ethiopia
+U82	s	Fiji
+U83	s	Finland
+U84	s	France
+U85	s	Gabon
+U86	s	Gambia
+U87	s	Georgia
+U88	s	Germany
+U89	s	Ghana
+U90	s	Greece
+U91	s	Grenada
+U92	s	Guatemala
+U93	s	Guinea
+U94	s	Guinea-Bissau
+U95	s	Guyana
+U96	s	Haiti
+U97	s	Honduras
+U98	s	Hungary
+U99	s	Iceland
+U100	s	India
+U101	s	Indonesia
+U102	s	Ireland
+U103	s	Italy
+U104	s	Jamaica
+U105	s	Japan
+U106	s	Kazakhstan
+U107	s	Kenya
+U108	s	Kiribati
+U109	s	Kosovo
+U110	s	Kyrgyzstan
+U111	s	Laos
+U112	s	Latvia
+U113	s	Lesotho
+U114	s	Liberia
+U115	s	Liechtenstein
+U116	s	Lithuania
+U117	s	Luxembourg
+U118	s	Madagascar
+U119	s	Malawi
+U120	s	Malaysia
+U121	s	Maldives
+U122	s	Mali
+U123	s	Malta
+U124	s	Marshall Islands
+U125	s	Mauritania
+U126	s	Mauritius
+U127	s	Mexico
+U128	s	Micronesia
+U129	s	Moldova
+U130	s	Monaco
+U131	s	Mongolia
+U132	s	Montenegro
+U133	s	Mozambique
+U134	s	Myanmar
+U135	s	Namibia
+U136	s	Nauru
+U137	s	Nepal
+U138	s	Netherlands
+U139	s	New Zealand
+U140	s	Nicaragua
+U141	s	Niger
+U142	s	Nigeria
+U143	s	North Korea
+U144	s	North Macedonia
+U145	s	Norway
+U146	s	Pakistan
+U147	s	Palau
+U148	s	Panama
+U149	s	Papua New Guinea
+U150	s	Paraguay
+U151	s	Peru
+U152	s	Philippines
+U153	s	Poland
+U154	s	Portugal
+U155	s	Romania
+U156	s	Russia
+U157	s	Rwanda
+U158	s	Saint Kitts and Nevis
+U159	s	Saint Lucia
+U160	s	Saint Vincent and the Grenadines
+U161	s	Samoa
+U162	s	San Marino
+U163	s	Sao Tome and Principe
+U164	s	Senegal
+U165	s	Serbia
+U166	s	Seychelles
+U167	s	Sierra Leone
+U168	s	Singapore
+U169	s	Slovakia
+U170	s	Slovenia
+U171	s	Solomon Islands
+U172	s	Somalia
+U173	s	South Africa
+U174	s	South Korea
+U175	s	South Sudan
+U176	s	Spain
+U177	s	Sri Lanka
+U178	s	Suriname
+U179	s	Sweden
+U180	s	Switzerland
+U181	s	Taiwan
+U182	s	Tajikistan
+U183	s	Tanzania
+U184	s	Thailand
+U185	s	Timor-Leste
+U186	s	Togo
+U187	s	Tonga
+U188	s	Trinidad and Tobago
+U189	s	Turkmenistan
+U190	s	Tuvalu
+U191	s	Uganda
+U192	s	Ukraine
+U193	s	United Kingdom
+U194	s	United States
+U195	s	Uruguay
+U196	s	Uzbekistan
+U197	s	Vanuatu
+U198	s	Vatican City
+U199	s	Venezuela
+U200	s	Vietnam
+U201	s	Zambia
+U202	s	Zimbabwe
+U203	s	Other (not listed)

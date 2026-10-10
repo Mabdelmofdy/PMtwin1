@@ -1,0 +1,397 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-BP-Wireframe
+state=visible dims=A1:Q102 max_row=102 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H27:H35 type=list formula1="No,Yes" formula2=None allow_blank=True
+sqref=C17 C41 type=decimal formula1=0 formula2=100000000 allow_blank=True
+sqref=C43 type=decimal formula1=0 formula2=10000000 allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Bulk Purchasing"
+B3	s	Scope & Work — Bulk Purchasing
+P3	s	Gate
+Q3	f	=$L$27
+B4	s	Define what you want to procure and what you bring to the group order. Both sides are mandatory.
+P4	s	Readiness
+Q4	f	=$L$21
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Bulk Purchasing        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  MODEL 5: BULK PURCHASING
+D7	f	=TEXT($L$21,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$21*24,0))&REPT("░",24-ROUND($L$21*24,0))
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = Bulk Purchasing.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$19
+P9	s	Need intent
+Q9	f	=$C$31
+B10	s	SECTION A  —  OFFER SIDE  ·  WHAT YOU ARE CONTRIBUTING TO THE PURCHASING POOL
+G10	s	MATERIAL TAXONOMY  —  CATEGORIES & SUB-TYPES
+P10	s	Need category
+Q10	f	=$C$32
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Category
+H11	s	Sub-types
+I11	s	First sub-options
+P11	s	Need sub-category
+Q11	f	=$C$34
+B12	s	S3-BP-O00 · Pool role *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. Anchor initiator, participant, exiting a commitment — or open to either.
+G12	f	='Step 3-BP-Lists'!$F$6
+H12	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G12)
+I12	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221262096A0>
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$43
+B13	s	S3-BP-O01 · Material or product you are pooling for *
+D13	f	=IF($C13="","● Required","✓ Complete")
+E13	s	Dropdown. 10 material categories plus Other.
+G13	f	='Step 3-BP-Lists'!$F$7
+H13	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G13)
+I13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126208560>
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=""
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($C$13="Other",IF($C14="","● Required","✓ Complete"),"— Hidden")
+E14	s	Free text. Appears only when O01 = Other.
+G14	f	='Step 3-BP-Lists'!$F$8
+H14	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G14)
+I14	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212620B980>
+K14	s	This form active (Bulk Purchasing)
+L14	f	=IF($L$13="Bulk Purchasing","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$63:$C$64)
+B15	s	S3-BP-O02 · Material sub-type *
+D15	f	=IF($C15="","● Required","✓ Complete")
+E15	s	Dropdown, filtered to the sub-types of the category above.
+G15	f	='Step 3-BP-Lists'!$F$9
+H15	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G15)
+I15	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212620B890>
+K15	s	Offer — completed
+L15	f	=IF($C12<>"",1,0)+IF($C13<>"",1,0)+IF($C15<>"",1,0)+IF($C17<>"",1,0)+IF($C19<>"",1,0)+IF($C21<>"",1,0)+IF($C23<>"",1,0)+IF($C25<>"",1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$69,$C$71,$C$73)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($C$15="Other",IF($C16="","● Required","✓ Complete"),"— Hidden")
+E16	s	Free text. Appears only when O02 = Other.
+G16	f	='Step 3-BP-Lists'!$F$10
+H16	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G16)
+I16	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212620B800>
+K16	s	Need — completed
+L16	f	=IF($C31<>"",1,0)+IF($C32<>"",1,0)+IF($C34<>"",1,0)+IF($C41<>"",1,0)+IF($C45<>"",1,0)+IF($C46<>"",1,0)+IF($C48<>"",1,0)+IF($C54<>"",1,0)
+B17	s	S3-BP-O03 · Volume commitment *
+D17	f	=IF($C17="","● Required","✓ Complete")
+E17	s	Numeric input. The volume you commit to the pool — this is your contribution.
+G17	f	='Step 3-BP-Lists'!$F$11
+H17	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G17)
+I17	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126208170>
+K17	s	Offer — total
+L17	f	=8
+B18	s	»  O03-TU — volume unit
+D18	f	=IF($C$17<>"",IF($C18="","● Required","✓ Complete"),"— Hidden")
+E18	s	Units, tonnes, m³, bags, pallets, containers… Required once a volume is entered.
+G18	f	='Step 3-BP-Lists'!$F$12
+H18	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G18)
+I18	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221262088F0>
+K18	s	Need — total
+L18	f	=8
+B19	s	S3-BP-O04 · Estimated budget contribution *
+D19	f	=IF($C19="","● Required","✓ Complete")
+E19	s	Range dropdown. Your share of the pooled spend.
+G19	f	='Step 3-BP-Lists'!$F$13
+H19	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G19)
+I19	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126221CA0>
+K19	s	Required — total
+L19	f	=16+$L$22
+B20	s	»  O04-CUR — currency
+D20	f	=IF(AND($C$19<>"",$C$19<>"To be agreed"),IF($C20="","● Required","✓ Complete"),"— Hidden")
+E20	s	Currency for the budget range above.
+G20	f	='Step 3-BP-Lists'!$F$14
+H20	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G20)
+I20	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126221C40>
+K20	s	Required — completed
+L20	f	=$L$15+$L$16+$L$23
+B21	s	S3-BP-O05 · Delivery location — country *
+D21	f	=IF($C21="","● Required","✓ Complete")
+E21	s	Full country list from the shared Cities dataset.
+G21	f	='Step 3-BP-Lists'!$F$15
+H21	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G21)
+I21	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126209EE0>
+K21	s	Readiness
+L21	f	=IFERROR($L$20/$L$19,0)
+B22	s	»  O05 — specify "Other" country
+D22	f	=IF($C$21="Other (not listed)",IF($C22="","● Required","✓ Complete"),"— Hidden")
+E22	s	Free text. Appears only when country = Other (not listed).
+G22	f	='Step 3-BP-Lists'!$F$16
+H22	f	=COUNTIF('Step 3-BP-Lists'!$AH$6:$AH$72,$G22)
+I22	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619CFB0>
+K22	s	Conditional fields — active
+L22	f	=IF($C$13="Other",1,0)+IF($C$15="Other",1,0)+IF($C$17<>"",1,0)+IF(AND($C$19<>"",$C$19<>"To be agreed"),1,0)+IF($C$21="Other (not listed)",1,0)+IF($C$23="Other",1,0)+IF($C$26="Other",1,0)+IF($C$32="Other",1,0)+IF($C$34="Other",1,0)+IF(OR($C$37="Specific brand preferred",$C$37="Other"),1,0)+IF(ISNUMBER(SEARCH("Other",$C$39)),1,0)+IF($C$41<>"",1,0)+IF($C$43<>"",1,0)+IF($C$46="Other (not listed)",1,0)+IF($C$48="Other",1,0)+IF($C$50="Other",1,0)+IF($C$52="Other",1,0)+IF($C$56="Other",1,0)+IF($C$58="Other",1,0)
+B23	s	S3-BP-O05a · Delivery location — city *
+D23	f	=IF($C$21="","— Locked (select country first)",IF($C$23="","● Required","✓ Complete"))
+E23	s	Required. Populates from the country above.
+K23	s	Conditional fields — completed
+L23	f	=IF(AND($C$13="Other",$C$14<>""),1,0)+IF(AND($C$15="Other",$C$16<>""),1,0)+IF(AND($C$17<>"",$C$18<>""),1,0)+IF(AND(AND($C$19<>"",$C$19<>"To be agreed"),$C$20<>""),1,0)+IF(AND($C$21="Other (not listed)",$C$22<>""),1,0)+IF(AND($C$23="Other",$C$24<>""),1,0)+IF(AND($C$26="Other",$C$27<>""),1,0)+IF(AND($C$32="Other",$C$33<>""),1,0)+IF(AND($C$34="Other",$C$35<>""),1,0)+IF(AND(OR($C$37="Specific brand preferred",$C$37="Other"),$C$38<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$39)),$C$40<>""),1,0)+IF(AND($C$41<>"",$C$42<>""),1,0)+IF(AND($C$43<>"",$C$44<>""),1,0)+IF(AND($C$46="Other (not listed)",$C$47<>""),1,0)+IF(AND($C$48="Other",$C$49<>""),1,0)+IF(AND($C$50="Other",$C$51<>""),1,0)+IF(AND($C$52="Other",$C$53<>""),1,0)+IF(AND($C$56="Other",$C$57<>""),1,0)+IF(AND($C$58="Other",$C$59<>""),1,0)
+B24	s	»  O05a — specify "Other" city
+D24	f	=IF($C$23="Other",IF($C24="","● Required","✓ Complete"),"— Hidden")
+E24	s	Free text. Appears only when city = Other.
+K24	s	Step 2 gate
+L24	f	='Step 2-Wireframe'!$L$19
+B25	s	S3-BP-O06 · Required delivery date *
+D25	f	=IF($C25="","● Required","✓ Complete")
+E25	s	Date picker. Pick from the dropdown — the date scope panel sets month / year.
+G25	s	NEED PICKER  —  N05 · QUALITY CERTIFICATION REQUIRED  (tick all)
+K25	s	Pool window
+L25	f	='Step 3-BP-Lists'!$AX$8
+B26	s	S3-BP-O07 · Supply preference
+D26	f	=IF($C26="","○ Optional","✓ Complete")
+E26	s	Dropdown. Local only, GCC preferred, import acceptable, no preference.
+G26	s	Certification
+H26	s	Select
+K26	s	Certifications ticked
+L26	f	=COUNTIF($H$27:$H$35,"Yes")
+B27	s	»  O07 — specify "Other"
+D27	f	=IF($C$26="Other",IF($C27="","● Required","✓ Complete"),"— Hidden")
+E27	s	Free text. Appears only when O07 = Other.
+G27	f	='Step 3-BP-Lists'!$R$6
+H27	s	No
+K27	s	Step 4 gate
+L27	f	=IF(AND($L$20=$L$19,$L$25<>"FAIL",$L$24="YES",$L$14="YES"),"YES","NO")
+G28	f	='Step 3-BP-Lists'!$R$7
+H28	s	No
+B29	s	SECTION B  —  NEED SIDE  ·  WHAT YOU WANT TO PROCURE
+G29	f	='Step 3-BP-Lists'!$R$8
+H29	s	No
+B30	s	Field
+C30	s	Your input
+D30	s	Status
+E30	s	Hint / validation rule
+G30	f	='Step 3-BP-Lists'!$R$9
+H30	s	No
+B31	s	S3-BP-N00 · Pool intent *
+D31	f	=IF($C31="","● Required","✓ Complete")
+E31	s	Dropdown. Initiating, joining, exiting a pool — or open to either.
+G31	f	='Step 3-BP-Lists'!$R$10
+H31	s	No
+B32	s	S3-BP-N01 · Material or product category *
+D32	f	=IF($C32="","● Required","✓ Complete")
+E32	s	Dropdown. 10 material categories plus Other.
+G32	f	='Step 3-BP-Lists'!$R$11
+H32	s	No
+B33	s	»  N01 — specify "Other"
+D33	f	=IF($C$32="Other",IF($C33="","● Required","✓ Complete"),"— Hidden")
+E33	s	Free text. Appears only when N01 = Other.
+G33	f	='Step 3-BP-Lists'!$R$12
+H33	s	No
+B34	s	S3-BP-N02 · Material or product sub-type *
+D34	f	=IF($C34="","● Required","✓ Complete")
+E34	s	Dropdown, filtered to the sub-types of the category above.
+G34	f	='Step 3-BP-Lists'!$R$13
+H34	s	No
+B35	s	»  N02 — specify "Other"
+D35	f	=IF($C$34="Other",IF($C35="","● Required","✓ Complete"),"— Hidden")
+E35	s	Free text. Appears only when N02 = Other.
+G35	f	='Step 3-BP-Lists'!$R$14
+H35	s	No
+B36	s	S3-BP-N03 · Specification / grade
+D36	f	=IF($C36="","○ Optional","✓ Complete")
+E36	s	Text area. Optional — grade, standard, technical spec.
+B37	s	S3-BP-N04 · Brand / manufacturer preference
+D37	f	=IF($C37="","○ Optional","✓ Complete")
+E37	s	Dropdown. Any brand, specific brand, approved vendor list, equivalent acceptable.
+B38	s	»  N04 — specify brand / "Other"
+D38	f	=IF(OR($C$37="Specific brand preferred",$C$37="Other"),IF($C38="","● Required","✓ Complete"),"— Hidden")
+E38	s	Free text. Appears when a specific brand is preferred, or N04 = Other.
+G38	s	DATE SCOPE  —  DELIVERY DATES & PHASES
+B39	s	S3-BP-N05 · Quality certification required
+C39	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221262216D0>
+D39	f	=IF(COUNTIF($H$27:$H$35,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$27:$H$35,"Yes")&" selected")
+E39	s	Multi-select. Tick certifications in the picker rail on the right.
+G39	s	Month
+I39	s	Year
+B40	s	»  N05 — specify "Other"
+D40	f	=IF(ISNUMBER(SEARCH("Other",$C$39)),IF($C40="","● Required","✓ Complete"),"— Hidden")
+E40	s	Free text. Appears only when "Other" is ticked in N05.
+B41	s	S3-BP-N06 · Quantity needed *
+D41	f	=IF($C41="","● Required","✓ Complete")
+E41	s	Numeric input. The quantity you need for your own use.
+B42	s	»  N06-TU — quantity unit
+D42	f	=IF($C$41<>"",IF($C42="","● Required","✓ Complete"),"— Hidden")
+E42	s	Units, tonnes, m³, bags, pallets, containers… Required once a quantity is entered.
+B43	s	S3-BP-N07 · Target unit price
+D43	f	=IF($C43="","○ Optional","✓ Complete")
+E43	s	Numeric input. Optional — the unit price you are aiming for through pooling.
+B44	s	»  N07-CUR — currency
+D44	f	=IF($C$43<>"",IF($C44="","● Required","✓ Complete"),"— Hidden")
+E44	s	Currency for the target unit price.
+B45	s	S3-BP-N08 · Required delivery date *
+D45	f	=IF($C45="","● Required","✓ Complete")
+E45	s	Date picker. Compared against the Offer-side delivery date in Section E.
+B46	s	S3-BP-N09 · Delivery location — country *
+D46	f	=IF($C46="","● Required","✓ Complete")
+E46	s	Full country list from the shared Cities dataset.
+B47	s	»  N09 — specify "Other" country
+D47	f	=IF($C$46="Other (not listed)",IF($C47="","● Required","✓ Complete"),"— Hidden")
+E47	s	Free text. Appears only when country = Other (not listed).
+B48	s	S3-BP-N09a · Delivery location — city *
+D48	f	=IF($C$46="","— Locked (select country first)",IF($C$48="","● Required","✓ Complete"))
+E48	s	Required. Populates from the country above.
+B49	s	»  N09a — specify "Other" city
+D49	f	=IF($C$48="Other",IF($C49="","● Required","✓ Complete"),"— Hidden")
+E49	s	Free text. Appears only when city = Other.
+B50	s	S3-BP-N10 · Supply preference
+D50	f	=IF($C50="","○ Optional","✓ Complete")
+E50	s	Dropdown. Local only, GCC preferred, import acceptable, no preference.
+B51	s	»  N10 — specify "Other"
+D51	f	=IF($C$50="Other",IF($C51="","● Required","✓ Complete"),"— Hidden")
+E51	s	Free text. Appears only when N10 = Other.
+B52	s	S3-BP-N11 · Delivery format
+D52	f	=IF($C52="","○ Optional","✓ Complete")
+E52	s	Dropdown. Bulk, palletised, containerised, JIT, phased delivery.
+B53	s	»  N11 — specify "Other"
+D53	f	=IF($C$52="Other",IF($C53="","● Required","✓ Complete"),"— Hidden")
+E53	s	Free text. Appears only when N11 = Other.
+B54	s	S3-BP-N12 · Minimum pool size to proceed *
+D54	f	=IF($C54="","● Required","✓ Complete")
+E54	s	Dropdown. The pool will not proceed below this size. Drives the Group Match flag.
+B55	s	S3-BP-N13 · Maximum pool size
+D55	f	=IF($C55="","○ Optional","✓ Complete")
+E55	s	Dropdown. Optional cap — checked against the minimum in Section E.
+B56	s	S3-BP-N14 · Preferred supplier location — country
+D56	f	=IF($C56="","○ Optional","✓ Complete")
+E56	s	Dropdown. Gulf, China, Turkey, Europe, international — or no preference.
+B57	s	»  N14 — specify "Other"
+D57	f	=IF($C$56="Other",IF($C57="","● Required","✓ Complete"),"— Hidden")
+E57	s	Free text. Appears only when N14 = Other.
+B58	s	S3-BP-N14a · Preferred supplier location — city
+D58	f	=IF('Step 3-BP-Lists'!$AS$6="","— Locked (pick a supplier country first)",IF($C$58="","○ Optional","✓ Complete"))
+E58	s	Optional. Populates from the supplier country above.
+B59	s	»  N14a — specify "Other" city
+D59	f	=IF($C$58="Other",IF($C59="","● Required","✓ Complete"),"— Hidden")
+E59	s	Free text. Appears only when city = Other.
+B61	s	SECTION C  —  QUALITY / DELIVERY CONDITIONS  ·  NEED SIDE  (collapsed by default — optional)
+B62	s	Field
+C62	s	Your input
+D62	s	Status
+E62	s	Hint / validation rule
+B63	s	S3-BP-D01 · Condition or standard 1
+D63	f	=IF($C$63="","○ Optional","✓ Complete")
+E63	s	Quality standards, delivery conditions or acceptance criteria.
+B64	s	S3-BP-D01 · Condition or standard 2
+D64	f	=IF($C$63="","— Locked",IF($C$64="","○ Optional","✓ Complete"))
+E64	s	Offered once the first is filled.
+B65	s	S3-BP-D02 · Acceptance criteria
+D65	f	=IF($C$63="","— Locked (add a condition first)",IF($C$65="","○ Optional","✓ Complete"))
+E65	s	How delivered goods will be inspected and accepted.
+B67	s	SECTION D  —  MILESTONES / PHASED DELIVERY SCHEDULE  (collapsed by default — optional)
+B68	s	Field
+C68	s	Your input
+D68	s	Status
+E68	s	Hint / validation rule
+B69	s	S3-BP-M01 · Delivery phase 1 — title
+D69	f	=IF($C$69="","○ Optional","✓ Complete")
+E69	s	Text. Useful for phased delivery — name each phase or tranche.
+B70	s	S3-BP-M02 · Delivery phase 1 — target date
+D70	f	=IF($C$69="","— Locked",IF($C$70="","○ Optional",IF(NOT(ISNUMBER($C$70)),"⚠ Not a valid date","✓ Complete")))
+E70	s	Date picker — uses the shared date scope panel on the right.
+B71	s	S3-BP-M01 · Delivery phase 2 — title
+D71	f	=IF($C$71="","○ Optional","✓ Complete")
+E71	s	Offered once the previous phase has a title.
+B72	s	S3-BP-M02 · Delivery phase 2 — target date
+D72	f	=IF($C$71="","— Locked",IF($C$72="","○ Optional",IF(NOT(ISNUMBER($C$72)),"⚠ Not a valid date","✓ Complete")))
+E72	s	Date picker — uses the shared date scope panel on the right.
+B73	s	S3-BP-M01 · Delivery phase 3 — title
+D73	f	=IF($C$73="","○ Optional","✓ Complete")
+E73	s	Offered once the previous phase has a title.
+B74	s	S3-BP-M02 · Delivery phase 3 — target date
+D74	f	=IF($C$73="","— Locked",IF($C$74="","○ Optional",IF(NOT(ISNUMBER($C$74)),"⚠ Not a valid date","✓ Complete")))
+E74	s	Date picker — uses the shared date scope panel on the right.
+B75	s	SECTION E  —  POOL CHECKS, MATCHING FLAGS & HIDDEN FIELDS
+B76	s	Item
+C76	s	Value
+D76	s	Status
+E76	s	Rule
+B77	s	Group Match (Type 3)
+C77	f	=IF($C$54="","Pending minimum pool size","Always a Group Match — min "&$C$54)
+D77	f	=IF($C$54="","— Waiting","◆ Type 3 by design")
+E77	s	Bulk purchasing is inherently a pooled, multi-party model — it always resolves to a Group Match.
+B78	s	Pool size window
+C78	f	=IF('Step 3-BP-Lists'!$AX$8="n/a","Not comparable — open minimum or no maximum",IF('Step 3-BP-Lists'!$AX$8="OK","Valid — "&$C$54&" up to "&$C$55,"Invalid — minimum exceeds maximum"))
+D78	f	=IF('Step 3-BP-Lists'!$AX$8="n/a","— N/A",IF('Step 3-BP-Lists'!$AX$8="OK","✓ Pass","⚠ Fix required"))
+E78	s	The minimum pool size must not exceed the maximum pool size.
+B79	s	Delivery date alignment
+C79	f	=IF(OR(NOT(ISNUMBER($C$25)),NOT(ISNUMBER($C$45))),"Enter both delivery dates",IF($C$25=$C$45,"Same date on both sides",ABS($C$45-$C$25)&" day(s) apart"))
+D79	f	=IF(OR(NOT(ISNUMBER($C$25)),NOT(ISNUMBER($C$45))),"— Waiting",IF(ABS($C$45-$C$25)<=14,"✓ Aligned","⚠ Review — wide gap"))
+E79	s	Offer-side and Need-side delivery dates more than 14 days apart make a single consolidated order harder.
+B80	s	Delivery location consistency
+C80	f	=IF(OR($C$21="",$C$46=""),"Enter both delivery countries",IF(AND($C$21=$C$46,$C$23=$C$48),"Identical — same city and country",IF($C$21=$C$46,"Same country, different city","Different countries")))
+D80	f	=IF(OR($C$21="",$C$46=""),"— Waiting",IF($C$21=$C$46,"✓ Pass","⚠ Review"))
+E80	s	A pooled order normally consolidates to one delivery country. Cross-border pooling is allowed but flagged.
+B81	s	Material consistency across sides
+C81	f	=IF(OR($C$13="",$C$32=""),"Enter both categories",IF(AND($C$13=$C$32,$C$15=$C$34),"Identical material and sub-type",IF($C$13=$C$32,"Same category, different sub-type","Different categories")))
+D81	f	=IF(OR($C$13="",$C$32=""),"— Waiting",IF(AND($C$13=$C$32,$C$15=$C$34),"✓ Pass",IF($C$13=$C$32,"◆ Review","⚠ Mismatch")))
+E81	s	Your pool contribution and your procurement need should normally be the same material.
+B82	s	Volume vs quantity
+C82	f	=IF(OR($C$17="",$C$41=""),"Enter both figures",IF($C$18<>$C$42,"Units differ — "&$C$18&" vs "&$C$42,IF($C$17>=$C$41,"Commitment covers your own need","Commitment is below your stated need")))
+D82	f	=IF(OR($C$17="",$C$41=""),"— Waiting",IF($C$18<>$C$42,"⚠ Unit mismatch",IF($C$17>=$C$41,"✓ Pass","◆ Review")))
+E82	s	Your volume commitment to the pool should at least cover the quantity you need, in the same unit.
+B83	s	Hidden for the Bulk Purchasing model
+C83	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-BP-Lists'!$AB$6:$AB$11)
+D83	s	— Not rendered
+E83	s	These fields exist in other Step 3 model forms but are suppressed here.
+B85	s	SECTION F  —  CROSS-FIELD VALIDATION & COMPLETION
+B86	s	Check
+C86	s	Result
+D86	s	Status
+E86	s	Rule
+B87	s	Required fields completed
+C87	f	=$L$20&" of "&$L$19
+D87	f	=IF($L$20=$L$19,"✓ Complete","● Incomplete")
+E87	s	16 mandatory fields (8 Offer + 8 Need) plus every conditional field opened by a selection.
+B88	s	Offer side complete
+C88	f	=$L$15&" of "&$L$17
+D88	f	=IF($L$15=$L$17,"✓ Pass","● Incomplete")
+E88	s	O00, O01, O02, O03, O04, O05, O05a, O06.
+B89	s	Need side complete
+C89	f	=$L$16&" of "&$L$18
+D89	f	=IF($L$16=$L$18,"✓ Pass","● Incomplete")
+E89	s	N00, N01, N02, N06, N08, N09, N09a, N12.
+B90	s	Conditional fields resolved
+C90	f	=$L$23&" of "&$L$22
+D90	f	=IF($L$23=$L$22,"✓ Pass","● Pending")
+E90	s	Units, currencies, brand text and "Other" free texts opened by a selection.
+B91	s	Pool size window valid
+C91	f	=IF('Step 3-BP-Lists'!$AX$8="n/a","Not applicable",IF('Step 3-BP-Lists'!$AX$8="OK","Valid","Minimum exceeds maximum"))
+D91	f	=IF('Step 3-BP-Lists'!$AX$8="FAIL","⚠ Fix required","✓ Pass")
+E91	s	A failing pool window blocks the step.
+B92	s	Step 2 model is Bulk Purchasing
+C92	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D92	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E92	s	This form is only valid when the Step 2 collaboration model is Bulk Purchasing.
+B93	s	Step 2 gate passed
+C93	f	=IF($L$24="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D93	f	=IF($L$24="YES","✓ Pass","⚠ Blocks Step 4")
+E93	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B94	s	Readiness meter
+C94	f	=TEXT($L$21,"0%")&" of required fields"
+D94	f	=IF($L$27="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E94	s	Optional fields, conditions and delivery phases do not affect the meter.
+B96	s	NAVIGATION
+B97	s	◀  Back to Step 2
+C97	s	💾  Save Draft
+D97	f	=IF($L$27="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E97	s	Continue activates only when Section F shows every check passed.

@@ -1,0 +1,127 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step1-Details
+state=visible dims=A1:E119 max_row=119 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 1 — Opportunity basics
+A3	s	Screen title: Create Opportunity Screen subtitle: Start by selecting your post type and filling in the basics. Readiness meter: Visible throughout, updates as fields are completed. Auto-save: Active throughout.
+A7	s	Screen layout
+A11	s	Section A — Post type
+A13	s	Code
+B13	s	Field label
+C13	s	Type
+D13	s	Required
+E13	s	Condition
+A14	s	S1-F00
+B14	s	What are you posting?
+C14	s	Single select cards
+D14	s	Yes
+E14	s	Always visible
+A16	s	S1-F00 — Post type values:
+A18	s	Option
+B18	s	Description
+C18	s	Matching eligibility
+A19	s	Need
+B19	s	You are seeking something
+C19	s	Type 1 matching
+A20	s	Offer
+B20	s	You are providing something
+C20	s	Type 1 matching
+A21	s	Need & Offer
+B21	s	You are both seeking and providing — same collaboration model
+C21	s	Types 1, 2, 3, 4
+A23	s	Note: If your Need and Offer belong to different collaboration models, create two separate posts (one Need, one Offer) and link them via barter at Step 4.
+A25	s	Platform recommendation: when a single-sided post is created, the system suggests posting the complementary side for applicable models — soft recommendation, not a requirement.
+A29	s	Section B — Opportunity identity
+A31	s	Code
+B31	s	Field label
+C31	s	Type
+D31	s	Required
+E31	s	Condition
+A32	s	S1-F01
+B32	s	Opportunity title
+C32	s	Text (max 100 chars)
+D32	s	Yes
+E32	s	Always visible
+A33	s	S1-F02
+B33	s	Short description
+C33	s	Text area (max 300 chars)
+D33	s	Yes
+E33	s	Always visible
+A35	s	S1-F01 — Opportunity title Placeholder: "Give your opportunity a clear, professional headline" Example hint: "Oracle ERP partnership with KSA local representative" No dropdown — free text only.
+A37	s	S1-F02 — Short description Placeholder: "Briefly describe what this opportunity is about and what makes it worth engaging with" No dropdown — free text only.
+A41	s	Section C — Location
+A43	s	Code
+B43	s	Field label
+C43	s	Type
+D43	s	Required
+E43	s	Condition
+A44	s	S1-F03
+B44	s	Primary location — country
+C44	s	Dropdown
+D44	s	Yes
+E44	s	Always visible
+A45	s	S1-F04
+B45	s	Primary location — city
+C45	s	Dropdown
+D45	s	Yes
+E45	s	Populates after S1-F03
+A46	s	S1-F05
+B46	s	Coverage area
+C46	s	Multi-select dropdown
+D46	s	No
+E46	s	Always visible
+A48	s	S1-F03 — Country dropdown values: Full ISO country list (all 195 countries). Grouped for UX:
+A50	s	Gulf (top group): Saudi Arabia / UAE / Qatar / Kuwait / Bahrain / Oman
+A52	s	North Africa: Egypt / Morocco / Algeria / Tunisia / Libya
+A54	s	Other MENA: Jordan / Iraq / Lebanon / Yemen / Syria / Palestine
+A56	s	Rest of world: all remaining countries alphabetically
+A58	s	S1-F04 — City dropdown values (conditional on country):
+A60	s	Developer note: Gulf countries, Egypt, and North Africa use comprehensive city lists below. All other countries use top 5 cities + Other, sourced from standard geographic database (GeoNames API recommended).
+A62	s	Saudi Arabia: Riyadh / Jeddah / Mecca / Medina / Dammam / Al Khobar / Dhahran / Tabuk / Abha / Khamis Mushait / Hail / Jubail / Yanbu / NEOM / Al Ula / Qassim / Other
+A64	s	UAE: Dubai / Abu Dhabi / Sharjah / Ajman / Ras Al Khaimah / Fujairah / Umm Al Quwain / Al Ain / Other
+A66	s	Qatar: Doha / Al Wakrah / Al Khor / Lusail / Al Rayyan / Other
+A68	s	Kuwait: Kuwait City / Hawalli / Salmiya / Farwaniya / Ahmadi / Jahra / Other
+A70	s	Bahrain: Manama / Muharraq / Riffa / Hamad Town / Isa Town / Sitra / Other
+A72	s	Oman: Muscat / Salalah / Sohar / Nizwa / Sur / Duqm / Musannah / Barka / Other
+A74	s	Egypt:
+A75	s	Cairo / Alexandria / New Administrative Capital / Giza / New Cairo / 6th of October / Sharm El Sheikh / North Coast / Al Eien Alsokhna / Hurghada / Luxor / Aswan / Suez / Port Said / Mansoura / Tanta / Zagazig / Damietta / Other
+A77	s	Morocco: Casablanca / Rabat / Marrakech / Fez / Tangier / Agadir / Meknes / Oujda / Other
+A79	s	Algeria: Algiers / Oran / Constantine / Annaba / Blida / Tlemcen / Other
+A81	s	Tunisia: Tunis / Sfax / Sousse / Gabes / Bizerte / Kairouan / Other
+A83	s	Libya: Tripoli / Benghazi / Misrata / Zawiya / Zliten / Other
+A85	s	Jordan: Amman / Irbid / Zarqa / Aqaba / Jerash / Other
+A87	s	Iraq: Baghdad / Basra / Erbil / Mosul / Najaf / Other
+A89	s	Lebanon: Beirut / Tripoli / Sidon / Tyre / Jounieh / Other
+A91	s	All other countries: Top 5 cities (sourced from GeoNames database) + Other → "Other" triggers free text city field for all countries
+A93	s	S1-F05 — Coverage area values: GCC-wide / KSA / UAE / Qatar / Kuwait / Bahrain / Oman / Egypt / North Africa / Wider MENA / Turkey / Europe / Asia / Africa / Americas / International (worldwide) Multi-select. No "Other" trigger — user selects all that apply.
+A97	s	Section D — Timeline
+A99	s	Code
+B99	s	Field label
+C99	s	Type
+D99	s	Required
+E99	s	Condition
+A100	s	S1-F06
+B100	s	Availability from
+C100	s	Date picker
+D100	s	Yes
+E100	s	Always visible
+A101	s	S1-F07
+B101	s	Timeline duration
+C101	s	Dropdown
+D101	s	Yes
+E101	s	Always visible
+A102	s	S1-F08
+B102	s	Hard deadline
+C102	s	Date picker
+D102	s	No
+E102	s	Always visible — optional
+A104	s	S1-F07 — Timeline duration dropdown values: Immediate / Within 1 month / 1–3 months / 3–6 months / 6–12 months / 12+ months / Flexible / To be agreed
+A108	s	Step 1 completion criteria
+A110	s	All required fields (S1-F00, S1-F01, S1-F02, S1-F03, S1-F04, S1-F06, S1-F07) must be completed before Step 2 is accessible.
+A112	s	Note: Visibility is not a user-controlled field — all opportunities are visible to vetted and subscribing members only by platform default.
+A113	s	Readiness meter reflects the completion percentage of required fields only.
+A117	s	Navigation
+A119	s	Back: N/A (first step) Save Draft: always available Continue: enabled once all required fields complete → proceeds to Step 2

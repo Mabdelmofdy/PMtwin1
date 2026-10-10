@@ -1,0 +1,368 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 3-ME-Lists
+state=visible dims=A1:AH203 max_row=203 max_col=34
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Mentorship (Individual)
+B3	s	Single source of truth for every dropdown on 'Step 3-ME-Wireframe'. Edit values here and the wireframe updates. Grey helper columns are live formulas — do not type in them.
+U4	s	O02 / N03 — SPECIFIC AREA TAXONOMY (by domain) — draft, edit freely
+B5	s	O00 — Collaboration intent
+C5	s	O01 / N02 — Mentorship domain
+D5	s	O04 / N05 — Mentorship format
+E5	s	O06 — Availability
+F5	s	O07 / N09 — Session frequency
+G5	s	O08 — Years of experience in domain
+H5	s	O09 — Personal credentials
+I5	s	O10 / N12 — Languages
+J5	s	O11 / N13 — Rate / budget range
+K5	s	Currency
+L5	s	N00 — Match with
+M5	s	N01 — Collaboration intent
+N5	s	N07 — When to start
+O5	s	N08-TU — Duration time unit
+P5	s	N10 — Minimum mentor experience
+Q5	s	N11 — Mentor credentials preferred
+R5	s	Country (same as S1-F03)
+S5	s	Yes / No (picker)
+U5	s	Technical domain
+V5	s	Business domain
+W5	s	Leadership
+X5	s	Digital & technology
+Y5	s	Finance & commercial
+Z5	s	Career development
+AA5	s	Other
+AC5	s	HELPER · O02 options (live)
+AD5	s	HELPER · O05a options (live)
+AE5	s	HELPER · N03 options (live)
+AF5	s	HELPER · N06a options (live)
+B6	s	Offering new mentorship
+C6	s	Technical domain
+D6	s	One-to-one sessions
+E6	s	Immediate
+F6	s	Weekly
+G6	s	3–7 years
+H6	s	RICS
+I6	s	Arabic
+J6	s	Free / goodwill
+K6	s	USD ($)
+L6	s	Individual mentor only
+M6	s	Seeking new mentorship
+N6	s	Immediately
+O6	s	Weeks
+P6	s	3–7 years
+Q6	s	RICS
+R6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221274A7500>
+S6	s	Yes
+U6	s	Engineering practice
+V6	s	Business development
+W6	s	Team leadership
+X6	s	BIM
+Y6	s	Cost management
+Z6	s	Career planning
+AA6	s	Other
+AC6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221274A7E30>
+AD6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221274A7EC0>
+AE6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221274A65A0>
+AF6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221274A7FB0>
+B7	s	Continuing an existing mentorship relationship
+C7	s	Business domain
+D7	s	Group sessions
+E7	s	Within 1 month
+F7	s	Bi-weekly
+G7	s	7–15 years
+H7	s	CIOB
+I7	s	English
+J7	s	Under $500
+K7	s	SAR (ر.س)
+L7	s	Company mentorship programme
+M7	s	Extending existing mentorship relationship
+N7	s	Within 2 weeks
+O7	s	Months
+P7	s	7–15 years
+Q7	s	CIOB
+R7	s	United Arab Emirates
+S7	s	No
+U7	s	Construction methods
+V7	s	Entrepreneurship
+W7	s	Executive presence
+X7	s	PropTech
+Y7	s	Contracts & claims
+Z7	s	Professional certification prep
+B8	s	Open to discussion
+C8	s	Leadership
+D8	s	Embedded in project
+E8	s	Flexible
+F8	s	Monthly
+G8	s	15–25 years
+H8	s	PE licence
+I8	s	Arabic & English
+J8	s	$500–$1K
+K8	s	AED (د.إ)
+L8	s	Both
+M8	s	Changing mentor
+N8	s	Within 1 month
+O8	s	Years
+P8	s	15–25 years
+Q8	s	PE licence
+R8	s	Qatar
+U8	s	Design management
+V8	s	Strategy
+W8	s	Change management
+X8	s	Data & AI
+Y8	s	Project finance
+Z8	s	Interview & CV
+C9	s	Digital & technology
+D9	s	Online
+E9	s	Specific period
+F9	s	Ad-hoc
+G9	s	25+ years
+H9	s	PMP
+I9	s	French
+J9	s	$1K–$3K
+K9	s	EGP (ج.م)
+M9	s	Open to discussion
+N9	s	1–3 months
+P9	s	25+ years
+Q9	s	PMP
+R9	s	Kuwait
+U9	s	HSE practice
+V9	s	Operations management
+W9	s	Decision making
+X9	s	Digital transformation
+Y9	s	Commercial strategy
+Z9	s	Transitioning sectors
+C10	s	Finance & commercial
+D10	s	In-person
+F10	s	To be agreed
+H10	s	MBA
+I10	s	Mandarin
+J10	s	$3K–$5K
+K10	s	QAR (ر.ق)
+N10	s	Flexible
+P10	s	Not specified
+Q10	s	MBA
+R10	s	Bahrain
+U10	s	Quality management
+V10	s	Client management
+W10	s	Negotiation
+X10	s	Other
+Y10	s	Other
+Z10	s	Other
+C11	s	Career development
+D11	s	Hybrid
+H11	s	PMTwin vetted
+I11	s	Hindi
+J11	s	Above $5K
+K11	s	KWD (د.ك)
+N11	s	Specific date
+Q11	s	PMTwin vetted
+R11	s	Oman
+U11	s	Other
+V11	s	Other
+W11	s	Other
+C12	s	Other
+D12	s	Flexible
+H12	s	Other
+I12	s	Other
+J12	s	To be agreed
+K12	s	BHD (د.ب)
+Q12	s	None
+R12	s	Egypt
+K13	s	OMR (ر.ع)
+Q13	s	Other
+R13	s	Morocco
+K14	s	EUR (€)
+R14	s	Algeria
+K15	s	GBP (£)
+R15	s	Tunisia
+K16	s	Other
+R16	s	Libya
+R17	s	Sudan
+R18	s	Jordan
+R19	s	Lebanon
+R20	s	Iraq
+R21	s	Syria
+R22	s	Yemen
+R23	s	Palestine
+R24	s	Turkey
+R25	s	Iran
+R26	s	Israel
+R27	s	Afghanistan
+R28	s	Albania
+R29	s	Andorra
+R30	s	Angola
+R31	s	Antigua and Barbuda
+R32	s	Argentina
+R33	s	Armenia
+R34	s	Australia
+R35	s	Austria
+R36	s	Azerbaijan
+R37	s	Bahamas
+R38	s	Bangladesh
+R39	s	Barbados
+R40	s	Belarus
+R41	s	Belgium
+R42	s	Belize
+R43	s	Benin
+R44	s	Bhutan
+R45	s	Bolivia
+R46	s	Bosnia and Herzegovina
+R47	s	Botswana
+R48	s	Brazil
+R49	s	Brunei
+R50	s	Bulgaria
+R51	s	Burkina Faso
+R52	s	Burundi
+R53	s	Cambodia
+R54	s	Cameroon
+R55	s	Canada
+R56	s	Cape Verde
+R57	s	Central African Republic
+R58	s	Chad
+R59	s	Chile
+R60	s	China
+R61	s	Colombia
+R62	s	Comoros
+R63	s	Congo (Republic)
+R64	s	Congo (DR)
+R65	s	Costa Rica
+R66	s	Côte d'Ivoire
+R67	s	Croatia
+R68	s	Cuba
+R69	s	Cyprus
+R70	s	Czechia
+R71	s	Denmark
+R72	s	Djibouti
+R73	s	Dominica
+R74	s	Dominican Republic
+R75	s	Ecuador
+R76	s	El Salvador
+R77	s	Equatorial Guinea
+R78	s	Eritrea
+R79	s	Estonia
+R80	s	Eswatini
+R81	s	Ethiopia
+R82	s	Fiji
+R83	s	Finland
+R84	s	France
+R85	s	Gabon
+R86	s	Gambia
+R87	s	Georgia
+R88	s	Germany
+R89	s	Ghana
+R90	s	Greece
+R91	s	Grenada
+R92	s	Guatemala
+R93	s	Guinea
+R94	s	Guinea-Bissau
+R95	s	Guyana
+R96	s	Haiti
+R97	s	Honduras
+R98	s	Hungary
+R99	s	Iceland
+R100	s	India
+R101	s	Indonesia
+R102	s	Ireland
+R103	s	Italy
+R104	s	Jamaica
+R105	s	Japan
+R106	s	Kazakhstan
+R107	s	Kenya
+R108	s	Kiribati
+R109	s	Kosovo
+R110	s	Kyrgyzstan
+R111	s	Laos
+R112	s	Latvia
+R113	s	Lesotho
+R114	s	Liberia
+R115	s	Liechtenstein
+R116	s	Lithuania
+R117	s	Luxembourg
+R118	s	Madagascar
+R119	s	Malawi
+R120	s	Malaysia
+R121	s	Maldives
+R122	s	Mali
+R123	s	Malta
+R124	s	Marshall Islands
+R125	s	Mauritania
+R126	s	Mauritius
+R127	s	Mexico
+R128	s	Micronesia
+R129	s	Moldova
+R130	s	Monaco
+R131	s	Mongolia
+R132	s	Montenegro
+R133	s	Mozambique
+R134	s	Myanmar
+R135	s	Namibia
+R136	s	Nauru
+R137	s	Nepal
+R138	s	Netherlands
+R139	s	New Zealand
+R140	s	Nicaragua
+R141	s	Niger
+R142	s	Nigeria
+R143	s	North Korea
+R144	s	North Macedonia
+R145	s	Norway
+R146	s	Pakistan
+R147	s	Palau
+R148	s	Panama
+R149	s	Papua New Guinea
+R150	s	Paraguay
+R151	s	Peru
+R152	s	Philippines
+R153	s	Poland
+R154	s	Portugal
+R155	s	Romania
+R156	s	Russia
+R157	s	Rwanda
+R158	s	Saint Kitts and Nevis
+R159	s	Saint Lucia
+R160	s	Saint Vincent and the Grenadines
+R161	s	Samoa
+R162	s	San Marino
+R163	s	Sao Tome and Principe
+R164	s	Senegal
+R165	s	Serbia
+R166	s	Seychelles
+R167	s	Sierra Leone
+R168	s	Singapore
+R169	s	Slovakia
+R170	s	Slovenia
+R171	s	Solomon Islands
+R172	s	Somalia
+R173	s	South Africa
+R174	s	South Korea
+R175	s	South Sudan
+R176	s	Spain
+R177	s	Sri Lanka
+R178	s	Suriname
+R179	s	Sweden
+R180	s	Switzerland
+R181	s	Taiwan
+R182	s	Tajikistan
+R183	s	Tanzania
+R184	s	Thailand
+R185	s	Timor-Leste
+R186	s	Togo
+R187	s	Tonga
+R188	s	Trinidad and Tobago
+R189	s	Turkmenistan
+R190	s	Tuvalu
+R191	s	Uganda
+R192	s	Ukraine
+R193	s	United Kingdom
+R194	s	United States
+R195	s	Uruguay
+R196	s	Uzbekistan
+R197	s	Vanuatu
+R198	s	Vatican City
+R199	s	Venezuela
+R200	s	Vietnam
+R201	s	Zambia
+R202	s	Zimbabwe
+R203	s	Other (not listed)

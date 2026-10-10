@@ -1,0 +1,442 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-JV-Wireframe
+state=visible dims=A1:Q92 max_row=92 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H12:H22 H26:H37 J12:J22 J26:J40 J44:J56 type=list formula1="No,Yes" formula2=None allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="JV"
+B3	s	Scope & Work — Joint Venture
+P3	s	Gate
+Q3	f	=$L$24
+B4	s	Define what you bring and what you are looking for in a JV partner. Both sides are required.
+P4	s	Readiness
+Q4	f	=$L$21
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — JV        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  MODEL 1: JV (PROJECT-BASED)
+D7	f	=TEXT($L$21,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$21*24,0))&REPT("░",24-ROUND($L$21*24,0))
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = JV.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$29
+P9	s	Need intent
+Q9	f	=$C$35
+B10	s	SECTION A  —  OFFER SIDE  ·  WHAT YOU BRING TO THIS JV
+G10	s	OFFER PICKER  —  O01 · WHAT YOU BRING  (tick all that apply)
+I10	s	NEED PICKER  —  N01 · WHAT YOU NEED FROM A PARTNER  (tick all)
+P10	s	Need category
+Q10	f	=$C$36
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Category
+H11	s	Select
+I11	s	Category
+J11	s	Select
+P11	s	Need sub-category
+Q11	f	=$C$38
+B12	s	S3-JV-O00 · Collaboration intent *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. Are you initiating, joining, taking over, exiting — or open to discussion.
+G12	f	='Step 3-JV-Lists'!$F$6
+H12	s	No
+I12	f	='Step 3-JV-Lists'!$F$6
+J12	s	No
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$52
+B13	s	S3-JV-O01 · What are you bringing to this JV? *
+C13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0E060>
+D13	f	=IF(COUNTIF($H$12:$H$22,"Yes")=0,"● Required","✓ "&COUNTIF($H$12:$H$22,"Yes")&" selected")
+E13	s	Multi-select. Tick categories in the Offer picker rail on the right; selections roll up here.
+G13	f	='Step 3-JV-Lists'!$F$7
+H13	s	No
+I13	f	='Step 3-JV-Lists'!$F$7
+J13	s	No
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=""
+B14	s	»  O01 — specify "Other"
+D14	f	=IF(ISNUMBER(SEARCH("Other",$C$13)),IF($C14="","● Required","✓ Complete"),"— Hidden")
+E14	s	Free text. Appears only when "Other" is ticked in O01.
+G14	f	='Step 3-JV-Lists'!$F$8
+H14	s	No
+I14	f	='Step 3-JV-Lists'!$F$8
+J14	s	No
+K14	s	This form active (JV)
+L14	f	=IF($L$13="JV","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$58:$C$60)
+B15	s	S3-JV-O02 · Specifically, what does this cover? *
+D15	f	=IF($C15="","● Required","✓ Complete")
+E15	s	Dropdown, filtered to the sub-options of whichever O01 categories you ticked.
+G15	f	='Step 3-JV-Lists'!$F$9
+H15	s	No
+I15	f	='Step 3-JV-Lists'!$F$9
+J15	s	No
+K15	s	Offer required — completed
+L15	f	=IF($C$12<>"",1,0)+IF(COUNTIF($H$12:$H$22,"Yes")>0,1,0)+IF($C$15<>"",1,0)+IF($C$17<>"",1,0)+IF($C$19<>"",1,0)+IF($C$20<>"",1,0)+IF($C$28<>"",1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$65,$C$67,$C$69)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($C$15="Other",IF($C16="","● Required","✓ Complete"),"— Hidden")
+E16	s	Free text. Appears only when O02 = Other.
+G16	f	='Step 3-JV-Lists'!$F$10
+H16	s	No
+I16	f	='Step 3-JV-Lists'!$F$10
+J16	s	No
+K16	s	Need required — completed
+L16	f	=IF($C$35<>"",1,0)+IF(COUNTIF($J$12:$J$22,"Yes")>0,1,0)+IF($C$38<>"",1,0)+IF($C$40<>"",1,0)+IF($C$42<>"",1,0)+IF(COUNTIF($J$26:$J$40,"Yes")>0,1,0)+IF($C$51<>"",1,0)
+B17	s	S3-JV-O03 · Project type *
+D17	f	=IF($C17="","● Required","✓ Complete")
+E17	s	Dropdown. 14 project types including giga-projects.
+G17	f	='Step 3-JV-Lists'!$F$11
+H17	s	No
+I17	f	='Step 3-JV-Lists'!$F$11
+J17	s	No
+K17	s	Conditional fields — active
+L17	f	=IF(ISNUMBER(SEARCH("Other",$C$13)),1,0)+IF($C$15="Other",1,0)+IF($C$17="Other",1,0)+IF($C$20="Other (not listed)",1,0)+IF($C$22="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$24)),1,0)+IF($C$26="Yes",1,0)+IF(ISNUMBER(SEARCH("Other",$C$36)),1,0)+IF($C$38="Other",1,0)+IF($C$40="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$43)),1,0)+IF($C$45="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$47)),1,0)+IF($C$49="Other",1,0)
+B18	s	»  O03 — specify "Other"
+D18	f	=IF($C$17="Other",IF($C18="","● Required","✓ Complete"),"— Hidden")
+E18	s	Free text. Appears only when O03 = Other.
+G18	f	='Step 3-JV-Lists'!$F$12
+H18	s	No
+I18	f	='Step 3-JV-Lists'!$F$12
+J18	s	No
+K18	s	Conditional fields — completed
+L18	f	=IF(AND(ISNUMBER(SEARCH("Other",$C$13)),$C$14<>""),1,0)+IF(AND($C$15="Other",$C$16<>""),1,0)+IF(AND($C$17="Other",$C$18<>""),1,0)+IF(AND($C$20="Other (not listed)",$C$21<>""),1,0)+IF(AND($C$22="Other",$C$23<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$24)),$C$25<>""),1,0)+IF(AND($C$26="Yes",$C$27<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$36)),$C$37<>""),1,0)+IF(AND($C$38="Other",$C$39<>""),1,0)+IF(AND($C$40="Other",$C$41<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$43)),$C$44<>""),1,0)+IF(AND($C$45="Other",$C$46<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$47)),$C$48<>""),1,0)+IF(AND($C$49="Other",$C$50<>""),1,0)
+B19	s	S3-JV-O04 · Project stage *
+D19	f	=IF($C19="","● Required","✓ Complete")
+E19	s	Dropdown. Pre-bid through DLP, or open to any stage.
+G19	f	='Step 3-JV-Lists'!$F$13
+H19	s	No
+I19	f	='Step 3-JV-Lists'!$F$13
+J19	s	No
+K19	s	Required — total
+L19	f	=14+$L$17
+B20	s	S3-JV-O05 · Project location — country *
+D20	f	=IF($C20="","● Required","✓ Complete")
+E20	s	Full country list from the shared Cities dataset (same taxonomy as S1-F03).
+G20	f	='Step 3-JV-Lists'!$F$14
+H20	s	No
+I20	f	='Step 3-JV-Lists'!$F$14
+J20	s	No
+K20	s	Required — completed
+L20	f	=$L$15+$L$16+$L$18
+B21	s	»  O05 — specify "Other" country
+D21	f	=IF($C$20="Other (not listed)",IF($C21="","● Required","✓ Complete"),"— Hidden")
+E21	s	Free text. Appears only when country = Other (not listed).
+G21	f	='Step 3-JV-Lists'!$F$15
+H21	s	No
+I21	f	='Step 3-JV-Lists'!$F$15
+J21	s	No
+K21	s	Readiness
+L21	f	=IFERROR($L$20/$L$19,0)
+B22	s	S3-JV-O05a · Project location — city
+D22	f	=IF($C$20="","— Locked (select country first)",IF($C$22="","○ Optional","✓ Complete"))
+E22	s	Populates from the country above. Gulf & Egypt detailed; elsewhere top 5 + nationwide + Other.
+G22	f	='Step 3-JV-Lists'!$F$16
+H22	s	No
+I22	f	='Step 3-JV-Lists'!$F$16
+J22	s	No
+K22	s	Step 2 gate
+L22	f	='Step 2-Wireframe'!$L$19
+B23	s	»  O05a — specify "Other" city
+D23	f	=IF($C$22="Other",IF($C23="","● Required","✓ Complete"),"— Hidden")
+E23	s	Free text. Appears only when city = Other.
+K23	s	Group match flag
+L23	f	=IF(OR($C$28="3 or more",$C$51="3 or more"),"YES","NO")
+B24	s	S3-JV-O06 · Company credentials & registration
+C24	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F3E240>
+D24	f	=IF(COUNTIF($H$26:$H$37,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$26:$H$37,"Yes")&" selected")
+E24	s	Multi-select. Tick credentials in the Offer picker rail; selections roll up here.
+G24	s	OFFER PICKER  —  O06 · COMPANY CREDENTIALS & REGISTRATION
+I24	s	NEED PICKER  —  N05 · PREFERRED PARTNER LOCATIONS  (tick all)
+K24	s	Step 4 gate
+L24	f	=IF(AND($L$20=$L$19,$L$22="YES",$L$14="YES"),"YES","NO")
+B25	s	»  O06 — specify "Other"
+D25	f	=IF(ISNUMBER(SEARCH("Other",$C$24)),IF($C25="","● Required","✓ Complete"),"— Hidden")
+E25	s	Free text. Appears only when "Other" is ticked in O06.
+G25	s	Credential
+H25	s	Select
+I25	s	Location
+J25	s	Select
+B26	s	S3-JV-O07 · New entity required
+D26	f	=IF($C26="","○ Optional","✓ Complete")
+E26	s	Single select: Yes / No / To be agreed. Choosing Yes opens the entity type field.
+G26	f	='Step 3-JV-Lists'!$O$6
+H26	s	No
+I26	f	='Step 3-JV-Lists'!$AE$6
+J26	s	No
+B27	s	»  O07 — entity type
+D27	f	=IF($C$26<>"Yes","— Hidden",IF($C$27="","● Required","✓ Complete"))
+E27	s	Appears only when O07 = Yes. SPV, consortium, LP, joint company, contractual JV…
+G27	f	='Step 3-JV-Lists'!$O$7
+H27	s	No
+I27	f	='Step 3-JV-Lists'!$AE$7
+J27	s	No
+B28	s	S3-JV-O08 · Number of partners sought *
+D28	f	=IF($C28="","● Required","✓ Complete")
+E28	s	Dropdown. "3 or more" raises the Group Match (Type 3) flag in Section E.
+G28	f	='Step 3-JV-Lists'!$O$8
+H28	s	No
+I28	f	='Step 3-JV-Lists'!$AE$8
+J28	s	No
+B29	s	S3-JV-O09 · Estimated project value
+D29	f	=IF($C29="","○ Optional","✓ Complete")
+E29	s	Range dropdown. Optional — "Prefer not to state" is a valid answer.
+G29	f	='Step 3-JV-Lists'!$O$9
+H29	s	No
+I29	f	='Step 3-JV-Lists'!$AE$9
+J29	s	No
+B30	s	S3-JV-O09-CUR · Currency
+D30	f	=IF($C$29="","— Locked (pick a range first)",IF($C$30="","● Required","✓ Complete"))
+E30	s	Currency for the range above.
+G30	f	='Step 3-JV-Lists'!$O$10
+H30	s	No
+I30	f	='Step 3-JV-Lists'!$AE$10
+J30	s	No
+B31	s	S3-JV-O10 · Expected JV duration
+D31	f	=IF($C31="","○ Optional","✓ Complete")
+E31	s	Dropdown. Short-term through open-ended.
+G31	f	='Step 3-JV-Lists'!$O$11
+H31	s	No
+I31	f	='Step 3-JV-Lists'!$AE$11
+J31	s	No
+G32	f	='Step 3-JV-Lists'!$O$12
+H32	s	No
+I32	f	='Step 3-JV-Lists'!$AE$12
+J32	s	No
+B33	s	SECTION B  —  NEED SIDE  ·  WHAT YOU ARE LOOKING FOR IN THIS JV
+G33	f	='Step 3-JV-Lists'!$O$13
+H33	s	No
+I33	f	='Step 3-JV-Lists'!$AE$13
+J33	s	No
+B34	s	Field
+C34	s	Your input
+D34	s	Status
+E34	s	Hint / validation rule
+G34	f	='Step 3-JV-Lists'!$O$14
+H34	s	No
+I34	f	='Step 3-JV-Lists'!$AE$14
+J34	s	No
+B35	s	S3-JV-N00 · Collaboration intent *
+D35	f	=IF($C35="","● Required","✓ Complete")
+E35	s	Dropdown. Initiating, joining, acquiring, exiting — or open to discussion.
+G35	f	='Step 3-JV-Lists'!$O$15
+H35	s	No
+I35	f	='Step 3-JV-Lists'!$AE$15
+J35	s	No
+B36	s	S3-JV-N01 · What do you need from a JV partner? *
+C36	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F52BD0>
+D36	f	=IF(COUNTIF($J$12:$J$22,"Yes")=0,"● Required","✓ "&COUNTIF($J$12:$J$22,"Yes")&" selected")
+E36	s	Multi-select. Tick categories in the Need picker rail on the right.
+G36	f	='Step 3-JV-Lists'!$O$16
+H36	s	No
+I36	f	='Step 3-JV-Lists'!$AE$16
+J36	s	No
+B37	s	»  N01 — specify "Other"
+D37	f	=IF(ISNUMBER(SEARCH("Other",$C$36)),IF($C37="","● Required","✓ Complete"),"— Hidden")
+E37	s	Free text. Appears only when "Other" is ticked in N01.
+G37	f	='Step 3-JV-Lists'!$O$17
+H37	s	No
+I37	f	='Step 3-JV-Lists'!$AE$17
+J37	s	No
+B38	s	S3-JV-N02 · Specifically, what should they bring? *
+D38	f	=IF($C38="","● Required","✓ Complete")
+E38	s	Dropdown, filtered to the sub-options of whichever N01 categories you ticked.
+I38	f	='Step 3-JV-Lists'!$AE$18
+J38	s	No
+B39	s	»  N02 — specify "Other"
+D39	f	=IF($C$38="Other",IF($C39="","● Required","✓ Complete"),"— Hidden")
+E39	s	Free text. Appears only when N02 = Other.
+I39	f	='Step 3-JV-Lists'!$AE$19
+J39	s	No
+B40	s	S3-JV-N03 · Project type *
+D40	f	=IF($C40="","● Required","✓ Complete")
+E40	s	Dropdown. Same 14 project types as the Offer side.
+I40	f	='Step 3-JV-Lists'!$AE$20
+J40	s	No
+B41	s	»  N03 — specify "Other"
+D41	f	=IF($C$40="Other",IF($C41="","● Required","✓ Complete"),"— Hidden")
+E41	s	Free text. Appears only when N03 = Other.
+B42	s	S3-JV-N04 · Project stage *
+D42	f	=IF($C42="","● Required","✓ Complete")
+E42	s	Dropdown. Pre-bid through DLP, or open to any stage.
+I42	s	NEED PICKER  —  N06 · MINIMUM PARTNER REQUIREMENTS  (tick all)
+B43	s	S3-JV-N05 · Preferred partner location — country *
+C43	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F52330>
+D43	f	=IF(COUNTIF($J$26:$J$40,"Yes")=0,"● Required","✓ "&COUNTIF($J$26:$J$40,"Yes")&" selected")
+E43	s	Multi-select. Tick one or more target markets in the Need picker rail.
+I43	s	Requirement
+J43	s	Select
+B44	s	»  N05 — specify "Other"
+D44	f	=IF(ISNUMBER(SEARCH("Other",$C$43)),IF($C44="","● Required","✓ Complete"),"— Hidden")
+E44	s	Free text. Appears only when "Other" is ticked in N05.
+I44	f	='Step 3-JV-Lists'!$AC$6
+J44	s	No
+B45	s	S3-JV-N05a · Preferred partner location — city
+D45	f	=IF('Step 3-JV-Lists'!$BC$6="","— Locked (tick a country first)",IF($C$45="","○ Optional","✓ Complete"))
+E45	s	Scoped to the first ticked country. In the live platform one city dropdown appears per ticked country.
+I45	f	='Step 3-JV-Lists'!$AC$7
+J45	s	No
+B46	s	»  N05a — specify "Other" city
+D46	f	=IF($C$45="Other",IF($C46="","● Required","✓ Complete"),"— Hidden")
+E46	s	Free text. Appears only when city = Other.
+I46	f	='Step 3-JV-Lists'!$AC$8
+J46	s	No
+B47	s	S3-JV-N06 · Minimum partner requirements
+C47	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F0FF50>
+D47	f	=IF(COUNTIF($J$44:$J$56,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$44:$J$56,"Yes")&" selected")
+E47	s	Multi-select. Tick minimum requirements in the Need picker rail.
+I47	f	='Step 3-JV-Lists'!$AC$9
+J47	s	No
+B48	s	»  N06 — specify "Other"
+D48	f	=IF(ISNUMBER(SEARCH("Other",$C$47)),IF($C48="","● Required","✓ Complete"),"— Hidden")
+E48	s	Free text. Appears only when "Other" is ticked in N06.
+I48	f	='Step 3-JV-Lists'!$AC$10
+J48	s	No
+B49	s	S3-JV-N07 · JV structure preference
+D49	f	=IF($C49="","○ Optional","✓ Complete")
+E49	s	Dropdown. SPV, consortium, LP, joint company, contractual JV, to be agreed.
+I49	f	='Step 3-JV-Lists'!$AC$11
+J49	s	No
+B50	s	»  N07 — specify "Other"
+D50	f	=IF($C$49="Other",IF($C50="","● Required","✓ Complete"),"— Hidden")
+E50	s	Free text. Appears only when N07 = Other.
+I50	f	='Step 3-JV-Lists'!$AC$12
+J50	s	No
+B51	s	S3-JV-N08 · Number of partners sought *
+D51	f	=IF($C51="","● Required","✓ Complete")
+E51	s	Dropdown. "3 or more" raises the Group Match (Type 3) flag.
+I51	f	='Step 3-JV-Lists'!$AC$13
+J51	s	No
+B52	s	S3-JV-N09 · Estimated project value
+D52	f	=IF($C52="","○ Optional","✓ Complete")
+E52	s	Range dropdown. Optional.
+I52	f	='Step 3-JV-Lists'!$AC$14
+J52	s	No
+B53	s	S3-JV-N09-CUR · Currency
+D53	f	=IF($C$52="","— Locked (pick a range first)",IF($C$53="","● Required","✓ Complete"))
+E53	s	Currency for the range above.
+I53	f	='Step 3-JV-Lists'!$AC$15
+J53	s	No
+B54	s	S3-JV-N10 · Expected JV duration
+D54	f	=IF($C54="","○ Optional","✓ Complete")
+E54	s	Dropdown. Short-term through open-ended.
+I54	f	='Step 3-JV-Lists'!$AC$16
+J54	s	No
+I55	f	='Step 3-JV-Lists'!$AC$17
+J55	s	No
+B56	s	SECTION C  —  EXPECTED DELIVERABLES  ·  NEED SIDE  (collapsed by default — recommended)
+I56	f	='Step 3-JV-Lists'!$AC$18
+J56	s	No
+B57	s	Field
+C57	s	Your input
+D57	s	Status
+E57	s	Hint / validation rule
+B58	s	S3-JV-D01 · Expected deliverable 1
+D58	f	=IF($C$58="","○ Optional","✓ Complete")
+E58	s	Add expected deliverables (recommended — helps partners assess fit). Text, repeatable.
+G58	s	MILESTONE DATE SCOPE
+B59	s	S3-JV-D01 · Expected deliverable 2
+D59	f	=IF($C$58="","— Locked",IF($C$59="","○ Optional","✓ Complete"))
+E59	s	Second deliverable row — only offered once the first is filled.
+G59	s	Month
+I59	s	Year
+B60	s	S3-JV-D01 · Expected deliverable 3
+D60	f	=IF($C$59="","— Locked",IF($C$60="","○ Optional","✓ Complete"))
+E60	s	Third deliverable row — the live platform allows unlimited rows.
+B61	s	S3-JV-D02 · Acceptance criteria
+D61	f	=IF($C$58="","— Locked (add a deliverable first)",IF($C$61="","○ Optional","✓ Complete"))
+E61	s	How you will judge the deliverable as accepted.
+B63	s	SECTION D  —  MILESTONES  ·  BOTH SIDES  (collapsed by default — optional)
+B64	s	Field
+C64	s	Your input
+D64	s	Status
+E64	s	Hint / validation rule
+B65	s	S3-JV-M01 · Milestone 1 — title
+D65	f	=IF($C$65="","○ Optional","✓ Complete")
+E65	s	Text. Add milestones (optional). User can add multiple.
+B66	s	S3-JV-M02 · Milestone 1 — target date
+D66	f	=IF($C$65="","— Locked",IF($C$66="","○ Optional",IF(NOT(ISNUMBER($C$66)),"⚠ Not a valid date","✓ Complete")))
+E66	s	Date picker — pick from the dropdown. Use the milestone date scope below the picker rails to change month / year.
+B67	s	S3-JV-M01 · Milestone 2 — title
+D67	f	=IF($C$67="","○ Optional","✓ Complete")
+E67	s	Text. Offered once the previous milestone has a title.
+B68	s	S3-JV-M02 · Milestone 2 — target date
+D68	f	=IF($C$67="","— Locked",IF($C$68="","○ Optional",IF(NOT(ISNUMBER($C$68)),"⚠ Not a valid date","✓ Complete")))
+E68	s	Date picker — pick from the dropdown. Use the milestone date scope below the picker rails to change month / year.
+B69	s	S3-JV-M01 · Milestone 3 — title
+D69	f	=IF($C$69="","○ Optional","✓ Complete")
+E69	s	Text. Offered once the previous milestone has a title.
+B70	s	S3-JV-M02 · Milestone 3 — target date
+D70	f	=IF($C$69="","— Locked",IF($C$70="","○ Optional",IF(NOT(ISNUMBER($C$70)),"⚠ Not a valid date","✓ Complete")))
+E70	s	Date picker — pick from the dropdown. Use the milestone date scope below the picker rails to change month / year.
+B71	s	SECTION E  —  MATCHING FLAGS & HIDDEN FIELDS
+B72	s	Item
+C72	s	Value
+D72	s	Status
+E72	s	Rule
+B73	s	Group Match (Type 3) flag
+C73	f	=IF($L$23="YES","Raised — 3 or more partners sought","Not raised")
+D73	f	=IF($L$23="YES","◆ Type 3 candidate","— None")
+E73	s	Raised when O08 or N08 = "3 or more". Feeds the Step 2 matching structure.
+B74	s	Two-Way Match (Type 2) readiness
+C74	f	=IF(AND($L$15=7,$L$16=7),"Both sides complete","Offer "&$L$15&"/7 · Need "&$L$16&"/7")
+D74	f	=IF(AND($L$15=7,$L$16=7),"✓ Type 2 eligible","● Incomplete")
+E74	s	Completing both Offer and Need sides is what upgrades the match type.
+B75	s	Hidden for the JV model
+C75	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-JV-Lists'!$AG$6:$AG$11)
+D75	s	— Not rendered
+E75	s	These fields exist in other Step 3 model forms but are suppressed for JV.
+B77	s	SECTION F  —  CROSS-FIELD VALIDATION & COMPLETION
+B78	s	Check
+C78	s	Result
+D78	s	Status
+E78	s	Rule
+B79	s	Required fields completed
+C79	f	=$L$20&" of "&$L$19
+D79	f	=IF($L$20=$L$19,"✓ Complete","● Incomplete")
+E79	s	14 mandatory fields (7 Offer + 7 Need) plus any "Other" specify field opened by a selection.
+B80	s	Offer side complete
+C80	f	=$L$15&" of 7"
+D80	f	=IF($L$15=7,"✓ Pass","● Incomplete")
+E80	s	O00, O01, O02, O03, O04, O05, O08.
+B81	s	Need side complete
+C81	f	=$L$16&" of 7"
+D81	f	=IF($L$16=7,"✓ Pass","● Incomplete")
+E81	s	N00, N01, N02, N03, N04, N05, N08.
+B82	s	Conditional fields resolved
+C82	f	=$L$18&" of "&$L$17
+D82	f	=IF($L$18=$L$17,"✓ Pass","● Pending")
+E82	s	Every conditional field opened by a selection (an "Other" free text, or the O07 entity type) must be filled.
+B83	s	Step 2 model is JV
+C83	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D83	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E83	s	This form is only valid when the Step 2 collaboration model is JV.
+B84	s	Step 2 gate passed
+C84	f	=IF($L$22="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D84	f	=IF($L$22="YES","✓ Pass","⚠ Blocks Step 4")
+E84	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B85	s	Readiness meter
+C85	f	=TEXT($L$21,"0%")&" of required fields"
+D85	f	=IF($L$24="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E85	s	Optional fields, deliverables and milestones do not affect the meter.
+B87	s	NAVIGATION
+B88	s	◀  Back to Step 2
+C88	s	💾  Save Draft
+D88	f	=IF($L$24="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E88	s	Continue activates only when Section F shows every check passed.

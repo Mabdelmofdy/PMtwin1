@@ -1,0 +1,326 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-RS-Lists
+state=visible dims=B2:BJ70 max_row=70 max_col=62
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 3: Resource Sharing (Variant A Sharing / Variant B Pooling)
+B3	s	Q01 decides which variant loads. Both variants share the resource-type and sub-type taxonomy.
+B5	s	Differentiating question (Q01)
+D5	s	Q01 answer
+E5	s	Variant loaded
+F5	s	Matching structure
+H5	s	Resource type (O01 / N01 / RP-O01 / RP-N01 / RP-N10)
+K5	s	Availability (O05 / N06 / RP-O05)
+M5	s	Availability period / duration (O06 / N07 / RP-O06 / RP-N06)
+O5	s	Resource condition — Sharing (O08)
+Q5	s	Resource condition — Pooling (RP-O07)
+S5	s	Capacity unit (O07)
+U5	s	Collaboration intent — Sharing Offer (O00)
+W5	s	Collaboration intent — Sharing Need (N00)
+Y5	s	Pool intent (RP-O00 / RP-N00)
+AA5	s	Owner location preference (N09)
+AC5	s	Usage frequency (RP-N05)
+AE5	s	Minimum pool size (RP-N07)
+AG5	s	Maximum pool size (RP-N08)
+AI5	s	Pool governance preference (RP-N09)
+AK5	s	Hidden fields for the Resource Sharing model
+AM5	s	Month (milestone date picker)
+AO5	s	Year (milestone date picker)
+AQ5	s	Resource type
+AR5	s	Sub-type (O02 / N02 / RP-O02 / RP-N02)
+AT5	s	O02 sub-type source
+AV5	s	N02 sub-type source
+AX5	s	RP-O02 sub-type source
+AZ5	s	RP-N02 sub-type source
+BB5	s	O04a city source
+BD5	s	N04a city source
+BF5	s	RP-O04a city source
+BH5	s	RP-N03a city source
+BJ5	s	Milestone date options
+B6	s	I own the resource and want to share it with others who need it
+D6	s	I own the resource and want to share it with others who need it
+E6	s	Variant A — Sharing (one owner, others use)
+F6	s	Straightforward Match (Type 1)
+H6	s	Space & facilities
+K6	s	Full-time
+M6	s	Less than 1 month
+O6	s	New / unused
+Q6	s	New / unused
+S6	s	Units / Nos
+U6	s	Making a resource available for sharing
+W6	s	Seeking access to a resource I do not own
+Y6	s	Initiating a new pool
+AA6	s	Same location (same city)
+AC6	s	Daily
+AE6	s	2 parties
+AG6	s	3 parties
+AI6	s	First-come scheduling
+AK6	s	Entity establishment
+AM6	s	January
+AO6	n	2026
+AQ6	s	Space & facilities
+AR6	s	Office space
+AT6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126058E30>
+AV6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A7B0>
+AX6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A7E0>
+AZ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A810>
+BB6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A870>
+BD6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A8A0>
+BF6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A8D0>
+BH6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A900>
+BJ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212605A930>
+B7	s	Multiple parties each contribute resources to a shared pool
+D7	s	Multiple parties each contribute resources to a shared pool
+E7	s	Variant B — Pooling (multiple contributors, shared access)
+F7	s	Group Match (Type 3)
+H7	s	Heavy equipment
+K7	s	Part-time
+M7	s	1–3 months
+O7	s	Like new
+Q7	s	Like new
+S7	s	m²
+U7	s	Exiting an existing sharing arrangement
+W7	s	Seeking to exit an existing sharing arrangement
+Y7	s	Joining an existing pool
+AA7	s	Same country
+AC7	s	Several times per week
+AE7	s	3 parties
+AG7	s	4 parties
+AI7	s	Proportional usage based on contribution
+AK7	s	Project stage
+AM7	s	February
+AO7	n	2027
+AQ7	s	Space & facilities
+AR7	s	Co-working space
+BJ7	f	=
+H8	s	Fleet & vehicles
+K8	s	Specific days per week
+M8	s	3–6 months
+O8	s	Good working condition
+Q8	s	Good working condition
+S8	s	m³
+U8	s	Open to discussion
+W8	s	Open to discussion
+Y8	s	Exiting an existing pool
+AA8	s	Gulf region
+AC8	s	Weekly
+AE8	s	4 parties
+AG8	s	5 parties
+AI8	s	Rotation
+AK8	s	Engineering credentials
+AM8	s	March
+AO8	n	2028
+AQ8	s	Space & facilities
+AR8	s	Meeting & conference rooms
+BJ8	f	=
+H9	s	Human capacity
+K9	s	On-demand
+M9	s	6–12 months
+O9	s	Operational with minor wear
+Q9	s	Operational with minor wear
+S9	s	Hours per week
+Y9	s	Open to discussion
+AA9	s	Any location
+AC9	s	Monthly
+AE9	s	5 parties
+AG9	s	6 parties
+AI9	s	Booking system
+AK9	s	Skill level
+AM9	s	April
+AO9	n	2029
+AQ9	s	Space & facilities
+AR9	s	Warehouse
+BJ9	f	=
+H10	s	Technology & software
+K10	s	Seasonal
+M10	s	Over 1 year
+O10	s	Requires minor maintenance
+Q10	s	Other
+S10	s	Days per week
+AA10	s	Other
+AC10	s	Occasional
+AE10	s	6 or more
+AG10	s	No maximum
+AI10	s	To be agreed
+AK10	s	Material category
+AM10	s	May
+AO10	n	2030
+AQ10	s	Space & facilities
+AR10	s	Cold storage
+BJ10	f	=
+H11	s	Materials & inventory
+K11	s	Flexible
+M11	s	Ongoing
+O11	s	Other
+S11	s	Persons
+AC11	s	On-demand
+AE11	s	Open
+AG11	s	To be agreed
+AI11	s	Other
+AM11	s	June
+AO11	n	2031
+AQ11	s	Space & facilities
+AR11	s	Distribution centre
+BJ11	f	=
+H12	s	Other
+M12	s	Flexible
+S12	s	Tonnes
+AC12	s	To be agreed
+AM12	s	July
+AO12	n	2032
+AQ12	s	Space & facilities
+AR12	s	Workshop & fabrication yard
+BJ12	f	=
+S13	s	Litres
+AM13	s	August
+AO13	n	2033
+AQ13	s	Space & facilities
+AR13	s	Labour accommodation
+BJ13	f	=
+S14	s	Kilometres
+AM14	s	September
+AO14	n	2034
+AQ14	s	Space & facilities
+AR14	s	Retail space
+BJ14	f	=
+S15	s	Other
+AM15	s	October
+AO15	n	2035
+AQ15	s	Space & facilities
+AR15	s	Showroom
+BJ15	f	=
+AM16	s	November
+AO16	n	2036
+AQ16	s	Space & facilities
+AR16	s	Laboratory / Testing facility
+BJ16	f	=
+AM17	s	December
+AQ17	s	Space & facilities
+AR17	s	Data centre / server room
+BJ17	f	=
+AQ18	s	Space & facilities
+AR18	s	Other
+BJ18	f	=
+AQ19	s	Heavy equipment
+AR19	s	Excavator
+BJ19	f	=
+AQ20	s	Heavy equipment
+AR20	s	Backhoe loader
+BJ20	f	=
+AQ21	s	Heavy equipment
+AR21	s	Tower crane
+BJ21	f	=
+AQ22	s	Heavy equipment
+AR22	s	Mobile crane
+BJ22	f	=
+AQ23	s	Heavy equipment
+AR23	s	Concrete mixer
+BJ23	f	=
+AQ24	s	Heavy equipment
+AR24	s	Concrete pump
+BJ24	f	=
+AQ25	s	Heavy equipment
+AR25	s	Batching plant
+BJ25	f	=
+AQ26	s	Heavy equipment
+AR26	s	Bulldozer
+BJ26	f	=
+AQ27	s	Heavy equipment
+AR27	s	Grader
+BJ27	f	=
+AQ28	s	Heavy equipment
+AR28	s	Compactor
+BJ28	f	=
+AQ29	s	Heavy equipment
+AR29	s	Generator / Power unit
+BJ29	f	=
+AQ30	s	Heavy equipment
+AR30	s	Surveying equipment
+BJ30	f	=
+AQ31	s	Heavy equipment
+AR31	s	Piling equipment
+BJ31	f	=
+AQ32	s	Heavy equipment
+AR32	s	Drilling rig
+BJ32	f	=
+AQ33	s	Heavy equipment
+AR33	s	Scaffolding & formwork
+BJ33	f	=
+AQ34	s	Heavy equipment
+AR34	s	Forklifts & lifting equipment
+BJ34	f	=
+AQ35	s	Heavy equipment
+AR35	s	Road construction equipment
+BJ35	f	=
+AQ36	s	Heavy equipment
+AR36	s	Other
+AQ37	s	Fleet & vehicles
+AR37	s	Heavy trucks
+AQ38	s	Fleet & vehicles
+AR38	s	Tipper trucks
+AQ39	s	Fleet & vehicles
+AR39	s	Concrete mixer trucks
+AQ40	s	Fleet & vehicles
+AR40	s	Light vehicles / Pick-ups
+AQ41	s	Fleet & vehicles
+AR41	s	Specialised transport / Low-loaders
+AQ42	s	Fleet & vehicles
+AR42	s	Staff buses
+AQ43	s	Fleet & vehicles
+AR43	s	Marine vessels
+AQ44	s	Fleet & vehicles
+AR44	s	Aerial work platforms
+AQ45	s	Fleet & vehicles
+AR45	s	Other
+AQ46	s	Human capacity
+AR46	s	Engineering professionals
+AQ47	s	Human capacity
+AR47	s	Project management professionals
+AQ48	s	Human capacity
+AR48	s	Commercial professionals (QS / contracts)
+AQ49	s	Human capacity
+AR49	s	Design professionals
+AQ50	s	Human capacity
+AR50	s	Technical & trade skills
+AQ51	s	Human capacity
+AR51	s	Site supervisors
+AQ52	s	Human capacity
+AR52	s	Administrative staff
+AQ53	s	Human capacity
+AR53	s	HSE professionals
+AQ54	s	Human capacity
+AR54	s	Finance professionals
+AQ55	s	Human capacity
+AR55	s	Other
+AQ56	s	Technology & software
+AR56	s	Project management software
+AQ57	s	Technology & software
+AR57	s	BIM software
+AQ58	s	Technology & software
+AR58	s	Design software (AutoCAD / Revit)
+AQ59	s	Technology & software
+AR59	s	ERP system access
+AQ60	s	Technology & software
+AR60	s	PMIS
+AQ61	s	Technology & software
+AR61	s	Server & computing capacity
+AQ62	s	Technology & software
+AR62	s	Cloud storage
+AQ63	s	Technology & software
+AR63	s	GIS & mapping software
+AQ64	s	Technology & software
+AR64	s	Other
+AQ65	s	Materials & inventory
+AR65	s	Construction materials
+AQ66	s	Materials & inventory
+AR66	s	MEP materials
+AQ67	s	Materials & inventory
+AR67	s	Finishing materials
+AQ68	s	Materials & inventory
+AR68	s	Tools & small equipment
+AQ69	s	Materials & inventory
+AR69	s	Other
+AQ70	s	Other
+AR70	s	Other

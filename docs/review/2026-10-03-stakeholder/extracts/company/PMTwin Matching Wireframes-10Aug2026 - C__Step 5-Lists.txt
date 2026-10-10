@@ -1,0 +1,281 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 5-Lists
+state=visible dims=B2:AB40 max_row=40 max_col=28
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE & ROUTING — Step 5 · Review & Publish
+B3	s	Routes the Review screen to whichever Step 3 model form is active, and holds the readiness scoring weights.
+P4	s	ENGINE — every model's Step 3 summary feed, with the active one resolved on the right
+B5	s	Collaboration model
+C5	s	Step 3 wireframe sheet
+E5	s	Readiness component
+F5	s	Weight
+H5	s	Schedule — time
+J5	s	Yes / No
+L5	s	Month (schedule date scope)
+N5	s	Year (schedule date scope)
+P5	s	Active collaboration model
+Q5	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+AB5	s	Schedule date options
+B6	s	JV
+C6	s	Step 3-JV-Wireframe
+E6	s	Required fields completed (base)
+F6	n	0.6
+H6	d	00:00:00
+J6	s	No
+L6	s	January
+N6	n	2026
+P6	s	Active Step 3 sheet
+Q6	f	=IFERROR(INDEX($C$6:$C$13,MATCH($Q$5,$B$6:$B$13,0)),"")
+AB6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265E1E50>
+B7	s	Co-ownership
+C7	s	Step 3-CO-Wireframe
+E7	s	Need & Offer dual declaration
+F7	n	0.15
+H7	d	01:00:00
+J7	s	Yes
+L7	s	February
+N7	n	2027
+P7	s	Feed key
+Q7	s	JV
+R7	s	Co-ownership
+S7	s	Resource Sharing
+T7	s	Resource Exchange
+U7	s	Bulk Purchasing
+V7	s	Task-based Collaboration
+W7	s	Hiring
+X7	s	Mentorship
+Z7	s	ACTIVE FEED
+AB7	f	=
+B8	s	Resource Sharing
+C8	s	Step 3-RS-Wireframe
+E8	s	Deliverables added
+F8	n	0.1
+H8	d	02:00:00
+L8	s	March
+N8	n	2028
+P8	s	Model
+Q8	f	='Step 3-JV-Wireframe'!$Q$2
+R8	f	='Step 3-CO-Wireframe'!$Q$2
+S8	f	='Step 3-RS-Wireframe'!$Q$2
+T8	f	='Step 3-RE-Wireframe'!$Q$2
+U8	f	='Step 3-BP-Wireframe'!$Q$2
+V8	f	='Step 3-TB-Wireframe'!$Q$2
+W8	f	='Step 3-HI-Wireframe'!$Q$2
+X8	f	='Step 3-ME-Wireframe'!$Q$2
+Z8	f	=IFERROR(IF(INDEX($Q$8:$X$21,1,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,1,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB8	f	=
+B9	s	Resource Exchange
+C9	s	Step 3-RE-Wireframe
+E9	s	Milestones added
+F9	n	0.05
+H9	d	03:00:00
+L9	s	April
+N9	n	2029
+P9	s	Gate
+Q9	f	='Step 3-JV-Wireframe'!$Q$3
+R9	f	='Step 3-CO-Wireframe'!$Q$3
+S9	f	='Step 3-RS-Wireframe'!$Q$3
+T9	f	='Step 3-RE-Wireframe'!$Q$3
+U9	f	='Step 3-BP-Wireframe'!$Q$3
+V9	f	='Step 3-TB-Wireframe'!$Q$3
+W9	f	='Step 3-HI-Wireframe'!$Q$3
+X9	f	='Step 3-ME-Wireframe'!$Q$3
+Z9	f	=IFERROR(IF(INDEX($Q$8:$X$21,2,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,2,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB9	f	=
+B10	s	Bulk Purchasing
+C10	s	Step 3-BP-Wireframe
+E10	s	Estimated value entered
+F10	n	0.05
+H10	d	04:00:00
+L10	s	May
+N10	n	2030
+P10	s	Readiness
+Q10	f	='Step 3-JV-Wireframe'!$Q$4
+R10	f	='Step 3-CO-Wireframe'!$Q$4
+S10	f	='Step 3-RS-Wireframe'!$Q$4
+T10	f	='Step 3-RE-Wireframe'!$Q$4
+U10	f	='Step 3-BP-Wireframe'!$Q$4
+V10	f	='Step 3-TB-Wireframe'!$Q$4
+W10	f	='Step 3-HI-Wireframe'!$Q$4
+X10	f	='Step 3-ME-Wireframe'!$Q$4
+Z10	f	=IFERROR(INDEX($Q$8:$X$21,3,MATCH($Q$5,$Q$7:$X$7,0)),0)
+AB10	f	=
+B11	s	Task-based Collaboration
+C11	s	Step 3-TB-Wireframe
+E11	s	Coverage area specified
+F11	n	0.05
+H11	d	05:00:00
+L11	s	June
+N11	n	2031
+P11	s	Offer intent
+Q11	f	='Step 3-JV-Wireframe'!$Q$5
+R11	f	='Step 3-CO-Wireframe'!$Q$5
+S11	f	='Step 3-RS-Wireframe'!$Q$5
+T11	f	='Step 3-RE-Wireframe'!$Q$5
+U11	f	='Step 3-BP-Wireframe'!$Q$5
+V11	f	='Step 3-TB-Wireframe'!$Q$5
+W11	f	='Step 3-HI-Wireframe'!$Q$5
+X11	f	='Step 3-ME-Wireframe'!$Q$5
+Z11	f	=IFERROR(IF(INDEX($Q$8:$X$21,4,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,4,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB11	f	=
+B12	s	Hiring
+C12	s	Step 3-HI-Wireframe
+H12	d	06:00:00
+L12	s	July
+N12	n	2032
+P12	s	Offer category
+Q12	f	='Step 3-JV-Wireframe'!$Q$6
+R12	f	='Step 3-CO-Wireframe'!$Q$6
+S12	f	='Step 3-RS-Wireframe'!$Q$6
+T12	f	='Step 3-RE-Wireframe'!$Q$6
+U12	f	='Step 3-BP-Wireframe'!$Q$6
+V12	f	='Step 3-TB-Wireframe'!$Q$6
+W12	f	='Step 3-HI-Wireframe'!$Q$6
+X12	f	='Step 3-ME-Wireframe'!$Q$6
+Z12	f	=IFERROR(IF(INDEX($Q$8:$X$21,5,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,5,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB12	f	=
+B13	s	Mentorship
+C13	s	Step 3-ME-Wireframe
+E13	s	Weights are editable — the Review screen recalculates immediately. Total of all six = 100%.
+H13	d	07:00:00
+L13	s	August
+N13	n	2033
+P13	s	Offer sub-category
+Q13	f	='Step 3-JV-Wireframe'!$Q$7
+R13	f	='Step 3-CO-Wireframe'!$Q$7
+S13	f	='Step 3-RS-Wireframe'!$Q$7
+T13	f	='Step 3-RE-Wireframe'!$Q$7
+U13	f	='Step 3-BP-Wireframe'!$Q$7
+V13	f	='Step 3-TB-Wireframe'!$Q$7
+W13	f	='Step 3-HI-Wireframe'!$Q$7
+X13	f	='Step 3-ME-Wireframe'!$Q$7
+Z13	f	=IFERROR(IF(INDEX($Q$8:$X$21,6,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,6,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB13	f	=
+H14	d	08:00:00
+L14	s	September
+N14	n	2034
+P14	s	Offer value
+Q14	f	='Step 3-JV-Wireframe'!$Q$8
+R14	f	='Step 3-CO-Wireframe'!$Q$8
+S14	f	='Step 3-RS-Wireframe'!$Q$8
+T14	f	='Step 3-RE-Wireframe'!$Q$8
+U14	f	='Step 3-BP-Wireframe'!$Q$8
+V14	f	='Step 3-TB-Wireframe'!$Q$8
+W14	f	='Step 3-HI-Wireframe'!$Q$8
+X14	f	='Step 3-ME-Wireframe'!$Q$8
+Z14	f	=IFERROR(IF(INDEX($Q$8:$X$21,7,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,7,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB14	f	=
+H15	d	09:00:00
+L15	s	October
+N15	n	2035
+P15	s	Need intent
+Q15	f	='Step 3-JV-Wireframe'!$Q$9
+R15	f	='Step 3-CO-Wireframe'!$Q$9
+S15	f	='Step 3-RS-Wireframe'!$Q$9
+T15	f	='Step 3-RE-Wireframe'!$Q$9
+U15	f	='Step 3-BP-Wireframe'!$Q$9
+V15	f	='Step 3-TB-Wireframe'!$Q$9
+W15	f	='Step 3-HI-Wireframe'!$Q$9
+X15	f	='Step 3-ME-Wireframe'!$Q$9
+Z15	f	=IFERROR(IF(INDEX($Q$8:$X$21,8,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,8,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB15	f	=
+H16	d	10:00:00
+L16	s	November
+N16	n	2036
+P16	s	Need category
+Q16	f	='Step 3-JV-Wireframe'!$Q$10
+R16	f	='Step 3-CO-Wireframe'!$Q$10
+S16	f	='Step 3-RS-Wireframe'!$Q$10
+T16	f	='Step 3-RE-Wireframe'!$Q$10
+U16	f	='Step 3-BP-Wireframe'!$Q$10
+V16	f	='Step 3-TB-Wireframe'!$Q$10
+W16	f	='Step 3-HI-Wireframe'!$Q$10
+X16	f	='Step 3-ME-Wireframe'!$Q$10
+Z16	f	=IFERROR(IF(INDEX($Q$8:$X$21,9,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,9,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB16	f	=
+H17	d	11:00:00
+L17	s	December
+P17	s	Need sub-category
+Q17	f	='Step 3-JV-Wireframe'!$Q$11
+R17	f	='Step 3-CO-Wireframe'!$Q$11
+S17	f	='Step 3-RS-Wireframe'!$Q$11
+T17	f	='Step 3-RE-Wireframe'!$Q$11
+U17	f	='Step 3-BP-Wireframe'!$Q$11
+V17	f	='Step 3-TB-Wireframe'!$Q$11
+W17	f	='Step 3-HI-Wireframe'!$Q$11
+X17	f	='Step 3-ME-Wireframe'!$Q$11
+Z17	f	=IFERROR(IF(INDEX($Q$8:$X$21,10,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,10,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB17	f	=
+H18	d	12:00:00
+P18	s	Need value
+Q18	f	='Step 3-JV-Wireframe'!$Q$12
+R18	f	='Step 3-CO-Wireframe'!$Q$12
+S18	f	='Step 3-RS-Wireframe'!$Q$12
+T18	f	='Step 3-RE-Wireframe'!$Q$12
+U18	f	='Step 3-BP-Wireframe'!$Q$12
+V18	f	='Step 3-TB-Wireframe'!$Q$12
+W18	f	='Step 3-HI-Wireframe'!$Q$12
+X18	f	='Step 3-ME-Wireframe'!$Q$12
+Z18	f	=IFERROR(IF(INDEX($Q$8:$X$21,11,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,11,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB18	f	=
+H19	d	13:00:00
+P19	s	Match with
+Q19	f	='Step 3-JV-Wireframe'!$Q$13
+R19	f	='Step 3-CO-Wireframe'!$Q$13
+S19	f	='Step 3-RS-Wireframe'!$Q$13
+T19	f	='Step 3-RE-Wireframe'!$Q$13
+U19	f	='Step 3-BP-Wireframe'!$Q$13
+V19	f	='Step 3-TB-Wireframe'!$Q$13
+W19	f	='Step 3-HI-Wireframe'!$Q$13
+X19	f	='Step 3-ME-Wireframe'!$Q$13
+Z19	f	=IFERROR(IF(INDEX($Q$8:$X$21,12,MATCH($Q$5,$Q$7:$X$7,0))=0,"",INDEX($Q$8:$X$21,12,MATCH($Q$5,$Q$7:$X$7,0))),"")
+AB19	f	=
+H20	d	14:00:00
+P20	s	Deliverables
+Q20	f	='Step 3-JV-Wireframe'!$Q$14
+R20	f	='Step 3-CO-Wireframe'!$Q$14
+S20	f	='Step 3-RS-Wireframe'!$Q$14
+T20	f	='Step 3-RE-Wireframe'!$Q$14
+U20	f	='Step 3-BP-Wireframe'!$Q$14
+V20	f	='Step 3-TB-Wireframe'!$Q$14
+W20	f	='Step 3-HI-Wireframe'!$Q$14
+X20	f	='Step 3-ME-Wireframe'!$Q$14
+Z20	f	=IFERROR(INDEX($Q$8:$X$21,13,MATCH($Q$5,$Q$7:$X$7,0)),"")
+AB20	f	=
+H21	d	15:00:00
+P21	s	Milestones
+Q21	f	='Step 3-JV-Wireframe'!$Q$15
+R21	f	='Step 3-CO-Wireframe'!$Q$15
+S21	f	='Step 3-RS-Wireframe'!$Q$15
+T21	f	='Step 3-RE-Wireframe'!$Q$15
+U21	f	='Step 3-BP-Wireframe'!$Q$15
+V21	f	='Step 3-TB-Wireframe'!$Q$15
+W21	f	='Step 3-HI-Wireframe'!$Q$15
+X21	f	='Step 3-ME-Wireframe'!$Q$15
+Z21	f	=IFERROR(INDEX($Q$8:$X$21,14,MATCH($Q$5,$Q$7:$X$7,0)),"")
+AB21	f	=
+H22	d	16:00:00
+AB22	f	=
+H23	d	17:00:00
+AB23	f	=
+H24	d	18:00:00
+AB24	f	=
+H25	d	19:00:00
+AB25	f	=
+H26	d	20:00:00
+AB26	f	=
+H27	d	21:00:00
+AB27	f	=
+H28	d	22:00:00
+AB28	f	=
+H29	d	23:00:00
+AB29	f	=
+AB30	f	=
+AB31	f	=
+AB32	f	=
+AB33	f	=
+AB34	f	=
+AB35	f	=

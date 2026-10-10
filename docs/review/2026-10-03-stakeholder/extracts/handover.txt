@@ -1,0 +1,177 @@
+# PM-Twin_Project_Master_Context_Handover.docx
+
+[p1|Title] PM-Twin — Project Master Context & Handover
+[p2|Normal] For ChatGPT Business / Team Handover
+[p3|Normal] Purpose
+This document consolidates the PM-Twin product/domain context, matching rules, recent implementation work, UAT status, customer issues, business decisions, and immediate next steps. It is intended as a master context for a new ChatGPT Business workspace/team.
+[p4|Heading 1] 1. Project Overview
+[p5|List Bullet] PM-Twin is a Saudi construction collaboration marketplace, conceptually similar to an “Upwork for contracting.”
+[p6|List Bullet] The platform connects construction-sector participants through Need/Offer opportunities and supports structured collaboration, matching, negotiation, commercial agreements, and contracts.
+[p7|List Bullet] Core objects: Opportunity, Need, Offer, Match, Negotiation, Commercial Agreement, Contract.
+[p8|List Bullet] Current work is focused on matching correctness, publishing, commercial structures, company behavior, and post-match deal workflows.
+[p9|List Bullet] UAT/demo storage prefixes include PMTWIN_DEMO_ and PMTWIN_UAT_; production is intended for the future API.
+[p10|Heading 1] 2. Wizard and Domain Model
+[p11|List Bullet] Wizard: Opportunity → Collaboration → Scope & Work → Commercial Structure → Review & Publish.
+[p12|List Bullet] Matching topologies: one_way, two_way, consortium, circular.
+[p13|List Bullet] Collaboration models: cash_subcontracting, service_exchange, joint_venture, resource_sharing, hiring.
+[p14|List Bullet] Exchange modes: Cash, Barter, Equity, Profit Sharing, Hybrid.
+[p15|List Bullet] Revenue Sharing is a commercial component and can derive Hybrid; it is not a sixth exchange mode.
+[p16|List Bullet] Marketplace is primarily published-only; post-match deal stages include negotiation, commercial agreement, and contract.
+[p17|Heading 1] 3. Matching Engine — Current Rules
+[p18|List Bullet] Eligible matching is based on published opportunities and excludes self-matches.
+[p19|List Bullet] Target role compatibility, required skills/services, budget overlap, timeline compatibility, and model/submodel compatibility are part of matching.
+[p20|List Bullet] Model/submodel mismatch is a hard incompatibility.
+[p21|List Bullet] Category is a soft compatibility factor, not an exact mandatory match.
+[p22|List Bullet] Title and description are informational and are not hard matching criteria.
+[p23|List Bullet] Nationwide Saudi coverage is treated as 100% location coverage for Saudi locations.
+[p24|List Bullet] Boundary-date timeline overlap remains compatible.
+[p25|List Bullet] Missing/incomplete timeline information scores 0 for Timeline Fit.
+[p26|List Bullet] Overall threshold is 50%.
+[p27|Heading 1] 4. Matching Score Weights
+[p28|List Bullet] Skill Match 25%; Exchange 20%; Value 20%; Budget 10%; Timeline 10%; Location 10%; Reputation 5%.
+[p29|List Bullet] Category compatibility was added as a small bonus on top of the existing weighted score without redistributing those weights, capped at 1.
+[p30|Heading 1] 5. Timeline Fit
+[p31|List Bullet] Timeline Fit now uses inclusive calendar-day overlap against the Need window.
+[p32|List Bullet] Formula: Timeline Fit = clamp(overlapDays / needDays, 0, 1).
+[p33|List Bullet] Missing/incomplete timelines score 0; disjoint timelines score 0; boundary overlap remains eligible and positive.
+[p34|List Bullet] Timeline eligibility behavior itself was not changed.
+[p35|Heading 1] 6. Match Lifecycle
+[p36|List Bullet] Statuses include Discovered, Accepted, Confirmed, Expired, Declined, and Superseded.
+[p37|List Bullet] Close/archive causes Discovered and Accepted matches to expire and leave the active pool; Confirmed remains unchanged.
+[p38|List Bullet] Expired matches are hidden from the default active list but can be explicitly viewed with status filters.
+[p39|List Bullet] Negotiation is a separate lifecycle and currently starts from Confirmed. Accepted represents partial consent; Confirmed represents quorum/terminal confirmation.
+[p40|List Bullet] Republishing an expired opportunity creates a new match record rather than reactivating the old one.
+[p41|Heading 1] 7. Automatic Re-evaluation
+[p42|List Bullet] Published matching-related opportunity edits now trigger the existing post-publish matching pipeline when the opportunity remains pool-eligible and the matching fingerprint changes.
+[p43|List Bullet] Flow: read before snapshot → persist update → check pool eligibility and fingerprint → run existing post-publish matching.
+[p44|List Bullet] Fingerprint canonicalizes unordered collections so reordering skills/services/etc. is not treated as a change.
+[p45|List Bullet] Title/description and other informational/non-matching fields are excluded from the fingerprint.
+[p46|List Bullet] Lifecycle behavior for Accepted/Confirmed/Negotiation was intentionally left unchanged pending business/product decisions.
+[p47|Heading 1] 8. Company Matching and Access
+[p48|List Bullet] A company matching persistence issue was caused by participant identity: demo/company sessions can use company ID as session.userId while matching persistence requires a human participant.
+[p49|List Bullet] A centralized human participant resolution was added for matching persistence.
+[p50|List Bullet] Company-to-company, mixed, Two-Way, and Circular matching were covered by tests.
+[p51|List Bullet] A later company-access issue was traced to seed data using actingForPartyId for the company party while userId represented the employee. Access/display logic now recognizes actingForPartyId.
+[p52|Heading 1] 9. UAT — 17 Issues
+[p53|List Bullet] ISS-01 Consortium matches never created — VERIFIED.
+[p54|List Bullet] ISS-02 Company accounts cannot open own matches — VERIFIED.
+[p55|List Bullet] ISS-03 Company posts show employee name instead of company — VERIFIED.
+[p56|List Bullet] ISS-04 Equity opportunities cannot be published — VERIFIED.
+[p57|List Bullet] ISS-05 Profit Sharing opportunities cannot be published — VERIFIED.
+[p58|List Bullet] ISS-06 Joint Venture Hybrid and Custom cannot be saved — VERIFIED.
+[p59|List Bullet] ISS-07 Error messages ask for fields that do not exist — VERIFIED.
+[p60|List Bullet] ISS-08 Revenue Sharing can never be chosen — VERIFIED.
+[p61|List Bullet] ISS-09 Missing required details only reported at end — VERIFIED.
+[p62|List Bullet] ISS-10 Step indicator loses current step on error — VERIFIED.
+[p63|List Bullet] ISS-11 Deal cannot move past negotiation / Create Commercial Agreement missing — VERIFIED.
+[p64|List Bullet] ISS-12 Contracts cannot be completed / Complete Contract missing — VERIFIED.
+[p65|List Bullet] ISS-13 Cash offer requires payment schedule — BUSINESS DECISION REQUIRED.
+[p66|List Bullet] ISS-14 Agreement can be completed while contract is active — BUSINESS DECISION REQUIRED.
+[p67|List Bullet] ISS-15 Strategic JV cannot be published with any payment type — VERIFIED.
+[p68|List Bullet] ISS-16 Tag fields remove spaces/commas while typing — VERIFIED.
+[p69|List Bullet] ISS-17 Consultant Hiring Deliverables ignored when saving — VERIFIED.
+[p70|Heading 1] 10. Key UAT Fixes
+[p71|List Bullet] ISS-01: Consortium partner publishing now re-anchors/re-evaluates compatible consortium leads.
+[p72|List Bullet] ISS-02/03: Company participant access and display name handling were corrected.
+[p73|List Bullet] ISS-04/05: Equity and Profit Sharing validation now reads current Creation 3.0 commercialStructure fields instead of obsolete legacy fields.
+[p74|List Bullet] ISS-06: Hybrid/Custom validation uses current commercialStructure representation.
+[p75|List Bullet] ISS-07: Validation messages were aligned with current field labels.
+[p76|List Bullet] ISS-08: Revenue Sharing is supported as a commercial component and can derive Hybrid.
+[p77|List Bullet] ISS-09: Required submodel attributes are checked at the Collaboration step.
+[p78|List Bullet] ISS-10: Stepper keeps the active step as aria-current while still showing error state.
+[p79|List Bullet] ISS-11: Agreed negotiation can expose Create Commercial Agreement.
+[p80|List Bullet] ISS-12: Active contracts expose Complete Contract on the correct contract page.
+[p81|List Bullet] ISS-16: Tag input preserves in-progress text.
+[p82|List Bullet] ISS-17: Consultant Hiring tag-based deliverables save and reload correctly.
+[p83|Heading 1] 11. Commercial Compatibility — Important
+[p84|List Bullet] Task-Based: Cash/Hybrid/Barter; components Cash, Barter, Revenue Sharing, Custom.
+[p85|List Bullet] Consortium: Cash/Profit Sharing/Hybrid; components Cash, Profit Sharing, Revenue Sharing, Custom.
+[p86|List Bullet] Project-Specific JV: Equity/Profit Sharing/Hybrid/Cash; components Cash, Profit Sharing, Revenue Sharing, Equity, Custom.
+[p87|List Bullet] SPV: Equity/Profit Sharing/Hybrid; components Profit Sharing, Revenue Sharing, Equity, Custom.
+[p88|List Bullet] Strategic JV: Equity/Profit Sharing/Hybrid; components Profit Sharing, Revenue Sharing, Equity, Custom.
+[p89|List Bullet] Strategic Alliance: Barter/Hybrid/Cash; components Cash, Barter, Revenue Sharing, Custom.
+[p90|List Bullet] Mentorship: Barter/Cash/Hybrid; components Cash, Barter, Revenue Sharing, Custom.
+[p91|List Bullet] Bulk Purchasing: Cash/Hybrid; components Cash, Revenue Sharing, Custom.
+[p92|List Bullet] Equipment Sharing: Cash/Barter/Hybrid; components Cash, Barter, Revenue Sharing, Custom.
+[p93|List Bullet] Resource Sharing: Cash/Barter/Hybrid; components Cash, Barter, Revenue Sharing, Custom.
+[p94|List Bullet] Professional Hiring: Cash/Hybrid; components Cash, Revenue Sharing, Custom.
+[p95|List Bullet] Consultant Hiring: Cash/Barter/Hybrid; components Cash, Barter, Revenue Sharing, Custom.
+[p96|List Bullet] Competition/RFP: Cash/Hybrid; components Cash, Revenue Sharing, Custom.
+[p97|Heading 1] 12. Latest Final Browser Verification
+[p98|List Bullet] ISS-01: Consortium lead was published first, then a compatible Architect/BIM partner; consortium match was created at 57% and opened by both parties.
+[p99|List Bullet] ISS-04: Project-Specific JV Equity published; Equity 40%, valuation, ordinary shares, and governance structure persisted after reload.
+[p100|List Bullet] ISS-05: Project-Specific JV Profit Sharing published; 35% of net, calculation basis, and quarterly settlement persisted after reload.
+[p101|List Bullet] ISS-06: JV Hybrid with Equity + Profit Sharing published and persisted; Custom published and persisted. A single Custom component is represented as Hybrid by the current registry.
+[p102|List Bullet] ISS-07: Empty Profit Sharing publish was blocked with current labels; obsolete legacy names did not appear.
+[p103|List Bullet] ISS-15: Strategic JV picker offered Profit Sharing, Revenue Sharing, Equity, and Custom; Cash was not offered; Equity published successfully.
+[p104|List Bullet] ISS-17: “0 Deliverables” is expected because the Review counter counts structured Scope & Work deliverables; Consultant Hiring tags are a separate collaboration attribute.
+[p105|Heading 1] 13. Latest Automated Verification
+[p106|List Bullet] packages/collaboration-models: npm test — 53 passed.
+[p107|List Bullet] packages/validation: npm test — 61 passed.
+[p108|List Bullet] packages/matching: npm test — 130 passed.
+[p109|List Bullet] Web focused suite — 113 passed.
+[p110|List Bullet] web npm run type-check — passed.
+[p111|List Bullet] web npm run build — passed.
+[p112|List Bullet] Final browser verification pass changed no product files.
+[p113|Heading 1] 14. ISS-13 — Customer Decision
+[p114|List Bullet] Current code requires paymentSchedule for a Cash negotiation offer.
+[p115|List Bullet] Question for customer: Should payment schedule remain mandatory before sending the Cash Offer, or should amount/budget be enough and schedule be defined later during negotiation/agreement?
+[p116|List Bullet] Do not change the rule until Naira confirms the intended business behavior.
+[p117|Heading 1] 15. ISS-14 — Customer Decision
+[p118|List Bullet] Agreement and Contract have separate lifecycle definitions.
+[p119|List Bullet] Question for customer: Should Agreement completion be blocked while the related Contract is active, or should Agreement and Contract remain independently completable?
+[p120|List Bullet] Current synchronization behavior can move the linked Agreement when a Contract is completed.
+[p121|List Bullet] Do not change the lifecycle rule until Naira confirms the intended business behavior.
+[p122|Heading 1] 16. Customer Email — Current Position
+[p123|List Bullet] The customer has been told that the remaining browser verification is complete and that the automated tests, type-check, and production build passed.
+[p124|List Bullet] The only two items explicitly requested from Naira are the ISS-13 and ISS-14 business decisions.
+[p125|List Bullet] The email also states that after all UAT items are finalized, the relevant documentation and User Guide will be updated to reflect the final confirmed system behavior and business rules.
+[p126|Heading 1] 17. Immediate Next Steps
+[p127|List Bullet] Wait for Naira’s decisions on ISS-13 and ISS-14.
+[p128|List Bullet] Translate each decision into explicit acceptance criteria.
+[p129|List Bullet] Implement only the confirmed rules and add focused regression tests.
+[p130|List Bullet] Run final UAT/regression/type-check/build.
+[p131|List Bullet] Update the documentation and User Guide with confirmed behavior.
+[p132|List Bullet] Commit and push the final changes.
+[p133|List Bullet] Send final UAT closure/update to Naira.
+[p134|Heading 1] 18. Working / Engineering Guidance
+[p135|List Bullet] Investigate first; implement the smallest focused slice.
+[p136|List Bullet] Use the collaboration-model registry as the source of truth for commercial compatibility.
+[p137|List Bullet] Do not invent or change business rules when customer intent is ambiguous.
+[p138|List Bullet] Do not alter Accepted/Confirmed/Negotiation lifecycle semantics without explicit product/business approval.
+[p139|List Bullet] Keep tracked generated dist/dist-types artifacts when required by the matching package.
+[p140|List Bullet] Before commit, inspect git status/diff and stage only relevant files; do not blindly use git add .
+[p141|List Bullet] Distinguish browser-verified behavior from automated-test-only evidence.
+[p142|Heading 1] 19. Customer Email — Full Text
+[p143|Normal] Hi Naira,
+
+Thank you for the detailed UAT feedback and for the issue list.
+
+We have now completed the remaining browser verification for the reported issues. The previously pending flows were tested successfully, including:
+
+- Consortium matching after the partner opportunity is published
+- Equity opportunities
+- Profit Sharing opportunities
+- Joint Venture Hybrid and Custom
+- Strategic JV payment options
+- Validation messages and current field labels
+- Consultant Hiring deliverables behavior
+
+The related automated tests, type-check, and production build also passed successfully.
+
+At this point, the only two items that require a business decision from your side are:
+
+ISS-13 – Cash Offer Payment Schedule
+Should the payment schedule be mandatory before a Cash Offer can be sent, or should the offer be allowed to proceed with the amount/budget only and have the payment schedule defined later during the negotiation/agreement stage?
+
+ISS-14 – Agreement and Contract Completion
+Should an Agreement be prevented from being marked as completed while its related Contract is still active, or should the Agreement and Contract continue to have independent completion lifecycles?
+
+Once we have your decision on these two points, we can finalize the remaining UAT items.
+
+Once all UAT items are finalized, we will also update the relevant documentation and User Guide to reflect the final confirmed system behavior and business rules.
+
+Best regards,
+Mohamed
+
+## TABLES

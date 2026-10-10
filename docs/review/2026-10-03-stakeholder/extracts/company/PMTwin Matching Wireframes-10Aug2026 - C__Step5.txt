@@ -1,0 +1,115 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step5
+state=visible dims=A1:D130 max_row=130 max_col=4
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 5 — Review & Publish
+A3	s	Screen title: Review & Publish Screen subtitle: Confirm your opportunity before it goes live. This is exactly what potential matches will see. Layout: Validation panel (top, if errors exist) → Executive summary → Section summaries with Edit buttons → Publish action
+A7	s	Section A — Validation panel (conditional)
+A9	s	Shown only if required fields are incomplete or contain errors. Hidden when all fields are valid.
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Condition
+A12	s	S5-F01
+B12	s	Validation errors
+C12	s	Error list with links
+D12	s	Shown if any required field is incomplete
+A14	s	S5-F01 — Behaviour:
+A16	s	Each error links directly to the relevant step and field
+A18	s	Errors grouped by step: "Fix in Step 1 / Step 2 / Step 3 / Step 4"
+A20	s	Publish button disabled until all errors are resolved
+A22	s	Warnings (non-blocking) shown separately — e.g., "Adding deliverables improves match quality"
+A26	s	Section B — Executive summary (read-only)
+A28	s	Auto-generated from all completed fields. Not editable here.
+A30	s	Code
+B30	s	Field label
+C30	s	Type
+A31	s	S5-F02
+B31	s	Opportunity headline
+C31	s	Read-only — pulls from S1-F01
+A32	s	S5-F02a
+B32	s	Post type
+C32	s	Read-only — pulls from S1-F00 (Need / Offer / Need & Offer)
+A33	s	S5-F03
+B33	s	Collaboration model
+C33	s	Read-only — pulls from S2-F03
+A34	s	S5-F03a
+B34	s	Collaboration intent
+C34	s	Read-only — pulls from S3-[MODEL]-O00 or N00
+A35	s	S5-F04
+B35	s	Exchange mechanism
+C35	s	Read-only — pulls from S4-F01
+A36	s	S5-F05
+B36	s	Location
+C36	s	Read-only — pulls from S1-F03 + S1-F04
+A37	s	S5-F06
+B37	s	Timeline
+C37	s	Read-only — pulls from S1-F07
+A38	s	S5-F07
+B38	s	Matching structure
+C38	s	Read-only — pulls from S2-F05
+A41	s	Section C — Step summaries (read-only with Edit buttons)
+A43	s	Each section shows a condensed summary. Edit button navigates directly back to that step.
+A45	s	Opportunity basics (Step 1)
+A47	s	Displays: Post type / Title / Description / Location / Coverage area / Timeline Edit button → returns to Step 1
+A49	s	Collaboration model (Step 2)
+A51	s	Displays: Routing path taken / Selected model / Matching structure type Edit button → returns to Step 2
+A53	s	Scope & Work (Step 3)
+A55	s	Adapts based on post type selected in Step 1:
+A57	s	If Need only: Displays: Collaboration intent / Primary category / Sub-category / Key need attributes / Match with (company/individual) / Deliverables count / Milestones count Edit button → returns to Step 3 Need side
+A59	s	If Offer only: Displays: Collaboration intent / Primary category / Sub-category / Key offer attributes / Estimated value (if entered) Edit button → returns to Step 3 Offer side
+A61	s	If Need & Offer: Displays both sections:
+A63	s	Offer side: Collaboration intent / Primary category / Sub-category / Key offer attributes / Estimated value
+A65	s	Need side: Primary category / Sub-category / Key need attributes / Match with / Deliverables count / Milestones count Edit button → returns to Step 3 (both sides)
+A67	s	Commercial structure (Step 4)
+A69	s	Displays: Exchange mechanism(s) / Barter specification (if barter selected) / Key financial terms / Barter balance indicator (if applicable) Edit button → returns to Step 4
+A73	s	Section D — Opportunity readiness
+A75	s	Code
+B75	s	Field label
+C75	s	Type
+A76	s	S5-F09
+B76	s	Opportunity readiness score
+C76	s	Progress indicator (%)
+A77	s	S5-F10
+B77	s	Readiness detail
+C77	s	Expandable list
+A79	s	S5-F09 — Readiness scoring:
+A81	s	Required fields completed: base score
+A83	s	Need & Offer (dual declaration): +15% — unlocks higher match types
+A85	s	Deliverables added: +10%
+A87	s	Milestones added: +5%
+A89	s	Estimated value entered: +5%
+A91	s	Coverage area specified: +5%
+A93	s	Maximum: 100%
+A95	s	S5-F10 — Readiness detail: Shows remaining recommended improvements — not blockers, just optimisations. Examples:
+A97	s	"Adding deliverables helps matches assess fit before requesting an introduction"
+A99	s	"Posting the complementary side (Offer) alongside this Need unlocks Two-Way and Multi-Party matches" — shown for applicable single-sided posts
+A101	s	"Adding an estimated value enables the barter balance calculator"
+A105	s	Section E — Publish actions
+A107	s	Code
+B107	s	Field label
+C107	s	Type
+D107	s	Condition
+A108	s	S5-F11
+B108	s	Save Draft
+C108	s	Button
+D108	s	Always available
+A109	s	S5-F12
+B109	s	Publish Opportunity
+C109	s	Primary button
+D109	s	Enabled only when all required fields valid
+A110	s	S5-F13
+B110	s	Schedule publish
+C110	s	Optional
+D110	s	Always available
+A112	s	S5-F13 — Schedule publish: User can set a future publish date/time instead of publishing immediately Date picker + time selector
+A116	s	Post-publish state
+A118	s	After publishing, user sees a confirmation screen:
+A120	s	"Your opportunity is live"
+A122	s	Matching structure label displayed (e.g., "Eligible for Two-Way Match")
+A124	s	CTA: "View your opportunity" / "Post another opportunity" / "Go to dashboard"
+A128	s	Navigation
+A130	s	Back: returns to Step 4 Save Draft: always available Publish Opportunity: submits to live platform — triggers matching engine

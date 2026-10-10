@@ -1,0 +1,284 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-RE-Lists
+state=visible dims=B2:AU63 max_row=63 max_col=47
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 4: Resource Exchange (bilateral swap)
+B3	s	Both parties must own a resource. No cash by default — the exchange mechanism is confirmed at Step 4.
+B5	s	Collaboration intent (O00 / N00)
+D5	s	Resource type (O01 / N01)
+F5	s	Availability for swap (O05)
+H5	s	When do you need the swap? (N06)
+J5	s	Swap duration time unit (O06-TU / N05-TU)
+L5	s	Estimated value range (O07 / N07)
+N5	s	Currency (O07-CUR / N07-CUR / top-up)
+P5	s	Resource condition (O08)
+R5	s	Resource condition required (N09)
+T5	s	Cash top-up offered (O09)
+V5	s	Cash top-up acceptable (N08)
+X5	s	Preferred owner location (N10)
+Z5	s	Hidden fields for the Resource Exchange model
+AB5	s	Month (date scope)
+AD5	s	Year (date scope)
+AF5	s	Resource type
+AG5	s	Sub-type (O02 / N02)
+AI5	s	O02 sub-type source
+AK5	s	N02 sub-type source
+AM5	s	O04a city source
+AO5	s	N04a city source
+AQ5	s	N10a city source (specific country)
+AS5	s	Date options (swap periods & milestones)
+AU5	s	Value-range rank helper (for the balance check)
+B6	s	Initiating a new resource exchange
+D6	s	Heavy equipment
+F6	s	Immediate
+H6	s	Immediate
+J6	s	Hours
+L6	s	Under $10K
+N6	s	USD ($)
+P6	s	New / unused
+R6	s	New / unused
+T6	s	Yes — willing to pay cash top-up
+V6	s	Yes — willing to pay cash to balance
+X6	s	Same country preferred
+Z6	s	Entity establishment
+AB6	s	January
+AD6	n	2026
+AF6	s	Heavy equipment
+AG6	s	Excavator
+AI6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260BB2F0>
+AK6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260B82C0>
+AM6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260B8290>
+AO6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126085A00>
+AQ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260859D0>
+AS6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221260859A0>
+AT6	s	Offer rank (O07)
+AU6	f	=IFERROR(MATCH('Step 3-RE-Wireframe'!$C$27,$L$6:$L$11,0),0)
+B7	s	Seeking to exit an existing exchange arrangement
+D7	s	Space & facilities
+F7	s	Within 1 month
+H7	s	Within 1 month
+J7	s	Days
+L7	s	$10K–$50K
+N7	s	SAR (ر.س)
+P7	s	Like new
+R7	s	Like new
+T7	s	Yes — willing to receive cash top-up
+V7	s	Yes — willing to receive cash to balance
+X7	s	Gulf region
+Z7	s	Number of partners
+AB7	s	February
+AD7	n	2027
+AF7	s	Heavy equipment
+AG7	s	Backhoe loader
+AS7	f	=
+AT7	s	Need rank (N07)
+AU7	f	=IFERROR(MATCH('Step 3-RE-Wireframe'!$C$52,$L$6:$L$11,0),0)
+B8	s	Seeking to extend an existing exchange
+D8	s	Fleet & vehicles
+F8	s	1–3 months
+H8	s	1–3 months
+J8	s	Weeks
+L8	s	$50K–$100K
+N8	s	AED (د.إ)
+P8	s	Good working condition
+R8	s	Good working condition
+T8	s	No — pure resource swap only
+V8	s	No — pure resource swap only
+X8	s	Any location
+Z8	s	Project stage
+AB8	s	March
+AD8	n	2028
+AF8	s	Heavy equipment
+AG8	s	Tower crane
+AS8	f	=
+B9	s	Open to discussion
+D9	s	Human capacity
+F9	s	Specific period → date range
+H9	s	3–6 months
+J9	s	Months
+L9	s	$100K–$500K
+N9	s	EGP (ج.م)
+P9	s	Operational with minor wear
+R9	s	Operational with minor wear
+T9	s	To be agreed
+V9	s	To be agreed
+X9	s	Specific country
+Z9	s	Skill level
+AB9	s	April
+AD9	n	2029
+AF9	s	Heavy equipment
+AG9	s	Mobile crane
+AS9	f	=
+D10	s	Technology & software
+F10	s	Flexible
+H10	s	Specific period → date range
+L10	s	Above $500K
+N10	s	QAR (ر.ق)
+P10	s	Requires minor maintenance
+R10	s	Any condition acceptable
+Z10	s	Material category
+AB10	s	May
+AD10	n	2030
+AF10	s	Heavy equipment
+AG10	s	Concrete mixer
+AS10	f	=
+D11	s	Materials & inventory
+H11	s	Flexible
+L11	s	To be agreed
+N11	s	KWD (د.ك)
+P11	s	Other
+R11	s	To be agreed
+Z11	s	Pool size
+AB11	s	June
+AD11	n	2031
+AF11	s	Heavy equipment
+AG11	s	Concrete pump
+AS11	f	=
+D12	s	Other
+N12	s	BHD (د.ب)
+AB12	s	July
+AD12	n	2032
+AF12	s	Heavy equipment
+AG12	s	Bulldozer
+AS12	f	=
+N13	s	OMR (ر.ع)
+AB13	s	August
+AD13	n	2033
+AF13	s	Heavy equipment
+AG13	s	Grader
+AS13	f	=
+N14	s	EUR (€)
+AB14	s	September
+AD14	n	2034
+AF14	s	Heavy equipment
+AG14	s	Compactor
+AS14	f	=
+N15	s	GBP (£)
+AB15	s	October
+AD15	n	2035
+AF15	s	Heavy equipment
+AG15	s	Generator
+AS15	f	=
+N16	s	Other
+AB16	s	November
+AD16	n	2036
+AF16	s	Heavy equipment
+AG16	s	Surveying equipment
+AS16	f	=
+AB17	s	December
+AF17	s	Heavy equipment
+AG17	s	Piling equipment
+AS17	f	=
+AF18	s	Heavy equipment
+AG18	s	Scaffolding & formwork
+AS18	f	=
+AF19	s	Heavy equipment
+AG19	s	Forklifts
+AS19	f	=
+AF20	s	Heavy equipment
+AG20	s	Road construction equipment
+AS20	f	=
+AF21	s	Heavy equipment
+AG21	s	Other
+AS21	f	=
+AF22	s	Space & facilities
+AG22	s	Office space
+AS22	f	=
+AF23	s	Space & facilities
+AG23	s	Co-working space
+AS23	f	=
+AF24	s	Space & facilities
+AG24	s	Warehouse
+AS24	f	=
+AF25	s	Space & facilities
+AG25	s	Cold storage
+AS25	f	=
+AF26	s	Space & facilities
+AG26	s	Workshop & yard
+AS26	f	=
+AF27	s	Space & facilities
+AG27	s	Labour accommodation
+AS27	f	=
+AF28	s	Space & facilities
+AG28	s	Retail space
+AS28	f	=
+AF29	s	Space & facilities
+AG29	s	Laboratory
+AS29	f	=
+AF30	s	Space & facilities
+AG30	s	Data centre space
+AS30	f	=
+AF31	s	Space & facilities
+AG31	s	Other
+AS31	f	=
+AF32	s	Fleet & vehicles
+AG32	s	Heavy trucks
+AS32	f	=
+AF33	s	Fleet & vehicles
+AG33	s	Tipper trucks
+AS33	f	=
+AF34	s	Fleet & vehicles
+AG34	s	Concrete mixer trucks
+AS34	f	=
+AF35	s	Fleet & vehicles
+AG35	s	Light vehicles
+AS35	f	=
+AF36	s	Fleet & vehicles
+AG36	s	Specialised transport
+AF37	s	Fleet & vehicles
+AG37	s	Staff buses
+AF38	s	Fleet & vehicles
+AG38	s	Marine vessels
+AF39	s	Fleet & vehicles
+AG39	s	Aerial work platforms
+AF40	s	Fleet & vehicles
+AG40	s	Other
+AF41	s	Human capacity
+AG41	s	Engineering professionals
+AF42	s	Human capacity
+AG42	s	Project management professionals
+AF43	s	Human capacity
+AG43	s	Commercial professionals
+AF44	s	Human capacity
+AG44	s	Design professionals
+AF45	s	Human capacity
+AG45	s	Technical & trade skills
+AF46	s	Human capacity
+AG46	s	Site supervisors
+AF47	s	Human capacity
+AG47	s	HSE professionals
+AF48	s	Human capacity
+AG48	s	Administrative staff
+AF49	s	Human capacity
+AG49	s	Other
+AF50	s	Technology & software
+AG50	s	Project management software
+AF51	s	Technology & software
+AG51	s	BIM software
+AF52	s	Technology & software
+AG52	s	Design software
+AF53	s	Technology & software
+AG53	s	ERP system access
+AF54	s	Technology & software
+AG54	s	Server capacity
+AF55	s	Technology & software
+AG55	s	Cloud storage
+AF56	s	Technology & software
+AG56	s	GIS software
+AF57	s	Technology & software
+AG57	s	Other
+AF58	s	Materials & inventory
+AG58	s	Construction materials
+AF59	s	Materials & inventory
+AG59	s	MEP materials
+AF60	s	Materials & inventory
+AG60	s	Finishing materials
+AF61	s	Materials & inventory
+AG61	s	Tools & small equipment
+AF62	s	Materials & inventory
+AG62	s	Other
+AF63	s	Other
+AG63	s	Other

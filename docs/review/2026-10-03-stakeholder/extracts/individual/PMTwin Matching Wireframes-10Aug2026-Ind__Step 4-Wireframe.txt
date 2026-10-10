@@ -1,0 +1,267 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 4-Wireframe
+state=visible dims=A1:N78 max_row=78 max_col=14
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H12:H17 type=list formula1="No,Yes" formula2=None allow_blank=True
+sqref=C21 C29 type=decimal formula1=0 formula2=1000000000 allow_blank=True
+
+## CELLS
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+B3	s	Commercial Structure
+B4	s	Define how value will be exchanged between you and the other professional or client.
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form        ④  Exchange model        ⑤  Review & publish
+B7	s	STEP 4 OF 5  —  COMMERCIAL STRUCTURE
+D7	f	=TEXT($M$26,"0%")&" ready"
+E7	f	=REPT("█",ROUND($M$26*24,0))&REPT("░",24-ROUND($M$26*24,0))
+B8	f	=IF($M$13="","— No collaboration model selected in Step 2 yet — the mechanism list is empty.","● Mechanisms filtered for: "&$M$13&"  ·  "&'Step 4-Lists'!$AT$12&" of 6 available")
+B10	s	SECTION A  —  EXCHANGE MECHANISM
+G10	s	EXCHANGE MECHANISM PICKER  —  FILTERED BY MODEL
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Mechanism
+H11	s	Select
+I11	s	Availability
+J11	s	Raw
+B12	s	»  Collaboration model (from Step 2)
+C12	f	=IF($M$13="","—",$M$13)
+D12	f	=IF($M$13="","● Missing in Step 2","✓ Linked")
+E12	s	Read-only. Drives which exchange mechanisms are shown. Incompatible options are hidden, not greyed out.
+G12	f	='Step 4-Lists'!$B$6
+H12	s	No
+I12	f	=IF($J12="","— no model yet",IF($J12="✓","✓ Valid",IF($J12="○","○ Edge case","✗ Not applicable")))
+J12	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221270C9C10>
+L12	s	VALIDATION ENGINE (live)
+B13	s	S4-F01 · How will value be exchanged? *
+C13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CCB90>
+D13	f	=IF($M$13="","— Locked (select a model in Step 2)",IF(COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"<>✗")=0,"● Required","✓ "&COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"<>✗")&" selected"))
+E13	s	Multi-select cards. Tick mechanisms in the picker rail on the right — only options valid for your model appear selectable.
+G13	f	='Step 4-Lists'!$B$7
+H13	s	No
+I13	f	=IF($J13="","— no model yet",IF($J13="✓","✓ Valid",IF($J13="○","○ Edge case","✗ Not applicable")))
+J13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CCCB0>
+L13	s	Collaboration model
+M13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+B14	s	S4-F01a · Hybrid label (derived)
+C14	f	=IF($M$15>=2,"Hybrid arrangement — details confirmed in negotiation",IF($M$15=1,"Single mechanism","—"))
+D14	f	=IF($M$15>=2,"◆ Hybrid",IF($M$15=1,"◆ Auto-set","— Waiting"))
+E14	s	Read-only. Appears automatically once two or more mechanisms are selected.
+G14	f	='Step 4-Lists'!$B$8
+H14	s	No
+I14	f	=IF($J14="","— no model yet",IF($J14="✓","✓ Valid",IF($J14="○","○ Edge case","✗ Not applicable")))
+J14	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CC4A0>
+L14	s	Step 3 gate
+M14	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CC590>
+B15	s	»  Edge-case notice
+C15	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CD340>
+D15	f	=IF($M$17=0,"✓ Standard","◆ Confirm")
+E15	s	"Less common for this model — confirm this is intentional before proceeding." Informational; never blocks.
+G15	f	='Step 4-Lists'!$B$9
+H15	s	No
+I15	f	=IF($J15="","— no model yet",IF($J15="✓","✓ Valid",IF($J15="○","○ Edge case","✗ Not applicable")))
+J15	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CED50>
+L15	s	Mechanisms selected
+M15	f	=COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"<>✗")
+B16	s	»  Custom shortcut
+C16	f	=IF($M$23="YES","Custom on — every mechanism available for this model is activated below","Off")
+D16	f	=IF($M$23="YES","◆ All available active","— Off")
+E16	s	Suggested change: make Custom a toggle rather than a card in the same multi-select group, to remove "Custom + Cash" ambiguity.
+G16	f	='Step 4-Lists'!$B$10
+H16	s	No
+I16	f	=IF($J16="","— no model yet",IF($J16="✓","✓ Valid",IF($J16="○","○ Edge case","✗ Not applicable")))
+J16	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CF170>
+L16	s	Hybrid?
+M16	f	=IF($M$15>=2,"YES","NO")
+G17	f	='Step 4-Lists'!$B$11
+H17	s	No
+I17	f	=IF($J17="","— no model yet",IF($J17="✓","✓ Valid",IF($J17="○","○ Edge case","✗ Not applicable")))
+J17	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221265CE2A0>
+L17	s	Edge cases selected
+M17	f	=COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"○")
+B18	s	SECTION B1  —  CASH  ·  fee, rate, salary or per-session  (appears when Cash is active)
+L18	s	Cash active
+M18	f	=IF(AND($J$12<>"✗",$J$12<>"",OR($H$12="Yes",$M$23="YES")),"YES","NO")
+B19	s	Field
+C19	s	Your input
+D19	s	Status
+E19	s	Hint / validation rule
+G19	s	MODEL CONTEXT
+L19	s	Barter active
+M19	f	=IF(AND($J$13<>"✗",$J$13<>"",OR($H$13="Yes",$M$23="YES")),"YES","NO")
+B20	s	S4-F02 · Payment structure *
+D20	f	=IF(NOT($M$18="YES"),"— Not selected",IF($C20="","● Required","✓ Complete"))
+E20	s	Dropdown. Fixed fee, hourly, daily, per session, monthly retainer, monthly salary, milestone-based, free / pro bono, or to be agreed.
+G20	s	Collaboration model
+H20	f	=IF($M$13="","—",$M$13)
+L20	s	Profit Sharing active
+M20	f	=IF(AND($J$14<>"✗",$J$14<>"",OR($H$14="Yes",$M$23="YES")),"YES","NO")
+B21	s	S4-F03 · Estimated amount
+D21	f	=IF(NOT($M$18="YES"),"— Not selected",IF($C21="","○ Optional","✓ Complete"))
+E21	s	Numeric input. Optional at this stage — the figure is confirmed in negotiation.
+G21	s	Mechanisms available
+H21	f	='Step 4-Lists'!$AT$12&" of 6"
+L21	s	Revenue Sharing active
+M21	f	=IF(AND($J$15<>"✗",$J$15<>"",OR($H$15="Yes",$M$23="YES")),"YES","NO")
+B22	s	»  S4-F03-CUR — currency
+D22	f	=IF(NOT($M$18="YES"),"— Not selected",IF($C$21="","— Locked (enter an amount first)",IF($C$22="","● Required","✓ Complete")))
+E22	s	Currency for the amount above.
+G22	s	Mechanisms selected
+H22	f	=$M$15
+L22	s	Equity active
+M22	f	=IF(AND($J$16<>"✗",$J$16<>"",OR($H$16="Yes",$M$23="YES")),"YES","NO")
+B23	s	S4-F04 · Payment timing
+D23	f	=IF(NOT($M$18="YES"),"— Not selected",IF($C23="","○ Optional","✓ Complete"))
+E23	s	Dropdown. Upfront, on delivery, milestone-based, monthly, per session, or to be agreed.
+G23	s	Arrangement
+H23	f	=IF($M$15>=2,"Hybrid",IF($M$15=1,"Single","—"))
+L23	s	Custom active
+M23	f	=IF(AND($H$17="Yes",$J$17<>"✗"),"YES","NO")
+L24	s	Required — total
+M24	f	=1+IF($M$18="YES",1,0)+IF($M$19="YES",2,0)
+B25	s	SECTION B2  —  BARTER  ·  skill / service swap  (appears when Barter is active)
+L25	s	Required — completed
+M25	f	=IF($M$15>0,1,0)+IF($M$18="YES",IF($C$20<>"",1,0),0)+IF($M$19="YES",IF($C$27<>"",1,0)+IF($C$28<>"",1,0),0)
+B26	s	Field
+C26	s	Your input
+D26	s	Status
+E26	s	Hint / validation rule
+G26	s	BARTER BALANCE MONITOR
+L26	s	Readiness
+M26	f	=IFERROR($M$25/$M$24,0)
+B27	s	S4-F05 · Barter type *
+D27	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C27="","● Required","✓ Complete"))
+E27	s	Dropdown. Full skill / service swap, partial swap combined with cash, reciprocal mentorship, or to be agreed.
+G27	s	Offering (S4-F07)
+H27	f	=IF($C$29="","—",$C$29)
+L27	s	Step 5 gate
+M27	f	=IF(AND($M$25=$M$24,$M$15>0,$M$14="YES"),"YES","NO")
+B28	s	S4-F06 · What are you offering in barter? *
+D28	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C$28="","● Required","✓ Complete"))
+E28	s	Text area. "Describe the skill, service or time you are offering in exchange — e.g. 20 hours of BIM modelling, or PM mentoring for PropTech knowledge."
+G28	s	Seeking (Step 3 band)
+H28	f	=IF('Step 4-Lists'!$AT$8="","n/a for this model",'Step 4-Lists'!$AT$8)
+B29	s	S4-F07 · Estimated barter value
+D29	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C29="","○ Optional","✓ Complete"))
+E29	s	Numeric input. Drives the balance ratio below. Assumed to be in the same currency as the Step 3 figure.
+G29	s	Seeking midpoint (USD)
+H29	f	=IF('Step 4-Lists'!$AT$9=0,"—",'Step 4-Lists'!$AT$9)
+B30	s	»  S4-F07-CUR — currency
+D30	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C$29="","— Locked (enter a value first)",IF($C$30="","● Required","✓ Complete")))
+E30	s	Currency for the barter value above.
+G30	s	Ratio
+H30	f	=IF('Step 4-Lists'!$AT$11=0,"—",TEXT('Step 4-Lists'!$AT$11,"0.00")&" ×")
+B31	s	S4-F08 · Barter scope
+D31	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C31="","○ Optional","✓ Complete"))
+E31	s	Text area. "Specify any conditions or limits on this barter component (e.g. first 3 accounts, 6-month period)."
+G31	s	Verdict
+H31	f	=$C$34
+B32	s	S4-F09a · Value of what you are offering
+C32	f	=IF($C$29="","—",$C$29&IF($C$30="",""," "&$C$30))
+D32	f	=IF(NOT($M$19="YES"),"— Not selected",IF($C$29="","— Waiting","◆ Auto-set"))
+E32	s	Read-only — pulled from S4-F07.
+B33	s	S4-F09b · Value of what you are seeking
+C33	f	=IF('Step 4-Lists'!$AT$8="","Not available for this collaboration model",'Step 4-Lists'!$AT$8)
+D33	f	=IF(NOT($M$19="YES"),"— Not selected",IF('Step 4-Lists'!$AT$8="","— N/A","◆ Auto-set"))
+E33	s	Read-only — pulled from the Step 3 need-value field of the active model. Resource Sharing has no such field.
+B34	s	S4-F09c · Barter balance ratio
+C34	f	=IF('Step 4-Lists'!$AT$11=0,"—",TEXT('Step 4-Lists'!$AT$11,"0.00")&" ×")
+D34	f	=IF(NOT($M$19="YES"),"— Not selected",IF('Step 4-Lists'!$AT$11=0,"— Waiting","◆ Calculated"))
+E34	s	Offer value ÷ midpoint of the Step 3 need band. Informational only — never blocks publishing.
+B35	s	S4-F09d · Balance indicator
+C35	f	=IF('Step 4-Lists'!$AT$11=0,"Calculation not shown — enter a barter value and a Step 3 need value",IF(AND('Step 4-Lists'!$AT$11>=0.85,'Step 4-Lists'!$AT$11<=1.15),"Balanced exchange — values are approximately equal",IF('Step 4-Lists'!$AT$11>1.15,"You are offering more than you are seeking — consider adjusting scope or adding conditions","You are offering less than you are seeking — consider adjusting scope or adding a cash component")))
+D35	f	=IF(NOT($M$19="YES"),"— Not selected",IF('Step 4-Lists'!$AT$11=0,"— Waiting",IF(AND('Step 4-Lists'!$AT$11>=0.85,'Step 4-Lists'!$AT$11<=1.15),"✓ Balanced","◆ Review")))
+E35	s	Bands: 0.85–1.15 balanced · above 1.15 offering more · below 0.85 offering less.
+B37	s	SECTION B3  —  PROFIT SHARING  ·  success fee / performance bonus  (appears when Profit Sharing is active)
+B38	s	Field
+C38	s	Your input
+D38	s	Status
+E38	s	Hint / validation rule
+B39	s	S4-F09 · Indicative success fee / profit share
+D39	f	=IF(NOT($M$20="YES"),"— Not selected",IF($C39="","○ Optional","✓ Complete"))
+E39	s	Dropdown. Up to 10% through 50%+, or to be agreed.
+B40	s	S4-F10 · Success fee / profit basis
+D40	f	=IF(NOT($M$20="YES"),"— Not selected",IF($C40="","○ Optional","✓ Complete"))
+E40	s	Dropdown. Profit of the engagement, performance bonus pool, success fee on agreed outcome, or to be agreed.
+B42	s	SECTION B4  —  REVENUE SHARING  ·  commission  (appears when Revenue Sharing is active)
+B43	s	Field
+C43	s	Your input
+D43	s	Status
+E43	s	Hint / validation rule
+B44	s	S4-F11 · Indicative commission / revenue share
+D44	f	=IF(NOT($M$21="YES"),"— Not selected",IF($C44="","○ Optional","✓ Complete"))
+E44	s	Dropdown. Up to 5% through 20%+, or to be agreed.
+B45	s	S4-F12 · Commission basis
+D45	f	=IF(NOT($M$21="YES"),"— Not selected",IF($C45="","○ Optional","✓ Complete"))
+E45	s	Dropdown. Sales I generate, revenue from deals I introduce, project revenue, or to be agreed.
+B47	s	SECTION B5  —  EQUITY  ·  sweat equity / advisor shares  (appears when Equity is active)
+B48	s	Field
+C48	s	Your input
+D48	s	Status
+E48	s	Hint / validation rule
+B49	s	S4-F13 · Indicative equity stake
+D49	f	=IF(NOT($M$22="YES"),"— Not selected",IF($C49="","○ Optional","✓ Complete"))
+E49	s	Dropdown. Under 0.5% through 10%+, or to be agreed. Typical for startup advisors and early team members.
+B50	s	S4-F14 · Equity type
+D50	f	=IF(NOT($M$22="YES"),"— Not selected",IF($C50="","○ Optional","✓ Complete"))
+E50	s	Dropdown. Sweat equity, advisor shares, stock options / ESOP, phantom equity, to be agreed, or Other.
+B51	s	»  S4-F14 — specify "Other"
+D51	f	=IF(NOT($M$22="YES"),"— Not selected",IF($C$50="Other",IF($C$51="","● Required","✓ Complete"),"— Hidden"))
+E51	s	Free text. Appears only when S4-F14 = Other.
+B53	s	SECTION C  —  COMMERCIAL CONSTRAINTS  (optional)
+B54	s	Field
+C54	s	Your input
+D54	s	Status
+E54	s	Hint / validation rule
+B55	s	S4-F16 · Commercial condition 1
+D55	f	=IF($C$55="","○ Optional","✓ Complete")
+E55	s	e.g. "Payment in SAR only" · "Minimum contract value applies" · "Subject to board approval".
+B56	s	S4-F16 · Commercial condition 2
+D56	f	=IF($C$55="","— Locked",IF($C$56="","○ Optional","✓ Complete"))
+E56	s	Offered once the first is filled.
+B57	s	S4-F16 · Commercial condition 3
+D57	f	=IF($C$56="","— Locked",IF($C$57="","○ Optional","✓ Complete"))
+E57	s	The live platform allows unlimited rows.
+B59	s	SECTION D  —  CROSS-FIELD VALIDATION & COMPLETION
+B60	s	Check
+C60	s	Result
+D60	s	Status
+E60	s	Rule
+B61	s	Collaboration model selected
+C61	f	=IF($M$13="","No model selected in Step 2",$M$13)
+D61	f	=IF($M$13="","⚠ Blocks Step 4","✓ Pass")
+E61	s	Step 4 cannot be completed until Step 2 has a collaboration model.
+B62	s	Exchange mechanism selected
+C62	f	=IF($M$15=0,"None",$M$15&" selected")
+D62	f	=IF($M$15=0,"● Required","✓ Pass")
+E62	s	S4-F01 is mandatory. Only mechanisms not marked ✗ for this model can be selected.
+B63	s	Required fields completed
+C63	f	=$M$25&" of "&$M$24
+D63	f	=IF($M$25=$M$24,"✓ Complete","● Incomplete")
+E63	s	S4-F01 always; S4-F02 when Cash is active; S4-F05 and S4-F06 when Barter is active.
+B64	s	Compatibility respected
+C64	f	=IF(COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"✗")=0,"No incompatible mechanism ticked",COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"✗")&" incompatible tick(s) ignored")
+D64	f	=IF(COUNTIFS($H$12:$H$17,"Yes",$J$12:$J$17,"✗")=0,"✓ Pass","⚠ Ignored")
+E64	s	Ticks on ✗ rows are excluded from the selection — in the live platform those cards are not rendered at all.
+B65	s	Edge-case confirmation
+C65	f	=IF($M$17=0,"None flagged",$M$17&" flagged — confirm intentional")
+D65	f	=IF($M$17=0,"✓ Pass","◆ Confirm")
+E65	s	Edge-case mechanisms are shown with a note but never blocked.
+B66	s	Barter balance
+C66	f	=IF(NOT($M$19="YES"),"Barter not selected",IF('Step 4-Lists'!$AT$11=0,"Not calculable",TEXT('Step 4-Lists'!$AT$11,"0.00")&" × — "&IF(AND('Step 4-Lists'!$AT$11>=0.85,'Step 4-Lists'!$AT$11<=1.15),"balanced","outside the 0.85–1.15 band")))
+D66	f	=IF(NOT($M$19="YES"),"— N/A",IF('Step 4-Lists'!$AT$11=0,"— Waiting",IF(AND('Step 4-Lists'!$AT$11>=0.85,'Step 4-Lists'!$AT$11<=1.15),"✓ Balanced","◆ Review")))
+E66	s	Informational only — does not block publishing.
+B67	s	Step 3 gate passed
+C67	f	=IF($M$14="YES","Steps 1–3 complete","Steps 1–3 still incomplete")
+D67	f	=IF($M$14="YES","✓ Pass","⚠ Blocks Step 5")
+E67	s	Reads the gate of whichever Step 3 model form is active.
+B68	s	Readiness meter
+C68	f	=TEXT($M$26,"0%")&" of required fields"
+D68	f	=IF($M$27="YES","✓ Step 5 unlocked","● Step 5 not yet open")
+E68	s	Optional fields and commercial constraints do not affect the meter.
+B70	s	NAVIGATION
+B71	s	◀  Back to Step 3
+C71	s	💾  Save Draft
+D71	f	=IF($M$27="YES","Continue to Step 5  ▶","Continue to Step 5  ▶  (disabled)")
+E71	s	Continue activates only when Section D shows every check passed.

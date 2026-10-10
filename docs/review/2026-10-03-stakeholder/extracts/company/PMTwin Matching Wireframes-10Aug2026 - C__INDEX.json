@@ -1,0 +1,343 @@
+{
+  "file": "PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx",
+  "sheets": [
+    {
+      "title": "Workflow Map",
+      "dimensions": "A1:J64",
+      "max_row": 64,
+      "max_column": 10,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Cities",
+      "dimensions": "A1:AQ199",
+      "max_row": 199,
+      "max_column": 43,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step1-Details",
+      "dimensions": "A1:E119",
+      "max_row": 119,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 1-Lists",
+      "dimensions": "A1:Z205",
+      "max_row": 205,
+      "max_column": 26,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 1-Wireframe",
+      "dimensions": "A1:N60",
+      "max_row": 60,
+      "max_column": 14,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step2",
+      "dimensions": "A1:E95",
+      "max_row": 95,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 2-Lists",
+      "dimensions": "B2:Z15",
+      "max_row": 15,
+      "max_column": 26,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 2-Wireframe",
+      "dimensions": "A1:N60",
+      "max_row": 60,
+      "max_column": 14,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-JV",
+      "dimensions": "A1:E152",
+      "max_row": 152,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-JV-Lists",
+      "dimensions": "B2:BC84",
+      "max_row": 84,
+      "max_column": 55,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-JV-Wireframe",
+      "dimensions": "A1:Q92",
+      "max_row": 92,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-Cownr",
+      "dimensions": "A1:E116",
+      "max_row": 116,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-CO-Lists",
+      "dimensions": "B2:AX40",
+      "max_row": 40,
+      "max_column": 50,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-CO-Wireframe",
+      "dimensions": "A1:Q98",
+      "max_row": 98,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-Sharing",
+      "dimensions": "A1:E181",
+      "max_row": 181,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-RS-Lists",
+      "dimensions": "B2:BJ70",
+      "max_row": 70,
+      "max_column": 62,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-RS-Wireframe",
+      "dimensions": "A1:Q128",
+      "max_row": 128,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-Exchange",
+      "dimensions": "A1:E120",
+      "max_row": 120,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-RE-Lists",
+      "dimensions": "B2:AU63",
+      "max_row": 63,
+      "max_column": 47,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-RE-Wireframe",
+      "dimensions": "A1:Q102",
+      "max_row": 102,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-BP",
+      "dimensions": "A1:E121",
+      "max_row": 121,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-BP-Lists",
+      "dimensions": "B2:AX72",
+      "max_row": 72,
+      "max_column": 50,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-BP-Wireframe",
+      "dimensions": "A1:Q102",
+      "max_row": 102,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-TaskBColl",
+      "dimensions": "A1:E155",
+      "max_row": 155,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-TaskBColl-Ind",
+      "dimensions": "A1:E137",
+      "max_row": 137,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-TB-Lists",
+      "dimensions": "B2:BH114",
+      "max_row": 114,
+      "max_column": 60,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-TB-Wireframe",
+      "dimensions": "A1:Q120",
+      "max_row": 120,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-Hiring",
+      "dimensions": "A1:E156",
+      "max_row": 156,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-HI-Lists",
+      "dimensions": "B2:BK103",
+      "max_row": 103,
+      "max_column": 63,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-HI-Wireframe",
+      "dimensions": "A1:Q116",
+      "max_row": 116,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step8-Mentorship",
+      "dimensions": "A1:E135",
+      "max_row": 135,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step8-Mentorship-Ind",
+      "dimensions": "A1:E131",
+      "max_row": 131,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-ME-Lists",
+      "dimensions": "B2:BF74",
+      "max_row": 74,
+      "max_column": 58,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Exchange Matrix",
+      "dimensions": "A1:G15",
+      "max_row": 15,
+      "max_column": 7,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 3-ME-Wireframe",
+      "dimensions": "A1:Q115",
+      "max_row": 115,
+      "max_column": 17,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Commercial STR",
+      "dimensions": "A1:G191",
+      "max_row": 191,
+      "max_column": 7,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 4-Lists",
+      "dimensions": "B2:AT40",
+      "max_row": 40,
+      "max_column": 46,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 4-Wireframe",
+      "dimensions": "A1:N78",
+      "max_row": 78,
+      "max_column": 14,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step5",
+      "dimensions": "A1:D130",
+      "max_row": 130,
+      "max_column": 4,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 5-Lists",
+      "dimensions": "B2:AB40",
+      "max_row": 40,
+      "max_column": 28,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step 5-Wireframe",
+      "dimensions": "A1:L72",
+      "max_row": 72,
+      "max_column": 12,
+      "sheet_state": "visible",
+      "merged": []
+    },
+    {
+      "title": "Step3-ind-hiring",
+      "dimensions": "A1:E110",
+      "max_row": 110,
+      "max_column": 5,
+      "sheet_state": "visible",
+      "merged": []
+    }
+  ],
+  "defined_names": [],
+  "defined_names_error": "'DefinedNameDict' object has no attribute 'definedName'"
+}

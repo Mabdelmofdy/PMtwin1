@@ -1,0 +1,563 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-HI-Wireframe
+state=visible dims=A1:Q116 max_row=116 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H12:H25 H29:H36 H40:H46 H50:H61 J12:J27 J31:J38 J42:J48 type=list formula1="No,Yes" formula2=None allow_blank=True
+sqref=C53 type=decimal formula1=0 formula2=10000 allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Hiring"
+B3	s	Scope & Work — Hiring / Professional Engagement
+P3	s	Gate
+Q3	f	=$N$25
+B4	s	Define the role or expertise you are offering or seeking. Both sides are mandatory.
+P4	s	Readiness
+Q4	f	=$N$21
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Hiring        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=""
+P6	s	Offer category
+Q6	f	=$C$12
+B7	s	STEP 3 OF 5  —  MODEL 7: HIRING / PROFESSIONAL ENGAGEMENT
+D7	f	=TEXT($N$21,"0%")&" ready"
+E7	f	=REPT("█",ROUND($N$21*24,0))&REPT("░",24-ROUND($N$21*24,0))
+P7	s	Offer sub-category
+Q7	f	=$C$14
+B8	f	=IF($N$14="YES","● This form is ACTIVE — Step 2 collaboration model = Hiring.",IF($N$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$N$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$28
+P9	s	Need intent
+Q9	f	=""
+B10	s	SECTION A  —  OFFER SIDE  ·  THE ROLE OR EXPERTISE YOU ARE OFFERING
+G10	s	OFFER PICKER  —  O04 · RELEVANT CREDENTIALS  (tick all)
+I10	s	NEED PICKER  —  N04 · REQUIRED CREDENTIALS  (options depend on N00)
+P10	s	Need category
+Q10	f	=$C$42
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Credential
+H11	s	Select
+I11	s	Credential
+J11	s	Select
+K11	s	Applies?
+P11	s	Need sub-category
+Q11	f	=$C$44
+B12	s	S3-HI-O01 · Role / expertise category *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. 11 role families plus Other.
+G12	f	='Step 3-HI-Lists'!$H$6
+H12	s	No
+I12	f	='Step 3-HI-Lists'!$J$6
+J12	s	No
+K12	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$6="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$6="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$6="Individuals")),"Yes","No"))
+M12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$60
+B13	s	»  O01 — specify "Other"
+D13	f	=IF($C$12="Other",IF($C13="","● Required","✓ Complete"),"— Hidden")
+E13	s	Free text. Appears only when O01 = Other.
+G13	f	='Step 3-HI-Lists'!$H$7
+H13	s	No
+I13	f	='Step 3-HI-Lists'!$J$7
+J13	s	No
+K13	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$7="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$7="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$7="Individuals")),"Yes","No"))
+M13	s	Step 2 model selected
+N13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=$C$41
+B14	s	S3-HI-O02 · Role / expertise sub-type *
+D14	f	=IF($C14="","● Required","✓ Complete")
+E14	s	Dropdown, filtered to the sub-types of the category above (98 roles in total).
+G14	f	='Step 3-HI-Lists'!$H$8
+H14	s	No
+I14	f	='Step 3-HI-Lists'!$J$8
+J14	s	No
+K14	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$8="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$8="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$8="Individuals")),"Yes","No"))
+M14	s	This form active (Hiring)
+N14	f	=IF($N$13="Hiring","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$73:$C$75)
+B15	s	»  O02 — specify "Other"
+D15	f	=IF($C$14="Other",IF($C15="","● Required","✓ Complete"),"— Hidden")
+E15	s	Free text. Appears only when O02 = Other.
+G15	f	='Step 3-HI-Lists'!$H$9
+H15	s	No
+I15	f	='Step 3-HI-Lists'!$J$9
+J15	s	No
+K15	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$9="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$9="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$9="Individuals")),"Yes","No"))
+M15	s	Offer — completed
+N15	f	=IF($C12<>"",1,0)+IF($C14<>"",1,0)+IF($C16<>"",1,0)+IF($C21<>"",1,0)+IF($C23<>"",1,0)+IF(COUNTIF($H$29:$H$36,"Yes")>0,1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$80,$C$82,$C$84)
+B16	s	S3-HI-O03 · Years of experience *
+D16	f	=IF($C16="","● Required","✓ Complete")
+E16	s	Dropdown. 0–3 / 3–7 / 7–15 / 15+ years.
+G16	f	='Step 3-HI-Lists'!$H$10
+H16	s	No
+I16	f	='Step 3-HI-Lists'!$J$10
+J16	s	No
+K16	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$10="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$10="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$10="Individuals")),"Yes","No"))
+M16	s	Need — completed
+N16	f	=IF($C41<>"",1,0)+IF($C42<>"",1,0)+IF($C44<>"",1,0)+IF($C46<>"",1,0)+IF($C51<>"",1,0)+IF($C53<>"",1,0)+IF($C55<>"",1,0)+IF(COUNTIF($J$31:$J$38,"Yes")>0,1,0)
+B17	s	S3-HI-O04 · Relevant credentials
+C17	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263D70E0>
+D17	f	=IF(COUNTIF($H$12:$H$25,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$12:$H$25,"Yes")&" selected")
+E17	s	Multi-select. Tick credentials in the Offer picker rail on the right.
+G17	f	='Step 3-HI-Lists'!$H$11
+H17	s	No
+I17	f	='Step 3-HI-Lists'!$J$11
+J17	s	No
+K17	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$11="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$11="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$11="Individuals")),"Yes","No"))
+M17	s	Offer — total
+N17	f	=6
+B18	s	»  O04 — specify "Other"
+D18	f	=IF(ISNUMBER(SEARCH("Other",$C$17)),IF($C18="","● Required","✓ Complete"),"— Hidden")
+E18	s	Free text. Appears only when "Other" is ticked in O04.
+G18	f	='Step 3-HI-Lists'!$H$12
+H18	s	No
+I18	f	='Step 3-HI-Lists'!$J$12
+J18	s	No
+K18	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$12="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$12="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$12="Individuals")),"Yes","No"))
+M18	s	Need — total
+N18	f	=8
+B19	s	S3-HI-O05 · Engagement type offered *
+C19	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263FF050>
+D19	f	=IF(COUNTIF($H$29:$H$36,"Yes")=0,"● Required","✓ "&COUNTIF($H$29:$H$36,"Yes")&" selected")
+E19	s	Multi-select. Tick every engagement type you would accept.
+G19	f	='Step 3-HI-Lists'!$H$13
+H19	s	No
+I19	f	='Step 3-HI-Lists'!$J$13
+J19	s	No
+K19	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$13="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$13="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$13="Individuals")),"Yes","No"))
+M19	s	Required — total
+N19	f	=14+$N$22
+B20	s	»  O05 — specify "Other"
+D20	f	=IF(ISNUMBER(SEARCH("Other",$C$19)),IF($C20="","● Required","✓ Complete"),"— Hidden")
+E20	s	Free text. Appears only when "Other" is ticked in O05.
+G20	f	='Step 3-HI-Lists'!$H$14
+H20	s	No
+I20	f	='Step 3-HI-Lists'!$J$14
+J20	s	No
+K20	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$14="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$14="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$14="Individuals")),"Yes","No"))
+M20	s	Required — completed
+N20	f	=$N$15+$N$16+$N$23
+B21	s	S3-HI-O06 · Availability *
+D21	f	=IF($C21="","● Required","✓ Complete")
+E21	s	Dropdown. Immediate through flexible. "Specific date" opens a date picker.
+G21	f	='Step 3-HI-Lists'!$H$15
+H21	s	No
+I21	f	='Step 3-HI-Lists'!$J$15
+J21	s	No
+K21	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$15="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$15="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$15="Individuals")),"Yes","No"))
+M21	s	Readiness
+N21	f	=IFERROR($N$20/$N$19,0)
+B22	s	»  O06 — specific available-from date
+D22	f	=IF($C$21="Specific date",IF($C22="","● Required","✓ Complete"),"— Hidden")
+E22	s	Date picker. Appears only when O06 = Specific date.
+G22	f	='Step 3-HI-Lists'!$H$16
+H22	s	No
+I22	f	='Step 3-HI-Lists'!$J$16
+J22	s	No
+K22	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$16="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$16="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$16="Individuals")),"Yes","No"))
+M22	s	Conditional fields — active
+N22	f	=IF($C$12="Other",1,0)+IF($C$14="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$17)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$19)),1,0)+IF($C$21="Specific date",1,0)+IF(OR($C$23="On-site",$C$23="Hybrid"),1,0)+IF(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$24="Other (not listed)"),1,0)+IF(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$26="Other"),1,0)+IF(AND($C$28<>"",$C$28<>"To be agreed"),1,0)+IF($C$32="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$34)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$36)),1,0)+IF($C$42="Other",1,0)+IF($C$44="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$47)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$49)),1,0)+IF($C$51="Specific date",1,0)+IF($C$53<>"",1,0)+IF(OR($C$55="On-site",$C$55="Hybrid"),1,0)+IF(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$56="Other (not listed)"),1,0)+IF(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$58="Other"),1,0)+IF(AND($C$60<>"",$C$60<>"To be agreed"),1,0)+IF($C$63="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$65)),1,0)+IF($C$67="Other",1,0)
+B23	s	S3-HI-O07 · Work location preference *
+D23	f	=IF($C23="","● Required","✓ Complete")
+E23	s	Dropdown. On-site / Remote / Hybrid / Flexible.
+G23	f	='Step 3-HI-Lists'!$H$17
+H23	s	No
+I23	f	='Step 3-HI-Lists'!$J$17
+J23	s	No
+K23	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$17="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$17="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$17="Individuals")),"Yes","No"))
+M23	s	Conditional fields — completed
+N23	f	=IF(AND($C$12="Other",$C$13<>""),1,0)+IF(AND($C$14="Other",$C$15<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$17)),$C$18<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$19)),$C$20<>""),1,0)+IF(AND($C$21="Specific date",$C$22<>""),1,0)+IF(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$24<>""),1,0)+IF(AND(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$24="Other (not listed)"),$C$25<>""),1,0)+IF(AND(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$26="Other"),$C$27<>""),1,0)+IF(AND(AND($C$28<>"",$C$28<>"To be agreed"),$C$29<>""),1,0)+IF(AND($C$32="Other",$C$33<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$34)),$C$35<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$36)),$C$37<>""),1,0)+IF(AND($C$42="Other",$C$43<>""),1,0)+IF(AND($C$44="Other",$C$45<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$47)),$C$48<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$49)),$C$50<>""),1,0)+IF(AND($C$51="Specific date",$C$52<>""),1,0)+IF(AND($C$53<>"",$C$54<>""),1,0)+IF(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$56<>""),1,0)+IF(AND(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$56="Other (not listed)"),$C$57<>""),1,0)+IF(AND(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$58="Other"),$C$59<>""),1,0)+IF(AND(AND($C$60<>"",$C$60<>"To be agreed"),$C$61<>""),1,0)+IF(AND($C$63="Other",$C$64<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$65)),$C$66<>""),1,0)+IF(AND($C$67="Other",$C$68<>""),1,0)
+B24	s	S3-HI-O07a · Preferred work location — country
+D24	f	=IF(NOT(OR($C$23="On-site",$C$23="Hybrid")),"— Hidden (remote / flexible)",IF($C$24="","● Required","✓ Complete"))
+E24	s	Shown only for On-site or Hybrid. Full country list.
+G24	f	='Step 3-HI-Lists'!$H$18
+H24	s	No
+I24	f	='Step 3-HI-Lists'!$J$18
+J24	s	No
+K24	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$18="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$18="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$18="Individuals")),"Yes","No"))
+M24	s	Step 2 gate
+N24	f	='Step 2-Wireframe'!$L$19
+B25	s	»  O07a — specify "Other" country
+D25	f	=IF(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$24="Other (not listed)"),IF($C25="","● Required","✓ Complete"),"— Hidden")
+E25	s	Free text. Appears only when country = Other (not listed).
+G25	f	='Step 3-HI-Lists'!$H$19
+H25	s	No
+I25	f	='Step 3-HI-Lists'!$J$19
+J25	s	No
+K25	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$19="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$19="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$19="Individuals")),"Yes","No"))
+M25	s	Step 4 gate
+N25	f	=IF(AND($N$20=$N$19,$N$24="YES",$N$14="YES"),"YES","NO")
+B26	s	S3-HI-O07b · Preferred work location — city
+D26	f	=IF(NOT(OR($C$23="On-site",$C$23="Hybrid")),"— Hidden (remote / flexible)",IF($C$24="","— Locked (select country first)",IF($C$26="","○ Optional","✓ Complete")))
+E26	s	Populates from the country above.
+I26	f	='Step 3-HI-Lists'!$J$20
+J26	s	No
+K26	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$20="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$20="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$20="Individuals")),"Yes","No"))
+B27	s	»  O07b — specify "Other" city
+D27	f	=IF(AND(OR($C$23="On-site",$C$23="Hybrid"),$C$26="Other"),IF($C27="","● Required","✓ Complete"),"— Hidden")
+E27	s	Free text. Appears only when city = Other.
+G27	s	OFFER PICKER  —  O05 · ENGAGEMENT TYPE OFFERED  (tick all)  *
+I27	f	='Step 3-HI-Lists'!$J$21
+J27	s	No
+K27	f	=IF($C$41="","No",IF(OR($C$41="Both",'Step 3-HI-Lists'!$K$21="Both",AND($C$41="Companies only",'Step 3-HI-Lists'!$K$21="Companies"),AND($C$41="Individual professionals only",'Step 3-HI-Lists'!$K$21="Individuals")),"Yes","No"))
+B28	s	S3-HI-O08 · Rate or compensation expected
+D28	f	=IF($C28="","○ Optional","✓ Complete")
+E28	s	Range dropdown. Compared against the Need-side budget in Section E.
+G28	s	Engagement type
+H28	s	Select
+B29	s	»  O08-CUR — currency
+D29	f	=IF(AND($C$28<>"",$C$28<>"To be agreed"),IF($C29="","● Required","✓ Complete"),"— Hidden")
+E29	s	Currency for the rate range above.
+G29	f	='Step 3-HI-Lists'!$M$6
+H29	s	No
+I29	s	NEED PICKER  —  N05 · ENGAGEMENT TYPE SOUGHT  (tick all)  *
+B30	s	S3-HI-O09 · Rate unit
+D30	f	=IF($C30="","○ Optional","✓ Complete")
+E30	s	Per hour / day / month / project, or to be agreed.
+G30	f	='Step 3-HI-Lists'!$M$7
+H30	s	No
+I30	s	Engagement type
+J30	s	Select
+B31	s	S3-HI-O10 · Notice period
+D31	f	=IF($C31="","○ Optional","✓ Complete")
+E31	s	Dropdown. How much notice you need to give before starting.
+G31	f	='Step 3-HI-Lists'!$M$8
+H31	s	No
+I31	f	='Step 3-HI-Lists'!$M$6
+J31	s	No
+B32	s	S3-HI-O11 · Work permit / visa status
+D32	f	=IF($C32="","○ Optional","✓ Complete")
+E32	s	Dropdown. Existing permits, sponsorship need, or openness to relocation.
+G32	f	='Step 3-HI-Lists'!$M$9
+H32	s	No
+I32	f	='Step 3-HI-Lists'!$M$7
+J32	s	No
+B33	s	»  O11 — specify "Other"
+D33	f	=IF($C$32="Other",IF($C33="","● Required","✓ Complete"),"— Hidden")
+E33	s	Free text. Appears only when O11 = Other.
+G33	f	='Step 3-HI-Lists'!$M$10
+H33	s	No
+I33	f	='Step 3-HI-Lists'!$M$8
+J33	s	No
+B34	s	S3-HI-O12 · Languages
+C34	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263E8DA0>
+D34	f	=IF(COUNTIF($H$40:$H$46,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$40:$H$46,"Yes")&" selected")
+E34	s	Multi-select. Tick the languages you work in.
+G34	f	='Step 3-HI-Lists'!$M$11
+H34	s	No
+I34	f	='Step 3-HI-Lists'!$M$9
+J34	s	No
+B35	s	»  O12 — specify "Other"
+D35	f	=IF(ISNUMBER(SEARCH("Other",$C$34)),IF($C35="","● Required","✓ Complete"),"— Hidden")
+E35	s	Free text. Appears only when "Other" is ticked in O12.
+G35	f	='Step 3-HI-Lists'!$M$12
+H35	s	No
+I35	f	='Step 3-HI-Lists'!$M$10
+J35	s	No
+B36	s	S3-HI-O13 · Sector experience
+C36	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126425430>
+D36	f	=IF(COUNTIF($H$50:$H$61,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$50:$H$61,"Yes")&" selected")
+E36	s	Multi-select. Tick the sectors you have delivered in.
+G36	f	='Step 3-HI-Lists'!$M$13
+H36	s	No
+I36	f	='Step 3-HI-Lists'!$M$11
+J36	s	No
+B37	s	»  O13 — specify "Other"
+D37	f	=IF(ISNUMBER(SEARCH("Other",$C$36)),IF($C37="","● Required","✓ Complete"),"— Hidden")
+E37	s	Free text. Appears only when "Other" is ticked in O13.
+I37	f	='Step 3-HI-Lists'!$M$12
+J37	s	No
+G38	s	OFFER PICKER  —  O12 · LANGUAGES  (tick all)
+I38	f	='Step 3-HI-Lists'!$M$13
+J38	s	No
+B39	s	SECTION B  —  NEED SIDE  ·  THE ROLE OR EXPERTISE YOU ARE LOOKING FOR
+G39	s	Language
+H39	s	Select
+B40	s	Field
+C40	s	Your input
+D40	s	Status
+E40	s	Hint / validation rule
+G40	f	='Step 3-HI-Lists'!$AK$6
+H40	s	No
+I40	s	NEED PICKER  —  N12 · LANGUAGE REQUIREMENT  (tick all)
+B41	s	S3-HI-N00 · Match with *
+D41	f	=IF($C41="","● Required","✓ Complete")
+E41	s	Single select. Determines which credential options apply in N04 — companies, individuals, or both.
+G41	f	='Step 3-HI-Lists'!$AK$7
+H41	s	No
+I41	s	Language
+J41	s	Select
+B42	s	S3-HI-N01 · Role category needed *
+D42	f	=IF($C42="","● Required","✓ Complete")
+E42	s	Dropdown. Same 11 role families as the Offer side.
+G42	f	='Step 3-HI-Lists'!$AK$8
+H42	s	No
+I42	f	='Step 3-HI-Lists'!$AK$6
+J42	s	No
+B43	s	»  N01 — specify "Other"
+D43	f	=IF($C$42="Other",IF($C43="","● Required","✓ Complete"),"— Hidden")
+E43	s	Free text. Appears only when N01 = Other.
+G43	f	='Step 3-HI-Lists'!$AK$9
+H43	s	No
+I43	f	='Step 3-HI-Lists'!$AK$7
+J43	s	No
+B44	s	S3-HI-N02 · Role sub-type *
+D44	f	=IF($C44="","● Required","✓ Complete")
+E44	s	Dropdown, filtered to the sub-types of the category above.
+G44	f	='Step 3-HI-Lists'!$AK$10
+H44	s	No
+I44	f	='Step 3-HI-Lists'!$AK$8
+J44	s	No
+B45	s	»  N02 — specify "Other"
+D45	f	=IF($C$44="Other",IF($C45="","● Required","✓ Complete"),"— Hidden")
+E45	s	Free text. Appears only when N02 = Other.
+G45	f	='Step 3-HI-Lists'!$AK$11
+H45	s	No
+I45	f	='Step 3-HI-Lists'!$AK$9
+J45	s	No
+B46	s	S3-HI-N03 · Minimum experience required *
+D46	f	=IF($C46="","● Required","✓ Complete")
+E46	s	Dropdown. 0–3 / 3–7 / 7–15 / 15+ years, or not specified.
+G46	f	='Step 3-HI-Lists'!$AK$12
+H46	s	No
+I46	f	='Step 3-HI-Lists'!$AK$10
+J46	s	No
+B47	s	S3-HI-N04 · Required credentials
+C47	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263FFC80>
+D47	f	=IF($C$41="","— Locked (answer N00 first)",IF(COUNTIFS($J$12:$J$27,"Yes",$K$12:$K$27,"Yes")=0,"○ Optional","✓ "&COUNTIFS($J$12:$J$27,"Yes",$K$12:$K$27,"Yes")&" selected"))
+E47	s	Multi-select. The picker rail greys out credentials that do not apply to your N00 answer.
+I47	f	='Step 3-HI-Lists'!$AK$11
+J47	s	No
+B48	s	»  N04 — specify "Other"
+D48	f	=IF(ISNUMBER(SEARCH("Other",$C$47)),IF($C48="","● Required","✓ Complete"),"— Hidden")
+E48	s	Free text. Appears only when "Other" is ticked in N04.
+G48	s	OFFER PICKER  —  O13 · SECTOR EXPERIENCE  (tick all)
+I48	f	='Step 3-HI-Lists'!$AK$12
+J48	s	No
+B49	s	S3-HI-N05 · Engagement type sought *
+C49	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221264149B0>
+D49	f	=IF(COUNTIF($J$31:$J$38,"Yes")=0,"● Required","✓ "&COUNTIF($J$31:$J$38,"Yes")&" selected")
+E49	s	Multi-select. Tick every engagement type you would consider.
+G49	s	Sector
+H49	s	Select
+B50	s	»  N05 — specify "Other"
+D50	f	=IF(ISNUMBER(SEARCH("Other",$C$49)),IF($C50="","● Required","✓ Complete"),"— Hidden")
+E50	s	Free text. Appears only when "Other" is ticked in N05.
+G50	f	='Step 3-HI-Lists'!$AM$6
+H50	s	No
+B51	s	S3-HI-N06 · When do you need this? *
+D51	f	=IF($C51="","● Required","✓ Complete")
+E51	s	Dropdown. Immediately through flexible start. "Specific date" opens a date picker.
+G51	f	='Step 3-HI-Lists'!$AM$7
+H51	s	No
+B52	s	»  N06 — specific start date
+D52	f	=IF($C$51="Specific date",IF($C52="","● Required","✓ Complete"),"— Hidden")
+E52	s	Date picker. Appears only when N06 = Specific date.
+G52	f	='Step 3-HI-Lists'!$AM$8
+H52	s	No
+B53	s	S3-HI-N07 · Engagement duration *
+D53	f	=IF($C53="","● Required","✓ Complete")
+E53	s	Numeric input. How long the engagement runs for.
+G53	f	='Step 3-HI-Lists'!$AM$9
+H53	s	No
+B54	s	»  N07-TU — time unit
+D54	f	=IF($C$53<>"",IF($C54="","● Required","✓ Complete"),"— Hidden")
+E54	s	Days / Weeks / Months / Years. Required once a duration is entered.
+G54	f	='Step 3-HI-Lists'!$AM$10
+H54	s	No
+B55	s	S3-HI-N08 · Work location type *
+D55	f	=IF($C55="","● Required","✓ Complete")
+E55	s	Dropdown. On-site / Remote / Hybrid / Flexible.
+G55	f	='Step 3-HI-Lists'!$AM$11
+H55	s	No
+B56	s	S3-HI-N08a · Work location — country
+D56	f	=IF(NOT(OR($C$55="On-site",$C$55="Hybrid")),"— Hidden (remote / flexible)",IF($C$56="","● Required","✓ Complete"))
+E56	s	Shown only for On-site or Hybrid. Full country list.
+G56	f	='Step 3-HI-Lists'!$AM$12
+H56	s	No
+B57	s	»  N08a — specify "Other" country
+D57	f	=IF(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$56="Other (not listed)"),IF($C57="","● Required","✓ Complete"),"— Hidden")
+E57	s	Free text. Appears only when country = Other (not listed).
+G57	f	='Step 3-HI-Lists'!$AM$13
+H57	s	No
+B58	s	S3-HI-N08b · Work location — city
+D58	f	=IF(NOT(OR($C$55="On-site",$C$55="Hybrid")),"— Hidden (remote / flexible)",IF($C$56="","— Locked (select country first)",IF($C$58="","○ Optional","✓ Complete")))
+E58	s	Populates from the country above.
+G58	f	='Step 3-HI-Lists'!$AM$14
+H58	s	No
+B59	s	»  N08b — specify "Other" city
+D59	f	=IF(AND(OR($C$55="On-site",$C$55="Hybrid"),$C$58="Other"),IF($C59="","● Required","✓ Complete"),"— Hidden")
+E59	s	Free text. Appears only when city = Other.
+G59	f	='Step 3-HI-Lists'!$AM$15
+H59	s	No
+B60	s	S3-HI-N09 · Budget / rate range
+D60	f	=IF($C60="","○ Optional","✓ Complete")
+E60	s	Range dropdown. Compared against the Offer-side rate in Section E.
+G60	f	='Step 3-HI-Lists'!$AM$16
+H60	s	No
+B61	s	»  N09-CUR — currency
+D61	f	=IF(AND($C$60<>"",$C$60<>"To be agreed"),IF($C61="","● Required","✓ Complete"),"— Hidden")
+E61	s	Currency for the budget range above.
+G61	f	='Step 3-HI-Lists'!$AM$17
+H61	s	No
+B62	s	S3-HI-N10 · Rate unit
+D62	f	=IF($C62="","○ Optional","✓ Complete")
+E62	s	Per hour / day / month / project, or to be agreed.
+B63	s	S3-HI-N11 · Sector or project type
+D63	f	=IF($C63="","○ Optional","✓ Complete")
+E63	s	Dropdown. The sector this engagement sits in.
+G63	s	DATE SCOPE  —  SPECIFIC DATES & MILESTONES
+B64	s	»  N11 — specify "Other"
+D64	f	=IF($C$63="Other",IF($C64="","● Required","✓ Complete"),"— Hidden")
+E64	s	Free text. Appears only when N11 = Other.
+G64	s	Month
+I64	s	Year
+B65	s	S3-HI-N12 · Language requirement
+C65	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221263FCA10>
+D65	f	=IF(COUNTIF($J$42:$J$48,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$42:$J$48,"Yes")&" selected")
+E65	s	Multi-select. Tick the languages the professional must work in.
+B66	s	»  N12 — specify "Other"
+D66	f	=IF(ISNUMBER(SEARCH("Other",$C$65)),IF($C66="","● Required","✓ Complete"),"— Hidden")
+E66	s	Free text. Appears only when "Other" is ticked in N12.
+B67	s	S3-HI-N13 · Work permit / visa status required
+D67	f	=IF($C67="","○ Optional","✓ Complete")
+E67	s	Dropdown. Required permits, or employer sponsorship.
+B68	s	»  N13 — specify "Other"
+D68	f	=IF($C$67="Other",IF($C68="","● Required","✓ Complete"),"— Hidden")
+E68	s	Free text. Appears only when N13 = Other.
+B69	s	S3-HI-N14 · Expected notice period
+D69	f	=IF($C69="","○ Optional","✓ Complete")
+E69	s	Dropdown. How quickly the professional must be able to start.
+B71	s	SECTION C  —  DELIVERABLES  ·  NEED SIDE  (collapsed by default — encouraged)
+B72	s	Field
+C72	s	Your input
+D72	s	Status
+E72	s	Hint / validation rule
+B73	s	S3-HI-D01 · Expected deliverable 1
+D73	f	=IF($C$73="","○ Optional","✓ Complete")
+E73	s	What should this professional deliver? Encouraged — helps candidates assess scope.
+B74	s	S3-HI-D01 · Expected deliverable 2
+D74	f	=IF($C$73="","— Locked",IF($C$74="","○ Optional","✓ Complete"))
+E74	s	Offered once the first is filled.
+B75	s	S3-HI-D01 · Expected deliverable 3
+D75	f	=IF($C$74="","— Locked",IF($C$75="","○ Optional","✓ Complete"))
+E75	s	The live platform allows unlimited rows.
+B76	s	S3-HI-D02 · Acceptance criteria
+D76	f	=IF($C$73="","— Locked (add a deliverable first)",IF($C$76="","○ Optional","✓ Complete"))
+E76	s	How performance will be judged as acceptable.
+B78	s	SECTION D  —  MILESTONES / PROBATION & PHASED ENGAGEMENT  (collapsed by default)
+B79	s	Field
+C79	s	Your input
+D79	s	Status
+E79	s	Hint / validation rule
+B80	s	S3-HI-M01 · Milestone 1 — title
+D80	f	=IF($C$80="","○ Optional","✓ Complete")
+E80	s	Text. Useful for probationary periods or phased engagement.
+B81	s	S3-HI-M02 · Milestone 1 — target date
+D81	f	=IF($C$80="","— Locked",IF($C$81="","○ Optional",IF(NOT(ISNUMBER($C$81)),"⚠ Not a valid date","✓ Complete")))
+E81	s	Date picker — uses the shared date scope panel on the right.
+B82	s	S3-HI-M01 · Milestone 2 — title
+D82	f	=IF($C$82="","○ Optional","✓ Complete")
+E82	s	Offered once the previous milestone has a title.
+B83	s	S3-HI-M02 · Milestone 2 — target date
+D83	f	=IF($C$82="","— Locked",IF($C$83="","○ Optional",IF(NOT(ISNUMBER($C$83)),"⚠ Not a valid date","✓ Complete")))
+E83	s	Date picker — uses the shared date scope panel on the right.
+B84	s	S3-HI-M01 · Milestone 3 — title
+D84	f	=IF($C$84="","○ Optional","✓ Complete")
+E84	s	Offered once the previous milestone has a title.
+B85	s	S3-HI-M02 · Milestone 3 — target date
+D85	f	=IF($C$84="","— Locked",IF($C$85="","○ Optional",IF(NOT(ISNUMBER($C$85)),"⚠ Not a valid date","✓ Complete")))
+E85	s	Date picker — uses the shared date scope panel on the right.
+B86	s	SECTION E  —  FIT CHECKS, MATCHING FLAGS & HIDDEN FIELDS
+B87	s	Item
+C87	s	Value
+D87	s	Status
+E87	s	Rule
+B88	s	Two-Way Match (Type 2) readiness
+C88	f	=IF(AND($N$15=$N$17,$N$16=$N$18),"Both sides complete","Offer "&$N$15&"/"&$N$17&" · Need "&$N$16&"/"&$N$18)
+D88	f	=IF(AND($N$15=$N$17,$N$16=$N$18),"◆ Type 2 eligible","● Incomplete")
+E88	s	Completing both sides makes the post eligible for a two-way match.
+B89	s	Role match consistency
+C89	f	=IF(OR($C$12="",$C$42=""),"Enter both role categories",IF($C$12<>$C$42,"Different role families",IF(OR($C$14="",$C$44=""),"Same family — complete both sub-types",IF($C$14=$C$44,"Identical role and sub-type","Same family, different role"))))
+D89	f	=IF(OR($C$12="",$C$42=""),"— Waiting",IF($C$12<>$C$42,"◆ Review",IF(OR($C$14="",$C$44=""),"● Pending","✓ Pass")))
+E89	s	Offer and Need role families normally align on a hiring post.
+B90	s	Experience alignment
+C90	f	=IF(OR('Step 3-HI-Lists'!$BK$8=0,'Step 3-HI-Lists'!$BK$9=0,$C$46="Not specified"),"Not comparable",IF('Step 3-HI-Lists'!$BK$8>='Step 3-HI-Lists'!$BK$9,"Offered experience meets the minimum","Offered experience is below the minimum"))
+D90	f	=IF(OR('Step 3-HI-Lists'!$BK$8=0,'Step 3-HI-Lists'!$BK$9=0,$C$46="Not specified"),"— Waiting",IF('Step 3-HI-Lists'!$BK$8>='Step 3-HI-Lists'!$BK$9,"✓ Pass","⚠ Below minimum"))
+E90	s	Compares O03 (years offered) against N03 (minimum required).
+B91	s	Rate vs budget alignment
+C91	f	=IF(OR('Step 3-HI-Lists'!$BK$6=0,'Step 3-HI-Lists'!$BK$7=0),"Enter both ranges",IF('Step 3-HI-Lists'!$BK$6='Step 3-HI-Lists'!$BK$7,"Same band",IF(ABS('Step 3-HI-Lists'!$BK$6-'Step 3-HI-Lists'!$BK$7)=1,"One band apart",ABS('Step 3-HI-Lists'!$BK$6-'Step 3-HI-Lists'!$BK$7)&" bands apart")))
+D91	f	=IF(OR('Step 3-HI-Lists'!$BK$6=0,'Step 3-HI-Lists'!$BK$7=0),"— Waiting",IF(ABS('Step 3-HI-Lists'!$BK$6-'Step 3-HI-Lists'!$BK$7)<=1,"✓ Aligned","⚠ Review"))
+E91	s	Compares O08 (rate expected) against N09 (budget). Rate units are checked separately.
+B92	s	Rate unit consistency
+C92	f	=IF(OR($C$30="",$C$62=""),"Enter both rate units",IF($C$30=$C$62,"Matched — "&$C$30,"Mismatch — "&$C$30&" vs "&$C$62))
+D92	f	=IF(OR($C$30="",$C$62=""),"— Waiting",IF($C$30=$C$62,"✓ Pass","⚠ Mismatch"))
+E92	s	A rate comparison is only meaningful when both sides quote on the same unit.
+B93	s	Work location & mode compatibility
+C93	f	=IF(OR($C$23="",$C$55=""),"Enter both location types",IF(OR($C$23=$C$55,$C$23="Flexible",$C$55="Flexible"),IF(AND(OR($C$23="On-site",$C$23="Hybrid"),OR($C$55="On-site",$C$55="Hybrid"),$C$24<>"",$C$56<>"",$C$24<>$C$56),"Mode matches but countries differ","Compatible"),IF(AND($C$23="Remote",$C$55="On-site"),"Incompatible — remote offer vs on-site need",IF(AND($C$23="On-site",$C$55="Remote"),"Incompatible — on-site offer vs remote need","Partly compatible — hybrid bridges the gap"))))
+D93	f	=IF(OR($C$23="",$C$55=""),"— Waiting",IF(LEFT($C$93,12)="Incompatible","⚠ Conflict",IF($C$93="Mode matches but countries differ","◆ Review","✓ Pass")))
+E93	s	Compares O07 against N08, and the work countries when both sides are on-site or hybrid.
+B94	s	Notice period vs required start
+C94	f	=IF(OR($C$31="",$C$69="",$C$69="Not specified"),"Not comparable",IF($C$31="Flexible","Flexible notice — no conflict",IF(OR(AND($C$69="Immediate availability",$C$31<>"Immediate"),AND($C$69="Up to 2 weeks",OR($C$31="Up to 1 month",$C$31="Up to 3 months")),AND($C$69="Up to 1 month",$C$31="Up to 3 months")),"Notice period is longer than the employer expects","Notice period fits")))
+D94	f	=IF(OR($C$31="",$C$69="",$C$69="Not specified"),"— Waiting",IF(LEFT($C$94,6)="Notice",IF($C$94="Notice period fits","✓ Pass","⚠ Review"),"✓ Pass"))
+E94	s	Compares O10 (notice you must give) against N14 (how quickly the employer needs you).
+B95	s	Credential applicability (driven by N00)
+C95	f	=IF($C$41="","Answer N00 to unlock the credential list",$C$41&" — "&COUNTIF($K$12:$K$27,"Yes")&" of 16 credentials apply")
+D95	f	=IF($C$41="","● Pending","◆ Auto-filtered")
+E95	s	Companies see company credentials, individuals see professional credentials, "Both" sees all 16.
+B96	s	Hidden for the Hiring model
+C96	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-HI-Lists'!$AQ$6:$AQ$10)
+D96	s	— Not rendered
+E96	s	These fields exist in other Step 3 model forms but are suppressed here.
+B98	s	SECTION F  —  CROSS-FIELD VALIDATION & COMPLETION
+B99	s	Check
+C99	s	Result
+D99	s	Status
+E99	s	Rule
+B100	s	Required fields completed
+C100	f	=$N$20&" of "&$N$19
+D100	f	=IF($N$20=$N$19,"✓ Complete","● Incomplete")
+E100	s	14 mandatory fields (6 Offer + 8 Need) plus every conditional field opened by a selection.
+B101	s	Offer side complete
+C101	f	=$N$15&" of "&$N$17
+D101	f	=IF($N$15=$N$17,"✓ Pass","● Incomplete")
+E101	s	O01, O02, O03, O05, O06, O07.
+B102	s	Need side complete
+C102	f	=$N$16&" of "&$N$18
+D102	f	=IF($N$16=$N$18,"✓ Pass","● Incomplete")
+E102	s	N00, N01, N02, N03, N05, N06, N07, N08.
+B103	s	Conditional fields resolved
+C103	f	=$N$23&" of "&$N$22
+D103	f	=IF($N$23=$N$22,"✓ Pass","● Pending")
+E103	s	Work-location countries, specific dates, time units, currencies and "Other" free texts.
+B104	s	Experience meets the minimum
+C104	f	=IF(OR('Step 3-HI-Lists'!$BK$8=0,'Step 3-HI-Lists'!$BK$9=0,$C$46="Not specified"),"Not comparable",IF('Step 3-HI-Lists'!$BK$8>='Step 3-HI-Lists'!$BK$9,"Yes","No"))
+D104	f	=IF(OR('Step 3-HI-Lists'!$BK$8=0,'Step 3-HI-Lists'!$BK$9=0,$C$46="Not specified"),"— N/A",IF('Step 3-HI-Lists'!$BK$8>='Step 3-HI-Lists'!$BK$9,"✓ Pass","⚠ Review"))
+E104	s	Informational — a shortfall is flagged but does not block the step.
+B105	s	Step 2 model is Hiring
+C105	f	=IF($N$14="YES","Yes — form applies",IF($N$13="","No model selected","No — Step 2 model = "&$N$13))
+D105	f	=IF($N$14="YES","✓ Pass","⚠ Wrong form")
+E105	s	This form is only valid when the Step 2 collaboration model is Hiring.
+B106	s	Step 2 gate passed
+C106	f	=IF($N$24="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D106	f	=IF($N$24="YES","✓ Pass","⚠ Blocks Step 4")
+E106	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B107	s	Readiness meter
+C107	f	=TEXT($N$21,"0%")&" of required fields"
+D107	f	=IF($N$25="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E107	s	Optional fields, deliverables and milestones do not affect the meter.
+B109	s	NAVIGATION
+B110	s	◀  Back to Step 2
+C110	s	💾  Save Draft
+D110	f	=IF($N$25="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E110	s	Continue activates only when Section F shows every check passed.

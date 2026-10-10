@@ -1,0 +1,385 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 3-TB-Lists
+state=visible dims=A1:AH203 max_row=203 max_col=34
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Task-based Collaboration (Individual)
+B3	s	Single source of truth for every dropdown on 'Step 3-TB-Wireframe'. Edit values here and the wireframe updates. Grey helper columns are live formulas — do not type in them.
+U4	s	O02 / N03 — SERVICE SPECIALISATION TAXONOMY (by category) — draft, edit freely
+B5	s	O00 — Collaboration intent
+C5	s	O01 / N02 — Service category
+D5	s	O03 / N04 — Sector / project context
+E5	s	O05 / N06 — Delivery mode
+F5	s	O07 / N08 — Engagement type
+G5	s	O08 — Availability
+H5	s	O09-TU / N10-TU — Duration time unit
+I5	s	O10 / N11 — Rate / budget range
+J5	s	Currency
+K5	s	O11 — Rate unit
+L5	s	O12 — Personal credentials
+M5	s	O13 / N13 — Languages
+N5	s	N00 — Match with
+O5	s	N01 — Collaboration intent
+P5	s	N09 — When do I need this?
+Q5	s	N12 — Required credentials
+R5	s	Country (same as S1-F03)
+S5	s	Yes / No (picker)
+U5	s	Technical services
+V5	s	Professional services
+W5	s	Technology services
+X5	s	Logistics & operations
+Y5	s	Training & development
+Z5	s	Administration & support
+AA5	s	Other
+AC5	s	HELPER · O02 options (live)
+AD5	s	HELPER · O06a options (live)
+AE5	s	HELPER · N03 options (live)
+AF5	s	HELPER · N07a options (live)
+B6	s	Offering a new task collaboration
+C6	s	Technical services
+D6	s	Residential development
+E6	s	On-site
+F6	s	One-off task
+G6	s	Immediate
+H6	s	Hours
+I6	s	Under $500
+J6	s	USD ($)
+K6	s	Per hour
+L6	s	RICS
+M6	s	Arabic
+N6	s	Companies only
+O6	s	Seeking a new task collaboration
+P6	s	Immediately
+Q6	s	RICS
+R6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127264830>
+S6	s	Yes
+U6	s	Engineering design
+V6	s	Project management
+W6	s	Software development
+X6	s	Supply chain coordination
+Y6	s	Technical training
+Z6	s	Document control
+AA6	s	Other
+AC6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127265C40>
+AD6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127265C70>
+AE6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127265CA0>
+AF6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127265CD0>
+B7	s	Extending an existing engagement
+C7	s	Professional services
+D7	s	Commercial development
+E7	s	Remote
+F7	s	Project-based
+G7	s	Within 2 weeks
+H7	s	Days
+I7	s	$500–$2K
+J7	s	SAR (ر.س)
+K7	s	Per day
+L7	s	CIOB
+M7	s	English
+N7	s	Individual professionals only
+O7	s	Extending an existing engagement
+P7	s	Within 2 weeks
+Q7	s	CIOB
+R7	s	United Arab Emirates
+S7	s	No
+U7	s	Surveying & inspection
+V7	s	Cost consulting
+W7	s	BIM modelling
+X7	s	Transport & logistics
+Y7	s	HSE training
+Z7	s	Translation
+B8	s	Open to discussion
+C8	s	Technology services
+D8	s	Mixed-use
+E8	s	Hybrid
+F8	s	Retainer
+G8	s	Within 1 month
+H8	s	Weeks
+I8	s	$2K–$5K
+J8	s	AED (د.إ)
+K8	s	Per week
+L8	s	PE licence
+M8	s	Arabic & English
+N8	s	Both
+O8	s	Replacing an existing provider
+P8	s	Within 1 month
+Q8	s	PE licence
+R8	s	Qatar
+U8	s	Testing & commissioning
+V8	s	Legal advisory
+W8	s	Data & analytics
+X8	s	Facilities operations
+Y8	s	Software training
+Z8	s	Bookkeeping
+C9	s	Logistics & operations
+D9	s	Infrastructure
+E9	s	Flexible
+F9	s	Fractional
+G9	s	1–3 months
+H9	s	Months
+I9	s	$5K–$10K
+J9	s	EGP (ج.م)
+K9	s	Per project
+L9	s	PMP
+M9	s	French
+O9	s	Open to discussion
+P9	s	1–3 months
+Q9	s	PMP
+R9	s	Kuwait
+U9	s	MEP services
+V9	s	Financial advisory
+W9	s	IT setup & support
+X9	s	Equipment management
+Y9	s	Leadership coaching
+Z9	s	Virtual assistance
+C10	s	Training & development
+D10	s	Industrial
+F10	s	Part-time
+G10	s	Flexible
+H10	s	Years
+I10	s	$10K–$20K
+J10	s	QAR (ر.ق)
+K10	s	To be agreed
+L10	s	PRINCE2
+M10	s	Mandarin
+P10	s	Flexible
+Q10	s	PRINCE2
+R10	s	Bahrain
+U10	s	Site supervision
+V10	s	Procurement support
+W10	s	Web & digital
+X10	s	Other
+Y10	s	Other
+Z10	s	Data entry
+C11	s	Administration & support
+D11	s	Hospitality
+F11	s	Advisory
+G11	s	Specific date
+I11	s	Above $20K
+J11	s	KWD (د.ك)
+L11	s	MBA
+M11	s	Hindi
+P11	s	Specific date
+Q11	s	MBA
+R11	s	Oman
+U11	s	Other
+V11	s	Other
+W11	s	Other
+Z11	s	Other
+C12	s	Other
+D12	s	Healthcare
+F12	s	Other
+I12	s	To be agreed
+J12	s	BHD (د.ب)
+L12	s	PMTwin vetted
+M12	s	Other
+Q12	s	PMTwin vetted
+R12	s	Egypt
+D13	s	Education
+J13	s	OMR (ر.ع)
+L13	s	MOMRA approved
+Q13	s	None
+R13	s	Morocco
+D14	s	Giga-project
+J14	s	EUR (€)
+L14	s	Saudi Council of Engineers
+Q14	s	Other
+R14	s	Algeria
+D15	s	Retail
+J15	s	GBP (£)
+L15	s	None
+R15	s	Tunisia
+D16	s	General business
+J16	s	Other
+L16	s	Other
+R16	s	Libya
+D17	s	Other
+R17	s	Sudan
+R18	s	Jordan
+R19	s	Lebanon
+R20	s	Iraq
+R21	s	Syria
+R22	s	Yemen
+R23	s	Palestine
+R24	s	Turkey
+R25	s	Iran
+R26	s	Israel
+R27	s	Afghanistan
+R28	s	Albania
+R29	s	Andorra
+R30	s	Angola
+R31	s	Antigua and Barbuda
+R32	s	Argentina
+R33	s	Armenia
+R34	s	Australia
+R35	s	Austria
+R36	s	Azerbaijan
+R37	s	Bahamas
+R38	s	Bangladesh
+R39	s	Barbados
+R40	s	Belarus
+R41	s	Belgium
+R42	s	Belize
+R43	s	Benin
+R44	s	Bhutan
+R45	s	Bolivia
+R46	s	Bosnia and Herzegovina
+R47	s	Botswana
+R48	s	Brazil
+R49	s	Brunei
+R50	s	Bulgaria
+R51	s	Burkina Faso
+R52	s	Burundi
+R53	s	Cambodia
+R54	s	Cameroon
+R55	s	Canada
+R56	s	Cape Verde
+R57	s	Central African Republic
+R58	s	Chad
+R59	s	Chile
+R60	s	China
+R61	s	Colombia
+R62	s	Comoros
+R63	s	Congo (Republic)
+R64	s	Congo (DR)
+R65	s	Costa Rica
+R66	s	Côte d'Ivoire
+R67	s	Croatia
+R68	s	Cuba
+R69	s	Cyprus
+R70	s	Czechia
+R71	s	Denmark
+R72	s	Djibouti
+R73	s	Dominica
+R74	s	Dominican Republic
+R75	s	Ecuador
+R76	s	El Salvador
+R77	s	Equatorial Guinea
+R78	s	Eritrea
+R79	s	Estonia
+R80	s	Eswatini
+R81	s	Ethiopia
+R82	s	Fiji
+R83	s	Finland
+R84	s	France
+R85	s	Gabon
+R86	s	Gambia
+R87	s	Georgia
+R88	s	Germany
+R89	s	Ghana
+R90	s	Greece
+R91	s	Grenada
+R92	s	Guatemala
+R93	s	Guinea
+R94	s	Guinea-Bissau
+R95	s	Guyana
+R96	s	Haiti
+R97	s	Honduras
+R98	s	Hungary
+R99	s	Iceland
+R100	s	India
+R101	s	Indonesia
+R102	s	Ireland
+R103	s	Italy
+R104	s	Jamaica
+R105	s	Japan
+R106	s	Kazakhstan
+R107	s	Kenya
+R108	s	Kiribati
+R109	s	Kosovo
+R110	s	Kyrgyzstan
+R111	s	Laos
+R112	s	Latvia
+R113	s	Lesotho
+R114	s	Liberia
+R115	s	Liechtenstein
+R116	s	Lithuania
+R117	s	Luxembourg
+R118	s	Madagascar
+R119	s	Malawi
+R120	s	Malaysia
+R121	s	Maldives
+R122	s	Mali
+R123	s	Malta
+R124	s	Marshall Islands
+R125	s	Mauritania
+R126	s	Mauritius
+R127	s	Mexico
+R128	s	Micronesia
+R129	s	Moldova
+R130	s	Monaco
+R131	s	Mongolia
+R132	s	Montenegro
+R133	s	Mozambique
+R134	s	Myanmar
+R135	s	Namibia
+R136	s	Nauru
+R137	s	Nepal
+R138	s	Netherlands
+R139	s	New Zealand
+R140	s	Nicaragua
+R141	s	Niger
+R142	s	Nigeria
+R143	s	North Korea
+R144	s	North Macedonia
+R145	s	Norway
+R146	s	Pakistan
+R147	s	Palau
+R148	s	Panama
+R149	s	Papua New Guinea
+R150	s	Paraguay
+R151	s	Peru
+R152	s	Philippines
+R153	s	Poland
+R154	s	Portugal
+R155	s	Romania
+R156	s	Russia
+R157	s	Rwanda
+R158	s	Saint Kitts and Nevis
+R159	s	Saint Lucia
+R160	s	Saint Vincent and the Grenadines
+R161	s	Samoa
+R162	s	San Marino
+R163	s	Sao Tome and Principe
+R164	s	Senegal
+R165	s	Serbia
+R166	s	Seychelles
+R167	s	Sierra Leone
+R168	s	Singapore
+R169	s	Slovakia
+R170	s	Slovenia
+R171	s	Solomon Islands
+R172	s	Somalia
+R173	s	South Africa
+R174	s	South Korea
+R175	s	South Sudan
+R176	s	Spain
+R177	s	Sri Lanka
+R178	s	Suriname
+R179	s	Sweden
+R180	s	Switzerland
+R181	s	Taiwan
+R182	s	Tajikistan
+R183	s	Tanzania
+R184	s	Thailand
+R185	s	Timor-Leste
+R186	s	Togo
+R187	s	Tonga
+R188	s	Trinidad and Tobago
+R189	s	Turkmenistan
+R190	s	Tuvalu
+R191	s	Uganda
+R192	s	Ukraine
+R193	s	United Kingdom
+R194	s	United States
+R195	s	Uruguay
+R196	s	Uzbekistan
+R197	s	Vanuatu
+R198	s	Vatican City
+R199	s	Venezuela
+R200	s	Vietnam
+R201	s	Zambia
+R202	s	Zimbabwe
+R203	s	Other (not listed)

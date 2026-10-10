@@ -1,0 +1,467 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-CO-Wireframe
+state=visible dims=A1:Q98 max_row=98 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H12:H23 H27:H33 J12:J25 J29:J43 J47:J56 J60:J67 type=list formula1="No,Yes" formula2=None allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Co-ownership"
+B3	s	Scope & Work — Co-ownership
+P3	s	Gate
+Q3	f	=$L$24
+B4	s	Define the asset you are sharing ownership of and what you bring or seek in a co-ownership arrangement.
+P4	s	Readiness
+Q4	f	=$L$21
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Co-ownership        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  MODEL 2: CO-OWNERSHIP
+D7	f	=TEXT($L$21,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$21*24,0))&REPT("░",24-ROUND($L$21*24,0))
+P7	s	Offer sub-category
+Q7	f	=""
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = Co-ownership.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$20
+P9	s	Need intent
+Q9	f	=$C$33
+B10	s	SECTION A  —  OFFER SIDE  ·  WHAT YOU ARE OFFERING IN THIS CO-OWNERSHIP
+G10	s	OFFER PICKER  —  O06 · YOUR CONTRIBUTION TYPE  (tick all)
+I10	s	NEED PICKER  —  N03 · WHAT YOUR CO-OWNER SHOULD BRING  (tick all)
+P10	s	Need category
+Q10	f	=$C$34
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Contribution
+H11	s	Select
+I11	s	Contribution
+J11	s	Select
+P11	s	Need sub-category
+Q11	f	=""
+B12	s	S3-CO-O00 · Collaboration intent *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. New arrangement, selling / exiting a stake, acquiring more — or open to discussion.
+G12	f	='Step 3-CO-Lists'!$P$6
+H12	s	No
+I12	f	='Step 3-CO-Lists'!$R$6
+J12	s	No
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$55
+B13	s	S3-CO-O01 · Asset type *
+D13	f	=IF($C13="","● Required","✓ Complete")
+E13	s	Dropdown. Real estate variants, land, equipment, platform, company, SPV, infrastructure.
+G13	f	='Step 3-CO-Lists'!$P$7
+H13	s	No
+I13	f	='Step 3-CO-Lists'!$R$7
+J13	s	No
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=""
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($C$13="Other",IF($C14="","● Required","✓ Complete"),"— Hidden")
+E14	s	Free text. Appears only when O01 = Other.
+G14	f	='Step 3-CO-Lists'!$P$8
+H14	s	No
+I14	f	='Step 3-CO-Lists'!$R$8
+J14	s	No
+K14	s	This form active (Co-ownership)
+L14	f	=IF($L$13="Co-ownership","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$63:$C$65)
+B15	s	S3-CO-O02 · Asset description *
+D15	f	=IF($C15="","● Required","✓ Complete")
+E15	s	Text area. Describe the asset — size, condition, tenure, current use.
+G15	f	='Step 3-CO-Lists'!$P$9
+H15	s	No
+I15	f	='Step 3-CO-Lists'!$R$9
+J15	s	No
+K15	s	Offer required — completed
+L15	f	=IF($C$12<>"",1,0)+IF($C$13<>"",1,0)+IF($C$15<>"",1,0)+IF($C$16<>"",1,0)+IF($C$18<>"",1,0)+IF($C$22<>"",1,0)+IF(COUNTIF($H$12:$H$23,"Yes")>0,1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$70,$C$72,$C$74)
+B16	s	S3-CO-O03 · Asset location — country *
+D16	f	=IF($C16="","● Required","✓ Complete")
+E16	s	Full country list from the shared Cities dataset (same taxonomy as S1-F03).
+G16	f	='Step 3-CO-Lists'!$P$10
+H16	s	No
+I16	f	='Step 3-CO-Lists'!$R$10
+J16	s	No
+K16	s	Need required — completed
+L16	f	=IF($C$33<>"",1,0)+IF($C$34<>"",1,0)+IF($C$36<>"",1,0)+IF(COUNTIF($J$12:$J$25,"Yes")>0,1,0)+IF(COUNTIF($J$29:$J$43,"Yes")>0,1,0)+IF($C$49<>"",1,0)+IF($C$50<>"",1,0)
+B17	s	»  O03 — specify "Other" country
+D17	f	=IF($C$16="Other (not listed)",IF($C17="","● Required","✓ Complete"),"— Hidden")
+E17	s	Free text. Appears only when country = Other (not listed).
+G17	f	='Step 3-CO-Lists'!$P$11
+H17	s	No
+I17	f	='Step 3-CO-Lists'!$R$11
+J17	s	No
+K17	s	Conditional fields — active
+L17	f	=IF($C$13="Other",1,0)+IF($C$16="Other (not listed)",1,0)+IF($C$18="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$23)),1,0)+IF($C$25="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$28)),1,0)+IF($C$34="Other",1,0)+IF(COUNTIF($C$36:$C$38,"Other (not listed)")>0,1,0)+IF($C$41="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$43)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$45)),1,0)+IF($C$47="Other",1,0)+IF($C$51="Other",1,0)+IF(ISNUMBER(SEARCH("Other",$C$53)),1,0)+IF(ISNUMBER(SEARCH("Other",$C$58)),1,0)
+B18	s	S3-CO-O03a · Asset location — city *
+D18	f	=IF($C$16="","— Locked (select country first)",IF($C$18="","● Required","✓ Complete"))
+E18	s	Required. Populates from the country above.
+G18	f	='Step 3-CO-Lists'!$P$12
+H18	s	No
+I18	f	='Step 3-CO-Lists'!$R$12
+J18	s	No
+K18	s	Conditional fields — completed
+L18	f	=IF(AND($C$13="Other",$C$14<>""),1,0)+IF(AND($C$16="Other (not listed)",$C$17<>""),1,0)+IF(AND($C$18="Other",$C$19<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$23)),$C$24<>""),1,0)+IF(AND($C$25="Other",$C$26<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$28)),$C$29<>""),1,0)+IF(AND($C$34="Other",$C$35<>""),1,0)+IF(AND(COUNTIF($C$36:$C$38,"Other (not listed)")>0,$C$39<>""),1,0)+IF(AND($C$41="Other",$C$42<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$43)),$C$44<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$45)),$C$46<>""),1,0)+IF(AND($C$47="Other",$C$48<>""),1,0)+IF(AND($C$51="Other",$C$52<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$53)),$C$54<>""),1,0)+IF(AND(ISNUMBER(SEARCH("Other",$C$58)),$C$59<>""),1,0)
+B19	s	»  O03a — specify "Other" city
+D19	f	=IF($C$18="Other",IF($C19="","● Required","✓ Complete"),"— Hidden")
+E19	s	Free text. Appears only when city = Other.
+G19	f	='Step 3-CO-Lists'!$P$13
+H19	s	No
+I19	f	='Step 3-CO-Lists'!$R$13
+J19	s	No
+K19	s	Required — total
+L19	f	=14+$L$17
+B20	s	S3-CO-O04 · Estimated asset value
+D20	f	=IF($C20="","○ Optional","✓ Complete")
+E20	s	Range dropdown. Optional — "Prefer not to state" is valid.
+G20	f	='Step 3-CO-Lists'!$P$14
+H20	s	No
+I20	f	='Step 3-CO-Lists'!$R$14
+J20	s	No
+K20	s	Required — completed
+L20	f	=$L$15+$L$16+$L$18
+B21	s	S3-CO-O04-CUR · Currency
+D21	f	=IF($C$20="","— Locked (pick a range first)",IF($C$21="","● Required","✓ Complete"))
+E21	s	Currency for the range above.
+G21	f	='Step 3-CO-Lists'!$P$15
+H21	s	No
+I21	f	='Step 3-CO-Lists'!$R$15
+J21	s	No
+K21	s	Readiness
+L21	f	=IFERROR($L$20/$L$19,0)
+B22	s	S3-CO-O05 · Ownership share you are offering *
+D22	f	=IF($C22="","● Required","✓ Complete")
+E22	s	Dropdown. Up to 10% through above 75%, or to be agreed.
+G22	f	='Step 3-CO-Lists'!$P$16
+H22	s	No
+I22	f	='Step 3-CO-Lists'!$R$16
+J22	s	No
+K22	s	Step 2 gate
+L22	f	='Step 2-Wireframe'!$L$19
+B23	s	S3-CO-O06 · Your contribution type *
+C23	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FDACF0>
+D23	f	=IF(COUNTIF($H$12:$H$23,"Yes")=0,"● Required","✓ "&COUNTIF($H$12:$H$23,"Yes")&" selected")
+E23	s	Multi-select. Tick contributions in the Offer picker rail on the right.
+H23	s	No
+I23	f	='Step 3-CO-Lists'!$R$17
+J23	s	No
+K23	s	Group match flag
+L23	f	=IF($C$50="3 or more","YES","NO")
+B24	s	»  O06 — specify "Other"
+D24	f	=IF(ISNUMBER(SEARCH("Other",$C$23)),IF($C24="","● Required","✓ Complete"),"— Hidden")
+E24	s	Free text. Appears only when "Other" is ticked in O06.
+I24	f	='Step 3-CO-Lists'!$R$18
+J24	s	No
+K24	s	Step 4 gate
+L24	f	=IF(AND($L$20=$L$19,$L$22="YES",$L$14="YES"),"YES","NO")
+B25	s	S3-CO-O07 · Entity structure
+D25	f	=IF($C25="","○ Optional","✓ Complete")
+E25	s	Dropdown. SPV, joint company, LP, contractual arrangement, to be agreed.
+G25	s	OFFER PICKER  —  O09 · EXIT PROVISIONS OFFERED  (tick all)
+J25	s	No
+B26	s	»  O07 — specify "Other"
+D26	f	=IF($C$25="Other",IF($C26="","● Required","✓ Complete"),"— Hidden")
+E26	s	Free text. Appears only when O07 = Other.
+G26	s	Provision
+H26	s	Select
+B27	s	S3-CO-O08 · Expected ownership duration
+D27	f	=IF($C27="","○ Optional","✓ Complete")
+E27	s	Dropdown. Short-term exit through indefinite hold.
+G27	f	='Step 3-CO-Lists'!$X$6
+H27	s	No
+I27	s	NEED PICKER  —  N04 · PREFERRED CO-OWNER LOCATIONS  (tick all)
+B28	s	S3-CO-O09 · Exit provisions offered
+C28	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FC4950>
+D28	f	=IF(COUNTIF($H$27:$H$33,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$27:$H$33,"Yes")&" selected")
+E28	s	Multi-select. Tick provisions in the Offer picker rail.
+G28	f	='Step 3-CO-Lists'!$X$7
+H28	s	No
+I28	s	Location
+J28	s	Select
+B29	s	»  O09 — specify "Other"
+D29	f	=IF(ISNUMBER(SEARCH("Other",$C$28)),IF($C29="","● Required","✓ Complete"),"— Hidden")
+E29	s	Free text. Appears only when "Other" is ticked in O09.
+G29	f	='Step 3-CO-Lists'!$X$8
+H29	s	No
+I29	f	='Step 3-CO-Lists'!$AF$6
+J29	s	No
+G30	f	='Step 3-CO-Lists'!$X$9
+H30	s	No
+I30	f	='Step 3-CO-Lists'!$AF$7
+J30	s	No
+B31	s	SECTION B  —  NEED SIDE  ·  WHAT YOU ARE LOOKING FOR IN A CO-OWNERSHIP ARRANGEMENT
+G31	f	='Step 3-CO-Lists'!$X$10
+H31	s	No
+I31	f	='Step 3-CO-Lists'!$AF$8
+J31	s	No
+B32	s	Field
+C32	s	Your input
+D32	s	Status
+E32	s	Hint / validation rule
+G32	f	='Step 3-CO-Lists'!$X$11
+H32	s	No
+I32	f	='Step 3-CO-Lists'!$AF$9
+J32	s	No
+B33	s	S3-CO-N00 · Collaboration intent *
+D33	f	=IF($C33="","● Required","✓ Complete")
+E33	s	Dropdown. New arrangement, acquiring a stake, exiting a position — or open to discussion.
+G33	f	='Step 3-CO-Lists'!$X$12
+H33	s	No
+I33	f	='Step 3-CO-Lists'!$AF$10
+J33	s	No
+B34	s	S3-CO-N01 · Asset type you want to co-own *
+D34	f	=IF($C34="","● Required","✓ Complete")
+E34	s	Dropdown. Same asset taxonomy as the Offer side.
+I34	f	='Step 3-CO-Lists'!$AF$11
+J34	s	No
+B35	s	»  N01 — specify "Other"
+D35	f	=IF($C$34="Other",IF($C35="","● Required","✓ Complete"),"— Hidden")
+E35	s	Free text. Appears only when N01 = Other.
+I35	f	='Step 3-CO-Lists'!$AF$12
+J35	s	No
+B36	s	S3-CO-N02 · Asset location — country 1 *
+D36	f	=IF($C$36="","● Required","✓ Complete")
+E36	s	Multi-select in the live platform; three country slots here. Full country list.
+I36	f	='Step 3-CO-Lists'!$AF$13
+J36	s	No
+B37	s	S3-CO-N02 · Asset location — country 2
+D37	f	=IF($C37="","○ Optional","✓ Complete")
+E37	s	Optional second target country.
+I37	f	='Step 3-CO-Lists'!$AF$14
+J37	s	No
+B38	s	S3-CO-N02 · Asset location — country 3
+D38	f	=IF($C38="","○ Optional","✓ Complete")
+E38	s	Optional third target country.
+I38	f	='Step 3-CO-Lists'!$AF$15
+J38	s	No
+B39	s	»  N02 — specify "Other" country
+D39	f	=IF(COUNTIF($C$36:$C$38,"Other (not listed)")>0,IF($C39="","● Required","✓ Complete"),"— Hidden")
+E39	s	Free text. Appears when any slot = Other (not listed).
+I39	f	='Step 3-CO-Lists'!$AF$16
+J39	s	No
+B40	s	»  N02 selected countries (derived)
+C40	f	=IF(COUNTA($C$36:$C$38)=0,"— none selected",_xlfn.TEXTJOIN(" · ",TRUE,$C$36:$C$38))
+D40	f	=IF(COUNTA($C$36:$C$38)=0,"— Waiting","◆ "&COUNTA($C$36:$C$38)&" selected")
+E40	s	Read-only roll-up of the three slots above.
+I40	f	='Step 3-CO-Lists'!$AF$17
+J40	s	No
+B41	s	S3-CO-N02a · Asset location — city
+D41	f	=IF('Step 3-CO-Lists'!$AX$6="","— Locked (pick a country first)",IF($C$41="","○ Optional","✓ Complete"))
+E41	s	Scoped to the first filled country slot. One city dropdown per country in the live platform.
+I41	f	='Step 3-CO-Lists'!$AF$18
+J41	s	No
+B42	s	»  N02a — specify "Other" city
+D42	f	=IF($C$41="Other",IF($C42="","● Required","✓ Complete"),"— Hidden")
+E42	s	Free text. Appears only when city = Other.
+I42	f	='Step 3-CO-Lists'!$AF$19
+J42	s	No
+B43	s	S3-CO-N03 · What should your co-owner bring? *
+C43	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FEA2A0>
+D43	f	=IF(COUNTIF($J$12:$J$25,"Yes")=0,"● Required","✓ "&COUNTIF($J$12:$J$25,"Yes")&" selected")
+E43	s	Multi-select. Tick contributions in the Need picker rail on the right.
+I43	f	='Step 3-CO-Lists'!$AF$20
+J43	s	No
+B44	s	»  N03 — specify "Other"
+D44	f	=IF(ISNUMBER(SEARCH("Other",$C$43)),IF($C44="","● Required","✓ Complete"),"— Hidden")
+E44	s	Free text. Appears only when "Other" is ticked in N03.
+B45	s	S3-CO-N04 · Preferred co-owner location — country *
+C45	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FE9580>
+D45	f	=IF(COUNTIF($J$29:$J$43,"Yes")=0,"● Required","✓ "&COUNTIF($J$29:$J$43,"Yes")&" selected")
+E45	s	Multi-select. Tick one or more target markets in the Need picker rail.
+I45	s	NEED PICKER  —  N08 · MINIMUM CO-OWNER REQUIREMENTS  (tick all)
+B46	s	»  N04 — specify "Other"
+D46	f	=IF(ISNUMBER(SEARCH("Other",$C$45)),IF($C46="","● Required","✓ Complete"),"— Hidden")
+E46	s	Free text. Appears only when "Other" is ticked in N04.
+I46	s	Requirement
+J46	s	Select
+B47	s	S3-CO-N04a · Preferred co-owner location — city
+D47	f	=IF('Step 3-CO-Lists'!$AV$6="","— Locked (tick a country first)",IF($C$47="","○ Optional","✓ Complete"))
+E47	s	Scoped to the first ticked co-owner country.
+I47	f	='Step 3-CO-Lists'!$AD$6
+J47	s	No
+B48	s	»  N04a — specify "Other" city
+D48	f	=IF($C$47="Other",IF($C48="","● Required","✓ Complete"),"— Hidden")
+E48	s	Free text. Appears only when city = Other.
+I48	f	='Step 3-CO-Lists'!$AD$7
+J48	s	No
+B49	s	S3-CO-N05 · Ownership share you are seeking *
+D49	f	=IF($C49="","● Required","✓ Complete")
+E49	s	Dropdown. Minority through above 75%, or to be agreed.
+I49	f	='Step 3-CO-Lists'!$AD$8
+J49	s	No
+B50	s	S3-CO-N06 · Number of co-owners sought *
+D50	f	=IF($C50="","● Required","✓ Complete")
+E50	s	Dropdown. "3 or more" raises the Group Match (Type 3) flag in Section E.
+I50	f	='Step 3-CO-Lists'!$AD$9
+J50	s	No
+B51	s	S3-CO-N07 · Entity structure preference
+D51	f	=IF($C51="","○ Optional","✓ Complete")
+E51	s	Dropdown. SPV, joint company, LP, contractual arrangement, to be agreed.
+I51	f	='Step 3-CO-Lists'!$AD$10
+J51	s	No
+B52	s	»  N07 — specify "Other"
+D52	f	=IF($C$51="Other",IF($C52="","● Required","✓ Complete"),"— Hidden")
+E52	s	Free text. Appears only when N07 = Other.
+I52	f	='Step 3-CO-Lists'!$AD$11
+J52	s	No
+B53	s	S3-CO-N08 · Minimum co-owner requirements
+C53	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FDAD20>
+D53	f	=IF(COUNTIF($J$47:$J$56,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$47:$J$56,"Yes")&" selected")
+E53	s	Multi-select. Tick minimum requirements in the Need picker rail.
+I53	f	='Step 3-CO-Lists'!$AD$12
+J53	s	No
+B54	s	»  N08 — specify "Other"
+D54	f	=IF(ISNUMBER(SEARCH("Other",$C$53)),IF($C54="","● Required","✓ Complete"),"— Hidden")
+E54	s	Free text. Appears only when "Other" is ticked in N08.
+I54	f	='Step 3-CO-Lists'!$AD$13
+J54	s	No
+B55	s	S3-CO-N09 · Estimated asset value
+D55	f	=IF($C55="","○ Optional","✓ Complete")
+E55	s	Range dropdown. Optional.
+I55	f	='Step 3-CO-Lists'!$AD$14
+J55	s	No
+B56	s	S3-CO-N09-CUR · Currency
+D56	f	=IF($C$55="","— Locked (pick a range first)",IF($C$56="","● Required","✓ Complete"))
+E56	s	Currency for the range above.
+I56	f	='Step 3-CO-Lists'!$AD$15
+J56	s	No
+B57	s	S3-CO-N10 · Expected ownership duration
+D57	f	=IF($C57="","○ Optional","✓ Complete")
+E57	s	Dropdown. Short-term exit through indefinite hold.
+B58	s	S3-CO-N11 · Exit strategy preference
+C58	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125FFC9E0>
+D58	f	=IF(COUNTIF($J$60:$J$67,"Yes")=0,"○ Optional","✓ "&COUNTIF($J$60:$J$67,"Yes")&" selected")
+E58	s	Multi-select. Tick preferences in the Need picker rail.
+I58	s	NEED PICKER  —  N11 · EXIT STRATEGY PREFERENCE  (tick all)
+B59	s	»  N11 — specify "Other"
+D59	f	=IF(ISNUMBER(SEARCH("Other",$C$58)),IF($C59="","● Required","✓ Complete"),"— Hidden")
+E59	s	Free text. Appears only when "Other" is ticked in N11.
+I59	s	Preference
+J59	s	Select
+I60	f	='Step 3-CO-Lists'!$Z$6
+J60	s	No
+B61	s	SECTION C  —  EXPECTED CONTRIBUTIONS / DELIVERABLES  ·  NEED SIDE  (collapsed by default)
+I61	f	='Step 3-CO-Lists'!$Z$7
+J61	s	No
+B62	s	Field
+C62	s	Your input
+D62	s	Status
+E62	s	Hint / validation rule
+I62	f	='Step 3-CO-Lists'!$Z$8
+J62	s	No
+B63	s	S3-CO-D01 · Expected contribution 1
+D63	f	=IF($C$63="","○ Optional","✓ Complete")
+E63	s	What do you expect your co-owner to contribute or deliver? Text, repeatable.
+I63	f	='Step 3-CO-Lists'!$Z$9
+J63	s	No
+B64	s	S3-CO-D01 · Expected contribution 2
+D64	f	=IF($C$63="","— Locked",IF($C$64="","○ Optional","✓ Complete"))
+E64	s	Offered once the first is filled.
+I64	f	='Step 3-CO-Lists'!$Z$10
+J64	s	No
+B65	s	S3-CO-D01 · Expected contribution 3
+D65	f	=IF($C$64="","— Locked",IF($C$65="","○ Optional","✓ Complete"))
+E65	s	The live platform allows unlimited rows.
+I65	f	='Step 3-CO-Lists'!$Z$11
+J65	s	No
+B66	s	S3-CO-D02 · Acceptance criteria
+D66	f	=IF($C$63="","— Locked (add a contribution first)",IF($C$66="","○ Optional","✓ Complete"))
+E66	s	How you will judge the contribution as accepted.
+I66	f	='Step 3-CO-Lists'!$Z$12
+J66	s	No
+J67	s	No
+B68	s	SECTION D  —  MILESTONES  ·  BOTH SIDES  (collapsed by default — optional)
+B69	s	Field
+C69	s	Your input
+D69	s	Status
+E69	s	Hint / validation rule
+B70	s	S3-CO-M01 · Milestone 1 — title
+D70	f	=IF($C$70="","○ Optional","✓ Complete")
+E70	s	Text. Add milestones (optional). User can add multiple.
+G70	s	MILESTONE DATE SCOPE
+B71	s	S3-CO-M02 · Milestone 1 — target date
+D71	f	=IF($C$70="","— Locked",IF($C$71="","○ Optional",IF(NOT(ISNUMBER($C$71)),"⚠ Not a valid date","✓ Complete")))
+E71	s	Date picker — pick from the dropdown. Milestone date scope panel sets the month / year.
+G71	s	Month
+I71	s	Year
+B72	s	S3-CO-M01 · Milestone 2 — title
+D72	f	=IF($C$72="","○ Optional","✓ Complete")
+E72	s	Offered once the previous milestone has a title.
+B73	s	S3-CO-M02 · Milestone 2 — target date
+D73	f	=IF($C$72="","— Locked",IF($C$73="","○ Optional",IF(NOT(ISNUMBER($C$73)),"⚠ Not a valid date","✓ Complete")))
+E73	s	Date picker — pick from the dropdown. Milestone date scope panel sets the month / year.
+B74	s	S3-CO-M01 · Milestone 3 — title
+D74	f	=IF($C$74="","○ Optional","✓ Complete")
+E74	s	Offered once the previous milestone has a title.
+B75	s	S3-CO-M02 · Milestone 3 — target date
+D75	f	=IF($C$74="","— Locked",IF($C$75="","○ Optional",IF(NOT(ISNUMBER($C$75)),"⚠ Not a valid date","✓ Complete")))
+E75	s	Date picker — pick from the dropdown. Milestone date scope panel sets the month / year.
+B77	s	SECTION E  —  MATCHING FLAGS & HIDDEN FIELDS
+B78	s	Item
+C78	s	Value
+D78	s	Status
+E78	s	Rule
+B79	s	Group Match (Type 3) flag
+C79	f	=IF($L$23="YES","Raised — 3 or more co-owners sought","Not raised")
+D79	f	=IF($L$23="YES","◆ Type 3 candidate","— None")
+E79	s	Raised when N06 = "3 or more". Co-ownership pools upgrade to a Group Match.
+B80	s	Two-Way Match (Type 2) readiness
+C80	f	=IF(AND($L$15=7,$L$16=7),"Both sides complete","Offer "&$L$15&"/7 · Need "&$L$16&"/7")
+D80	f	=IF(AND($L$15=7,$L$16=7),"✓ Type 2 eligible","● Incomplete")
+E80	s	Completing both Offer and Need sides is what upgrades the match type.
+B81	s	Hidden for the Co-ownership model
+C81	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-CO-Lists'!$AH$6:$AH$10)
+D81	s	— Not rendered
+E81	s	These fields exist in other Step 3 model forms but are suppressed for Co-ownership.
+B83	s	SECTION F  —  CROSS-FIELD VALIDATION & COMPLETION
+B84	s	Check
+C84	s	Result
+D84	s	Status
+E84	s	Rule
+B85	s	Required fields completed
+C85	f	=$L$20&" of "&$L$19
+D85	f	=IF($L$20=$L$19,"✓ Complete","● Incomplete")
+E85	s	14 mandatory fields (7 Offer + 7 Need) plus every "Other" specify field opened by a selection.
+B86	s	Offer side complete
+C86	f	=$L$15&" of 7"
+D86	f	=IF($L$15=7,"✓ Pass","● Incomplete")
+E86	s	O00, O01, O02, O03, O03a, O05, O06.
+B87	s	Need side complete
+C87	f	=$L$16&" of 7"
+D87	f	=IF($L$16=7,"✓ Pass","● Incomplete")
+E87	s	N00, N01, N02, N03, N04, N05, N06.
+B88	s	Conditional fields resolved
+C88	f	=$L$18&" of "&$L$17
+D88	f	=IF($L$18=$L$17,"✓ Pass","● Pending")
+E88	s	Every conditional free-text field opened by an "Other" selection must be filled before the step can close.
+B89	s	Step 2 model is Co-ownership
+C89	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D89	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E89	s	This form is only valid when the Step 2 collaboration model is Co-ownership.
+B90	s	Step 2 gate passed
+C90	f	=IF($L$22="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D90	f	=IF($L$22="YES","✓ Pass","⚠ Blocks Step 4")
+E90	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B91	s	Readiness meter
+C91	f	=TEXT($L$21,"0%")&" of required fields"
+D91	f	=IF($L$24="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E91	s	Optional fields, contributions and milestones do not affect the meter.
+B93	s	NAVIGATION
+B94	s	◀  Back to Step 2
+C94	s	💾  Save Draft
+D94	f	=IF($L$24="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E94	s	Continue activates only when Section F shows every check passed.

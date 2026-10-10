@@ -1,0 +1,226 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-CO-Lists
+state=visible dims=B2:AX40 max_row=40 max_col=50
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 2: Co-ownership
+B3	s	Every Offer-side and Need-side value set for the co-ownership scope & work form.
+B5	s	Collaboration intent — Offer (O00)
+D5	s	Collaboration intent — Need (N00)
+F5	s	Asset type (O01 / N01)
+H5	s	Estimated asset value (O04 / N09)
+J5	s	Currency (O04-CUR / N09-CUR)
+L5	s	Ownership share offered (O05)
+N5	s	Ownership share sought (N05)
+P5	s	Your contribution type (O06)
+R5	s	What should your co-owner bring? (N03)
+T5	s	Entity structure (O07 / N07)
+V5	s	Expected ownership duration (O08 / N10)
+X5	s	Exit provisions offered (O09)
+Z5	s	Exit strategy preference (N11)
+AB5	s	Number of co-owners sought (N06)
+AD5	s	Minimum co-owner requirements (N08)
+AF5	s	Preferred co-owner location (N04)
+AH5	s	Hidden fields for the Co-ownership model
+AJ5	s	Month (milestone date picker)
+AL5	s	Year (milestone date picker)
+AN5	s	O03a city source (asset location)
+AP5	s	N02a city source (first asset country slot)
+AR5	s	N04a city source (first ticked co-owner country)
+AT5	s	Milestone date options
+AV5	s	First ticked N04 co-owner country
+AX5	s	First filled N02 asset country slot
+B6	s	Offering a stake in a new co-ownership arrangement
+D6	s	Entering a new co-ownership arrangement
+F6	s	Real estate — residential (apartment / villa / compound)
+H6	s	Under $100K
+J6	s	USD ($)
+L6	s	Up to 10%
+N6	s	Minority stake (under 25%)
+P6	s	Capital / equity contribution
+R6	s	Capital / equity contribution
+T6	s	SPV / Special Purpose Vehicle
+V6	s	Short-term — exit within 1–2 years
+X6	s	Buy-out provisions available
+Z6	s	Open to buy-out provisions
+AB6	s	1 co-owner
+AD6	s	PMTwin vetted
+AF6	s	Saudi Arabia
+AH6	s	Routing question (sharing vs pooling)
+AJ6	s	January
+AL6	n	2026
+AN6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F51700>
+AP6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F620F0>
+AR6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F62120>
+AT6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F62150>
+AV6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F62180>
+AX6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125F62720>
+B7	s	Offering to sell / exit an existing co-ownership stake
+D7	s	Seeking to acquire an existing co-ownership stake
+F7	s	Real estate — commercial (office / retail / hotel)
+H7	s	$100K–$500K
+J7	s	SAR (ر.س)
+L7	s	10–25%
+N7	s	Minority stake (25–49%)
+P7	s	Land contribution
+R7	s	Land contribution
+T7	s	Joint company
+V7	s	Medium-term (3–5 years)
+X7	s	Right of first refusal
+Z7	s	Right of first refusal
+AB7	s	2 co-owners
+AD7	s	Muqawil registered
+AF7	s	UAE
+AH7	s	Skill level
+AJ7	s	February
+AL7	n	2027
+AT7	f	=
+B8	s	Offering to acquire an additional stake in existing arrangement
+D8	s	Seeking to exit from an existing co-ownership position
+F8	s	Real estate — mixed use
+H8	s	$500K–$1M
+J8	s	AED (د.إ)
+L8	s	25–49%
+N8	s	Equal share (50%)
+P8	s	Asset in-kind
+R8	s	Asset in-kind
+T8	s	Limited partnership
+V8	s	Long-term (5–10 years)
+X8	s	Open to IPO / listing
+Z8	s	Open to IPO / listing
+AB8	s	3 or more
+AD8	s	Minimum capital threshold
+AF8	s	Egypt
+AH8	s	Years experience
+AJ8	s	March
+AL8	n	2028
+AT8	f	=
+B9	s	Open to discussion
+D9	s	Open to discussion
+F9	s	Real estate — industrial (warehouse / factory)
+H9	s	$1M–$5M
+J9	s	EGP (ج.م)
+L9	s	50% (equal)
+N9	s	Majority stake (51–75%)
+P9	s	Development expertise
+R9	s	Development expertise
+T9	s	Contractual arrangement (no new entity)
+V9	s	Indefinite hold
+X9	s	Open to third-party sale
+Z9	s	Open to third-party sale
+AB9	s	Open
+AD9	s	Legal entity required
+AF9	s	Qatar
+AH9	s	Material category
+AJ9	s	April
+AL9	n	2029
+AT9	f	=
+F10	s	Land / development plot
+H10	s	$5M–$20M
+J10	s	QAR (ر.ق)
+L10	s	51–75%
+N10	s	Above 75%
+P10	s	Management & operations capability
+R10	s	Management & operations capability
+T10	s	To be agreed
+V10	s	To be agreed
+X10	s	No exit provisions
+Z10	s	No exit provisions required
+AD10	s	Proven track record in asset type
+AF10	s	Kuwait
+AH10	s	Task scope
+AJ10	s	May
+AL10	n	2030
+AT10	f	=
+F11	s	Heavy equipment
+H11	s	$20M–$100M
+J11	s	KWD (د.ك)
+L11	s	Above 75%
+N11	s	To be agreed
+P11	s	Technical expertise
+R11	s	Technical expertise
+T11	s	Other
+X11	s	To be agreed
+Z11	s	To be agreed
+AD11	s	Minimum 5 years sector experience
+AF11	s	Bahrain
+AJ11	s	June
+AL11	n	2031
+AT11	f	=
+F12	s	Technology platform
+H12	s	Above $100M
+J12	s	BHD (د.ب)
+L12	s	To be agreed
+P12	s	Market access & relationships
+R12	s	Market access & relationships
+X12	s	Other
+Z12	s	Other
+AD12	s	Minimum 10 years sector experience
+AF12	s	Oman
+AJ12	s	July
+AL12	n	2032
+AT12	f	=
+F13	s	Company / business
+H13	s	Prefer not to state
+J13	s	OMR (ر.ع)
+P13	s	Financing / debt capacity
+R13	s	Financing / debt capacity
+AD13	s	Sector-specific credentials
+AF13	s	Jordan
+AJ13	s	August
+AL13	n	2033
+AT13	f	=
+F14	s	SPV / holding entity
+J14	s	EUR (€)
+P14	s	Regulatory approvals & permits
+R14	s	Regulatory approvals & permits
+AD14	s	None
+AF14	s	UK
+AJ14	s	September
+AL14	n	2034
+AT14	f	=
+F15	s	Infrastructure asset
+J15	s	GBP (£)
+P15	s	Construction execution capacity
+R15	s	Construction execution capacity
+AD15	s	Other
+AF15	s	USA
+AJ15	s	October
+AL15	n	2035
+AT15	f	=
+F16	s	Other
+J16	s	Other
+P16	s	Other
+R16	s	Legal & compliance expertise
+AF16	s	China
+AJ16	s	November
+AL16	n	2036
+AT16	f	=
+R17	s	International credentials
+AF17	s	Europe (any)
+AJ17	s	December
+AT17	f	=
+R18	s	Other
+AF18	s	Asia (any)
+AT18	f	=
+AF19	s	International (any)
+AT19	f	=
+AF20	s	Other
+AT20	f	=
+AT21	f	=
+AT22	f	=
+AT23	f	=
+AT24	f	=
+AT25	f	=
+AT26	f	=
+AT27	f	=
+AT28	f	=
+AT29	f	=
+AT30	f	=
+AT31	f	=
+AT32	f	=
+AT33	f	=
+AT34	f	=
+AT35	f	=

@@ -1,0 +1,446 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 3-ME-Wireframe
+state=visible dims=A1:T83 max_row=83 max_col=20
+merged=['C80:D80']
+
+## DATA VALIDATIONS
+sqref=C22 C46 C66 C68 C70 type=date formula1=46023 formula2=None allow_blank=True
+sqref=C47 type=decimal formula1=0 formula2=None allow_blank=True
+
+## CELLS
+P1	s	FEED → Step 4 / Step 5
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	s	Mentorship
+B3	s	Scope & Work  ·  Mentorship
+P3	s	Gate
+Q3	f	=$N$26
+B4	s	Define the expertise you offer as a mentor and the guidance you are seeking as a mentee.
+P4	s	Readiness
+Q4	f	=$N$24
+B5	s	Account type: Individual professional only  ·  Mentorship is personal capability-building. Engagements with a deliverable output should use Task-based Collaboration instead.
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  SCOPE & WORK  ·  MENTORSHIP
+D7	f	="Readiness  "&TEXT($N$24,"0%")
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($N$14="YES","◆ Active — Mentorship selected in Step 2. Auto-save on.","○ Not active — select Mentorship in Step 2 to use this form.")
+P8	s	Offer value
+Q8	f	=$C$29
+P9	s	Need intent
+Q9	f	=$C$36
+B10	s	SECTION A  —  OFFER SIDE  ·  The expertise or guidance you are offering as a mentor
+G10	s	OFFER PICKER  ·  multi-select
+J10	s	NEED PICKER  ·  multi-select
+P10	s	Need category
+Q10	f	=$C$37
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint
+G11	s	Option
+H11	s	Select
+J11	s	Option
+K11	s	Select
+M11	s	VALIDATION ENGINE (live)
+P11	s	Need sub-category
+Q11	f	=$C$39
+R11	s	Req shown
+S11	s	Req done
+B12	s	S3-ME-I-O00 · Collaboration intent *
+D12	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$12="","● Required","✓ Complete"))
+E12	s	Single select.
+G12	s	S3-ME-I-O04 · Mentorship format offered
+H12	s	Select
+J12	s	S3-ME-I-N05 · Preferred mentorship format
+K12	s	Select
+M12	s	Model
+N12	s	Mentorship
+P12	s	Need value
+Q12	f	=$C$55
+R12	f	=IF(AND($N$16="YES"),1,0)
+S12	f	=IF(AND($R$12=1,$C$12<>""),1,0)
+B13	s	S3-ME-I-O01 · Mentorship domain *
+D13	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$13="","● Required","✓ Complete"))
+E13	s	Single select.
+G13	f	='Step 3-ME-Lists'!$D$6
+J13	f	='Step 3-ME-Lists'!$D$6
+M13	s	Model selected in Step 2
+N13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=$C$35
+R13	f	=IF(AND($N$16="YES"),1,0)
+S13	f	=IF(AND($R$13=1,$C$13<>""),1,0)
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$13))),"— Hidden",IF($C$14="","● Required","✓ Complete")))
+E14	s	Free text — shown when Other is selected.
+G14	f	='Step 3-ME-Lists'!$D$7
+J14	f	='Step 3-ME-Lists'!$D$7
+M14	s	Model active
+N14	f	=IF($N$13=$N$12,"YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$60,$C$61,$C$62)
+R14	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$13))),1,0)
+S14	f	=IF(AND($R$14=1,$C$14<>""),1,0)
+B15	s	S3-ME-I-O02 · Specific area of expertise *
+D15	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$15="","● Required","✓ Complete"))
+E15	s	Options depend on S3-ME-I-O01.
+G15	f	='Step 3-ME-Lists'!$D$8
+J15	f	='Step 3-ME-Lists'!$D$8
+M15	s	Post type (Step 1)
+N15	f	=IF('Step 1-Wireframe'!$C$12="","",'Step 1-Wireframe'!$C$12)
+P15	s	Milestones
+Q15	f	=COUNTA($C$65,$C$67,$C$69)
+R15	f	=IF(AND($N$16="YES"),1,0)
+S15	f	=IF(AND($R$15=1,$C$15<>""),1,0)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$15))),"— Hidden",IF($C$16="","● Required","✓ Complete")))
+E16	s	Free text — shown when Other is selected.
+G16	f	='Step 3-ME-Lists'!$D$9
+J16	f	='Step 3-ME-Lists'!$D$9
+M16	s	Offer side active
+N16	f	=IF(OR($N$15="",ISNUMBER(SEARCH("Offer",$N$15))),"YES","NO")
+R16	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$15))),1,0)
+S16	f	=IF(AND($R$16=1,$C$16<>""),1,0)
+B17	s	S3-ME-I-O03 · What you bring as a mentor *
+D17	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$17="","● Required","✓ Complete"))
+E17	s	Free text — a few sentences.
+G17	f	='Step 3-ME-Lists'!$D$10
+J17	f	='Step 3-ME-Lists'!$D$10
+M17	s	Need side active
+N17	f	=IF(OR($N$15="",ISNUMBER(SEARCH("Need",$N$15))),"YES","NO")
+R17	f	=IF(AND($N$16="YES"),1,0)
+S17	f	=IF(AND($R$17=1,$C$17<>""),1,0)
+B18	s	S3-ME-I-O04 · Mentorship format offered *
+C18	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221266766F0>
+D18	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$18="","● Required","✓ Complete"))
+E18	s	Multi-select — set Yes beside each option in the Offer picker (G:H).
+G18	f	='Step 3-ME-Lists'!$D$11
+J18	f	='Step 3-ME-Lists'!$D$11
+M18	s	Offer required — shown
+N18	f	=SUM($R$12:$R$31)
+R18	f	=IF(AND($N$16="YES"),1,0)
+S18	f	=IF(AND($R$18=1,$C$18<>""),1,0)
+B19	s	S3-ME-I-O05 · Session location — country
+D19	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(OR(ISNUMBER(SEARCH("In-person",$C$18)),ISNUMBER(SEARCH("Hybrid",$C$18)))),"— Hidden",IF($C$19="","○ Optional","✓ Complete")))
+E19	s	Country list (same as S1-F03). Shown only when S3-ME-I-O04 is In-person or Hybrid.
+G19	f	='Step 3-ME-Lists'!$D$12
+J19	f	='Step 3-ME-Lists'!$D$12
+M19	s	Offer required — done
+N19	f	=SUM($S$12:$S$31)
+R19	n	0
+S19	f	=IF(AND($R$19=1,$C$19<>""),1,0)
+B20	s	S3-ME-I-O05a · Session location — city
+D20	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(OR(ISNUMBER(SEARCH("In-person",$C$18)),ISNUMBER(SEARCH("Hybrid",$C$18)))),"— Hidden",IF($C$20="","○ Optional","✓ Complete")))
+E20	s	Cities for the country in S3-ME-I-O05 (same as S1-F04). Shown only when S3-ME-I-O04 is In-person or Hybrid.
+M20	s	Need required — shown
+N20	f	=SUM($R$35:$R$57)
+R20	n	0
+S20	f	=IF(AND($R$20=1,$C$20<>""),1,0)
+B21	s	S3-ME-I-O06 · Availability *
+D21	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$21="","● Required","✓ Complete"))
+E21	s	Single select.
+G21	s	S3-ME-I-O09 · Personal credentials
+H21	s	Select
+J21	s	S3-ME-I-N11 · Mentor credentials preferred
+K21	s	Select
+M21	s	Need required — done
+N21	f	=SUM($S$35:$S$57)
+R21	f	=IF(AND($N$16="YES"),1,0)
+S21	f	=IF(AND($R$21=1,$C$21<>""),1,0)
+B22	s	»  O06 — specific period
+D22	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT($C$21="Specific period"),"— Hidden",IF($C$22="","● Required","✓ Complete")))
+E22	s	Date picker — shown when "Specific period" is selected.
+G22	f	='Step 3-ME-Lists'!$H$6
+J22	f	='Step 3-ME-Lists'!$Q$6
+M22	s	Required — total
+N22	f	=$N$18+$N$20
+R22	f	=IF(AND($N$16="YES",$C$21="Specific period"),1,0)
+S22	f	=IF(AND($R$22=1,$C$22<>""),1,0)
+B23	s	S3-ME-I-O07 · Session frequency offered
+D23	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$23="","○ Optional","✓ Complete"))
+E23	s	Single select.
+G23	f	='Step 3-ME-Lists'!$H$7
+J23	f	='Step 3-ME-Lists'!$Q$7
+M23	s	Required — done
+N23	f	=$N$19+$N$21
+R23	n	0
+S23	f	=IF(AND($R$23=1,$C$23<>""),1,0)
+B24	s	S3-ME-I-O08 · Years of experience in domain *
+D24	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$24="","● Required","✓ Complete"))
+E24	s	Single select.
+G24	f	='Step 3-ME-Lists'!$H$8
+J24	f	='Step 3-ME-Lists'!$Q$8
+M24	s	Readiness
+N24	f	=IFERROR($N$23/$N$22,0)
+R24	f	=IF(AND($N$16="YES"),1,0)
+S24	f	=IF(AND($R$24=1,$C$24<>""),1,0)
+B25	s	S3-ME-I-O09 · Personal credentials
+C25	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212753E720>
+D25	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$25="","○ Optional","✓ Complete"))
+E25	s	Multi-select — set Yes beside each option in the Offer picker (G:H).
+G25	f	='Step 3-ME-Lists'!$H$9
+J25	f	='Step 3-ME-Lists'!$Q$9
+M25	s	Step 2 gate
+N25	f	='Step 2-Wireframe'!$L$19
+R25	n	0
+S25	f	=IF(AND($R$25=1,$C$25<>""),1,0)
+B26	s	»  O09 — specify "Other"
+D26	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$25))),"— Hidden",IF($C$26="","● Required","✓ Complete")))
+E26	s	Free text — shown when Other is selected.
+G26	f	='Step 3-ME-Lists'!$H$10
+J26	f	='Step 3-ME-Lists'!$Q$10
+M26	s	Step 4 gate
+N26	f	=IF(AND($N$14="YES",$N$25="YES",$N$22>0,$N$23=$N$22),"YES","NO")
+R26	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$25))),1,0)
+S26	f	=IF(AND($R$26=1,$C$26<>""),1,0)
+B27	s	S3-ME-I-O10 · Languages offered
+C27	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127572DB0>
+D27	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$27="","○ Optional","✓ Complete"))
+E27	s	Multi-select — set Yes beside each option in the Offer picker (G:H).
+G27	f	='Step 3-ME-Lists'!$H$11
+J27	f	='Step 3-ME-Lists'!$Q$11
+R27	n	0
+S27	f	=IF(AND($R$27=1,$C$27<>""),1,0)
+B28	s	»  O10 — specify "Other"
+D28	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$27))),"— Hidden",IF($C$28="","● Required","✓ Complete")))
+E28	s	Free text — shown when Other is selected.
+G28	f	='Step 3-ME-Lists'!$H$12
+J28	f	='Step 3-ME-Lists'!$Q$12
+R28	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$27))),1,0)
+S28	f	=IF(AND($R$28=1,$C$28<>""),1,0)
+B29	s	S3-ME-I-O11 · Rate or compensation expected
+D29	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$29="","○ Optional","✓ Complete"))
+E29	s	Pick a range, then the currency on the next row.
+J29	f	='Step 3-ME-Lists'!$Q$13
+R29	n	0
+S29	f	=IF(AND($R$29=1,$C$29<>""),1,0)
+B30	s	»  O11-CUR — currency
+D30	f	=IF($N$16<>"YES","— Locked (not in post type)",IF($C$30="","○ Optional","✓ Complete"))
+E30	s	Currency for the range above.
+G30	s	S3-ME-I-O10 · Languages offered
+H30	s	Select
+R30	n	0
+S30	f	=IF(AND($R$30=1,$C$30<>""),1,0)
+B31	s	»  O11-CUR — specify "Other"
+D31	f	=IF($N$16<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$30))),"— Hidden",IF($C$31="","● Required","✓ Complete")))
+E31	s	Free text — shown when currency is Other.
+G31	f	='Step 3-ME-Lists'!$I$6
+J31	s	S3-ME-I-N12 · Language preference
+K31	s	Select
+R31	f	=IF(AND($N$16="YES",ISNUMBER(SEARCH("Other",$C$30))),1,0)
+S31	f	=IF(AND($R$31=1,$C$31<>""),1,0)
+G32	f	='Step 3-ME-Lists'!$I$7
+J32	f	='Step 3-ME-Lists'!$I$6
+B33	s	SECTION B  —  NEED SIDE  ·  The mentorship or guidance you are seeking
+G33	f	='Step 3-ME-Lists'!$I$8
+J33	f	='Step 3-ME-Lists'!$I$7
+B34	s	Field
+C34	s	Your input
+D34	s	Status
+E34	s	Hint
+G34	f	='Step 3-ME-Lists'!$I$9
+J34	f	='Step 3-ME-Lists'!$I$8
+B35	s	S3-ME-I-N00 · Match with *
+D35	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$35="","● Required","✓ Complete"))
+E35	s	Single select.
+G35	f	='Step 3-ME-Lists'!$I$10
+J35	f	='Step 3-ME-Lists'!$I$9
+R35	f	=IF(AND($N$17="YES"),1,0)
+S35	f	=IF(AND($R$35=1,$C$35<>""),1,0)
+B36	s	S3-ME-I-N01 · Collaboration intent *
+D36	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$36="","● Required","✓ Complete"))
+E36	s	Single select.
+G36	f	='Step 3-ME-Lists'!$I$11
+J36	f	='Step 3-ME-Lists'!$I$10
+R36	f	=IF(AND($N$17="YES"),1,0)
+S36	f	=IF(AND($R$36=1,$C$36<>""),1,0)
+B37	s	S3-ME-I-N02 · Mentorship domain I need *
+D37	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$37="","● Required","✓ Complete"))
+E37	s	Single select.
+G37	f	='Step 3-ME-Lists'!$I$12
+J37	f	='Step 3-ME-Lists'!$I$11
+R37	f	=IF(AND($N$17="YES"),1,0)
+S37	f	=IF(AND($R$37=1,$C$37<>""),1,0)
+B38	s	»  N02 — specify "Other"
+D38	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$37))),"— Hidden",IF($C$38="","● Required","✓ Complete")))
+E38	s	Free text — shown when Other is selected.
+J38	f	='Step 3-ME-Lists'!$I$12
+R38	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$37))),1,0)
+S38	f	=IF(AND($R$38=1,$C$38<>""),1,0)
+B39	s	S3-ME-I-N03 · Specific area I want guidance in *
+D39	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$39="","● Required","✓ Complete"))
+E39	s	Options depend on S3-ME-I-N02.
+R39	f	=IF(AND($N$17="YES"),1,0)
+S39	f	=IF(AND($R$39=1,$C$39<>""),1,0)
+B40	s	»  N03 — specify "Other"
+D40	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$39))),"— Hidden",IF($C$40="","● Required","✓ Complete")))
+E40	s	Free text — shown when Other is selected.
+R40	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$39))),1,0)
+S40	f	=IF(AND($R$40=1,$C$40<>""),1,0)
+B41	s	S3-ME-I-N04 · What outcome am I seeking? *
+D41	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$41="","● Required","✓ Complete"))
+E41	s	Free text — a few sentences.
+R41	f	=IF(AND($N$17="YES"),1,0)
+S41	f	=IF(AND($R$41=1,$C$41<>""),1,0)
+B42	s	S3-ME-I-N05 · Preferred mentorship format
+C42	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022127569F10>
+D42	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$42="","○ Optional","✓ Complete"))
+E42	s	Multi-select — set Yes beside each option in the Need picker (J:K).
+R42	n	0
+S42	f	=IF(AND($R$42=1,$C$42<>""),1,0)
+B43	s	S3-ME-I-N06 · Session location — country
+D43	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(OR(ISNUMBER(SEARCH("In-person",$C$42)),ISNUMBER(SEARCH("Hybrid",$C$42)))),"— Hidden",IF($C$43="","○ Optional","✓ Complete")))
+E43	s	Country list (same as S1-F03). Shown only when S3-ME-I-N05 is In-person or Hybrid.
+R43	n	0
+S43	f	=IF(AND($R$43=1,$C$43<>""),1,0)
+B44	s	S3-ME-I-N06a · Session location — city
+D44	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(OR(ISNUMBER(SEARCH("In-person",$C$42)),ISNUMBER(SEARCH("Hybrid",$C$42)))),"— Hidden",IF($C$44="","○ Optional","✓ Complete")))
+E44	s	Cities for the country in S3-ME-I-N06 (same as S1-F04). Shown only when S3-ME-I-N05 is In-person or Hybrid.
+R44	n	0
+S44	f	=IF(AND($R$44=1,$C$44<>""),1,0)
+B45	s	S3-ME-I-N07 · When do I want to start? *
+D45	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$45="","● Required","✓ Complete"))
+E45	s	Single select.
+R45	f	=IF(AND($N$17="YES"),1,0)
+S45	f	=IF(AND($R$45=1,$C$45<>""),1,0)
+B46	s	»  N07 — specific date
+D46	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT($C$45="Specific date"),"— Hidden",IF($C$46="","● Required","✓ Complete")))
+E46	s	Date picker — shown when "Specific date" is selected.
+R46	f	=IF(AND($N$17="YES",$C$45="Specific date"),1,0)
+S46	f	=IF(AND($R$46=1,$C$46<>""),1,0)
+B47	s	S3-ME-I-N08 · Total duration of mentorship *
+D47	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$47="","● Required","✓ Complete"))
+E47	s	Enter a number, then pick the time unit on the next row.
+R47	f	=IF(AND($N$17="YES"),1,0)
+S47	f	=IF(AND($R$47=1,$C$47<>""),1,0)
+B48	s	»  N08-TU — time unit
+D48	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$48="","● Required","✓ Complete"))
+E48	s	Time unit for the duration above.
+R48	f	=IF(AND($N$17="YES"),1,0)
+S48	f	=IF(AND($R$48=1,$C$48<>""),1,0)
+B49	s	S3-ME-I-N09 · Session frequency preferred
+D49	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$49="","○ Optional","✓ Complete"))
+E49	s	Single select.
+R49	n	0
+S49	f	=IF(AND($R$49=1,$C$49<>""),1,0)
+B50	s	S3-ME-I-N10 · Minimum mentor experience
+D50	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$50="","○ Optional","✓ Complete"))
+E50	s	Single select.
+R50	n	0
+S50	f	=IF(AND($R$50=1,$C$50<>""),1,0)
+B51	s	S3-ME-I-N11 · Mentor credentials preferred
+C51	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126624380>
+D51	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$51="","○ Optional","✓ Complete"))
+E51	s	Multi-select — set Yes beside each option in the Need picker (J:K).
+R51	n	0
+S51	f	=IF(AND($R$51=1,$C$51<>""),1,0)
+B52	s	»  N11 — specify "Other"
+D52	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$51))),"— Hidden",IF($C$52="","● Required","✓ Complete")))
+E52	s	Free text — shown when Other is selected.
+R52	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$51))),1,0)
+S52	f	=IF(AND($R$52=1,$C$52<>""),1,0)
+B53	s	S3-ME-I-N12 · Language preference
+C53	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126627E00>
+D53	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$53="","○ Optional","✓ Complete"))
+E53	s	Multi-select — set Yes beside each option in the Need picker (J:K).
+R53	n	0
+S53	f	=IF(AND($R$53=1,$C$53<>""),1,0)
+B54	s	»  N12 — specify "Other"
+D54	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$53))),"— Hidden",IF($C$54="","● Required","✓ Complete")))
+E54	s	Free text — shown when Other is selected.
+R54	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$53))),1,0)
+S54	f	=IF(AND($R$54=1,$C$54<>""),1,0)
+B55	s	S3-ME-I-N13 · Budget range
+D55	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$55="","○ Optional","✓ Complete"))
+E55	s	Pick a range, then the currency on the next row.
+R55	n	0
+S55	f	=IF(AND($R$55=1,$C$55<>""),1,0)
+B56	s	»  N13-CUR — currency
+D56	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$56="","○ Optional","✓ Complete"))
+E56	s	Currency for the range above.
+R56	n	0
+S56	f	=IF(AND($R$56=1,$C$56<>""),1,0)
+B57	s	»  N13-CUR — specify "Other"
+D57	f	=IF($N$17<>"YES","— Locked (not in post type)",IF(NOT(ISNUMBER(SEARCH("Other",$C$56))),"— Hidden",IF($C$57="","● Required","✓ Complete")))
+E57	s	Free text — shown when currency is Other.
+R57	f	=IF(AND($N$17="YES",ISNUMBER(SEARCH("Other",$C$56))),1,0)
+S57	f	=IF(AND($R$57=1,$C$57<>""),1,0)
+B59	s	SECTION C  —  DELIVERABLES  (Need side — optional)
+E59	s	Collapsed by default (+ to expand). Describe personal learning outcomes. If work products are expected, use Task-based Collaboration.
+B60	s	S3-ME-I-D01 · Deliverable 1
+D60	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$60="","○ Optional","✓ Complete"))
+E60	s	Optional — short description.
+R60	n	0
+S60	f	=IF(AND($R$60=1,$C$60<>""),1,0)
+B61	s	S3-ME-I-D02 · Deliverable 2
+D61	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$61="","○ Optional","✓ Complete"))
+E61	s	Optional — short description.
+R61	n	0
+S61	f	=IF(AND($R$61=1,$C$61<>""),1,0)
+B62	s	S3-ME-I-D03 · Deliverable 3
+D62	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$62="","○ Optional","✓ Complete"))
+E62	s	Optional — short description.
+R62	n	0
+S62	f	=IF(AND($R$62=1,$C$62<>""),1,0)
+B64	s	SECTION D  —  MILESTONES  (optional)
+E64	s	Collapsed by default (+ to expand). Useful for structured mentorship with progression checkpoints.
+B65	s	S3-ME-I-M01 · Milestone 1 — title
+D65	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$65="","○ Optional","✓ Complete"))
+E65	s	Optional.
+R65	n	0
+S65	f	=IF(AND($R$65=1,$C$65<>""),1,0)
+B66	s	»  M01 — target date
+D66	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$66="","○ Optional","✓ Complete"))
+E66	s	Date picker.
+R66	n	0
+S66	f	=IF(AND($R$66=1,$C$66<>""),1,0)
+B67	s	S3-ME-I-M02 · Milestone 2 — title
+D67	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$67="","○ Optional","✓ Complete"))
+E67	s	Optional.
+R67	n	0
+S67	f	=IF(AND($R$67=1,$C$67<>""),1,0)
+B68	s	»  M02 — target date
+D68	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$68="","○ Optional","✓ Complete"))
+E68	s	Date picker.
+R68	n	0
+S68	f	=IF(AND($R$68=1,$C$68<>""),1,0)
+B69	s	S3-ME-I-M03 · Milestone 3 — title
+D69	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$69="","○ Optional","✓ Complete"))
+E69	s	Optional.
+R69	n	0
+S69	f	=IF(AND($R$69=1,$C$69<>""),1,0)
+B70	s	»  M03 — target date
+D70	f	=IF($N$17<>"YES","— Locked (not in post type)",IF($C$70="","○ Optional","✓ Complete"))
+E70	s	Date picker.
+R70	n	0
+S70	f	=IF(AND($R$70=1,$C$70<>""),1,0)
+B72	s	SECTION E  —  VALIDATION
+B73	s	Check
+C73	s	Result
+D73	s	Status
+E73	s	Detail
+B74	s	Model selected in Step 2
+C74	f	=$N$13
+D74	f	=IF($N$14="YES","✓ Pass","⚠ Select Mentorship in Step 2")
+E74	s	This form only applies when Mentorship is the Step 2 model.
+B75	s	Step 2 complete
+C75	f	=$N$25
+D75	f	=IF($N$25="YES","✓ Pass","⚠ Blocks Step 4")
+E75	s	Step 2 routing and model must be complete.
+B76	s	Offer side — required fields
+C76	f	=$N$19&" / "&$N$18
+D76	f	=IF($N$16<>"YES","— Not in post type",IF($N$19=$N$18,"✓ Pass","● Incomplete"))
+E76	s	Counts required Offer fields that are currently shown.
+B77	s	Need side — required fields
+C77	f	=$N$21&" / "&$N$20
+D77	f	=IF($N$17<>"YES","— Not in post type",IF($N$21=$N$20,"✓ Pass","● Incomplete"))
+E77	s	Counts required Need fields that are currently shown.
+B78	s	Overall readiness
+C78	f	=$N$24
+D78	f	=IF($N$24=1,"✓ Pass","● In progress")
+E78	s	Required fields completed ÷ required fields shown.
+B80	s	← Back to Step 2
+C80	f	=IF($N$26="YES","→ Continue to Step 4 — Matching","🔒 Complete required fields to continue")

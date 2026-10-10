@@ -1,0 +1,272 @@
+# PMTwin-Need&Offer Framework-Matching Mechanizim-10Jan2025.pdf
+pages: 10
+
+
+===== PAGE 1 =====
+PMTwin PLATFORM
+Collaboration
+Models
+Framework
+Empowering Construction Partnerships Across Every Scale
+
+
+===== PAGE 2 =====
+PMTwin Platform
+Need/Offer Framework
+A bidirectional marketplace where both Needs and Offers are first-
+class posts. Users can post what they're seeking or what they're 
+providing, creating a dynamic ecosystem of collaboration 
+opportunities.
+5 Main Collaboration Models
+15 Collaboration Models
+From simple task-based engagements to complex SPVs and strategic 
+JVs. Each model supports both Need and Offer posts with semantic 
+attribute mirroring for intelligent matching.
+5 Value Exchange Modes
+Go beyond cash transactions. Support Equity, Profit-Sharing, Barter, 
+and Hybrid arrangements, unlocking value in resource-constrained 
+environments.
+AI-Powered Matching
+Intelligent wizard guides users to the right model, then performs 
+bidirectional semantic matching to connect Needs with compatible 
+Offers based on skills, budget, timeline, and value exchange 
+preferences.
+
+
+===== PAGE 3 =====
+The Need/Offer Framework
+Bidirectional Marketplace
+Unlike traditional platforms that separate demand 
+(job boards) from supply (profiles), PMTwin treats 
+both Needs and Offers as first-class collaboration 
+posts.
+Equal Status: A Need post ("I'm looking for...") and an 
+Offer post ("I can provide...") use the same 
+collaboration models.
+Semantic Mirroring: Attributes are inverted, "Required 
+Skills" becomes "Available Skills", "Budget" becomes 
+"Rate".
+Intelligent Matching: The AI engine performs 
+bidirectional matching to connect compatible Needs 
+with Offers.
+NEED
+"I am seeking...“
+I demand
+OFFER
+"I can provide...“
+Need Example
+"I need a structural 
+engineer for shop drawing 
+review. Budget: 10K SAR."
+Offer Example
+"I offer structural 
+engineering services. 
+Rate: 8-12K SAR per 
+project."
+A demand, 
+Something I don’t 
+Have or Own
+A Give, 
+Something I Have or 
+Own
+
+
+===== PAGE 4 =====
+5 Exchange Modes
+y
+PMTwin enables multiple value exchange modes beyond cash.
+Cash
+Standard payments with defined terms and 
+milestones.
+Structural engineer, 10K SAR in 2 
+milestones.
+Equity
+Ownership stake for contribution; includes 
+vesting.
+Join our JV: 40% equity for expertise + 
+equipment.
+Profit-Sharing
+Share revenue or profit without ownership 
+transfer.
+Consortium: 60–40 profit split after costs.
+Barter
+Direct exchange of resources or services; no cash.
+Offer office space; need structural 
+engineering.
+Hybrid
+Mix cash, equity, or barter and in-kind for 
+flexible deals.
+SPV: 30% cash, 50% equity, 20% Bartering 
+Non-monetary exchange unlocks value where cash is scarce.
+.
+Once he/she select to Barter the offer register will be opened to selct and/or add new offer.
+User can link one need to multible offers
+
+
+===== PAGE 5 =====
+Matching Methodology
+Bidirectional Semantic Matching
+Matching Models
+1
+One Way Matching-Simple Matching
+2
+Two Way Matching-Dependancy
+3
+Group Formation
+4
+Circular Exchange
+
+
+===== PAGE 6 =====
+1- One Way Matching
+Semantic Matching
+User A: Need Post
+Required Skills
+Structural Engineering, AutoCAD
+Budget Available
+10,000 - 15,000 SAR
+Deadline
+March 15, 2026
+Location
+Riyadh, Saudi Arabia
+Match
+Match
+Partial
+Match
+User B: Offer Post
+Available Skills
+Structural Engineering, AutoCAD, Revit
+Rate Expected
+8,000 - 12,000 SAR
+Availability Start Date
+March 20, 2026
+Preferred Location
+Riyadh, Remote OK
+MATCH SCORE: Attribute Overlap (40%) + Budget Fit (30%) + Timeline (15%) + Location (10%) + Reputation (5%) = 82%
+
+
+===== PAGE 7 =====
+2- Two-Way Dependency
+Barter posts require bidirectional matching: User A's need must match User B's offer, AND User A's offer 
+must match User B's need.
+User A
+I Offer
+Office space in Riyadh
+150 sqm, 6 months
+I Need
+Structural engineering
+Shop drawing review
+A's Offer matches B's 
+Need
+B's Offer matches 
+A's Need
+User B
+I Offer
+Structural engineering
+15 years experience
+I Need
+Office space in Riyadh
+100+ sqm, 6+ months
+Equivalence Ratio:
+1 month office space (25K SAR) = 40 hours engineering (25K SAR)
+
+
+===== PAGE 8 =====
+3- Group Formation
+1 Need + 3 Offers = 1 Consortium
+Multiple users with Offers are matched with a single Need (or multiple Needs) to form a single collaboration group.
+Lead Company: Need Post
+"I need consortium partners for a 500M SAR highway project."
+Financial: 
+200M SAR
+Construction 
+Expertise
+Equipment 
+Fleet
+Matching
+Partner 1: Offer
+Contribution
+Financial Backing
+Value
+200M SAR Capital
+Partner 2: Offer
+Contribution
+Construction Expertise
+Experience
+20+ Highway Projects
+Partner 3: Offer
+Contribution
+Equipment Fleet
+Assets
+50+ Heavy Machines
+4-Party Consortium Formed
+Use Cases: Consortium Formation • Bulk Purchasing • Co-Ownership Pooling • Resource Sharing Networks
+
+
+===== PAGE 9 =====
+4- Circular Exchange
+3-Way Barter Chain
+Three or more users exchange resources in a circular pattern, where each user's Offer matches another user's Need.
+The user can link one Need to multible Offers from his Offer register.
+User A: Contractor
+I Offer
+Office Space
+150 sqm, 6 months
+I Need
+Excavator
+For upcoming project
+User B: Equipment
+I Offer
+Excavator
+Available for 6 months
+I Need
+Accounting Services
+To manage books
+User C: Accounting
+I Offer
+Accounting Services
+Professional CPA
+I Need
+Office Space
+Expanding team
+Accounting
+Zero Cash: All three parties get what they need without any money changing hands
+
+
+===== PAGE 10 =====
+Simplified User Journey Map
+1
+Sign Up/Sign In
+2
+Post Deal
+3
+Search Engine
+4
+User 
+Dashboard
+.
+Company
+Individual
+Professional
+Consultant/SME
+Need or Offer
+Select Model
+Select Sub 
+model
+Describe 
+Deal/Attribute
+Matching 
+(system)
+Comparison
+Negotiation 
+(more details)
+Develop 
+Agreement/s
+mart contract
+Follow-up & 
+Reviews
+Company
+Professional
+SME
+Need
+Offer

@@ -1,0 +1,231 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step8-Mentorship
+state=visible dims=A1:E135 max_row=135 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 8: Mentorship
+A5	s	Screen title: Scope & Work — Mentorship Screen subtitle: Define the expertise you are offering or seeking and what you bring in return. Layout: Offer side (top) and Need side (bottom). Both required. Account access: Companies and individuals. Matching permitted with companies, individuals, or both. Note: Mentorship is a capability-building model — any engagement with a deliverable output should use Task-based Collaboration instead.
+A9	s	Offer side — "What expertise or guidance you are offering"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-ME-O00
+B12	s	Collaboration intent
+C12	s	Dropdown
+D12	s	Yes
+E12	s	No
+A13	s	S3-ME-O01
+B13	s	Mentorship domain
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-ME-O02
+B14	s	Specific area
+C14	s	Dropdown
+D14	s	Yes
+E14	s	Yes
+A15	s	S3-ME-O03
+B15	s	What you bring
+C15	s	Text area
+D15	s	Yes
+E15	s	No
+A16	s	S3-ME-O04
+B16	s	Mentorship format offered
+C16	s	Multi-select dropdown
+D16	s	Yes
+E16	s	No
+A17	s	S3-ME-O05
+B17	s	Session location — country
+C17	s	Dropdown
+D17	s	No
+E17	s	Shows if in-person or hybrid
+A18	s	S3-ME-O05a
+B18	s	Session location — city
+C18	s	Dropdown
+D18	s	No
+E18	s	Populates per O05
+A19	s	S3-ME-O06
+B19	s	Availability
+C19	s	Dropdown
+D19	s	Yes
+E19	s	No
+A20	s	S3-ME-O07
+B20	s	Session frequency offered
+C20	s	Dropdown
+D20	s	No
+E20	s	No
+A21	s	S3-ME-O08
+B21	s	Relevant credentials
+C21	s	Multi-select dropdown
+D21	s	No
+E21	s	Yes
+A22	s	S3-ME-O09
+B22	s	Years of experience in domain
+C22	s	Dropdown
+D22	s	Yes
+E22	s	No
+A23	s	S3-ME-O10
+B23	s	Languages offered
+C23	s	Multi-select dropdown
+D23	s	No
+E23	s	No
+A24	s	S3-ME-O11
+B24	s	Rate or compensation expected
+C24	s	Range dropdown + currency (S3-ME-O11-CUR)
+D24	s	No
+E24	s	No
+A26	s	S3-ME-O00 — Collaboration intent values: Offering new mentorship / Continuing an existing mentorship relationship / Open to discussion
+A28	s	S3-ME-O01 — Mentorship domain values: Technical domain / Business domain / Leadership / Digital & technology / Finance & commercial / Career development / Other → free text
+A30	s	S3-ME-O02 — Specific area values (conditional on O01): Same comprehensive taxonomy as S3-ME-N03 (Need side) — full sub-type lists per domain
+A32	s	S3-ME-O04 — Format offered values: One-to-one sessions / Group sessions / Embedded in project / Online / In-person / Hybrid / Flexible
+A34	s	S3-ME-O05 — Session location country values: Full country list — shown when In-person or Hybrid selected
+A36	s	S3-ME-O05a — Session location city values: Conditional on O05. Same city taxonomy as S1-F04
+A38	s	S3-ME-O06 — Availability values: Immediate / Within 1 month / Flexible / Specific period → date picker
+A40	s	S3-ME-O07 — Session frequency offered values: Weekly / Bi-weekly / Monthly / Ad-hoc / To be agreed
+A42	s	S3-ME-O08 — Credentials values: RICS / CIOB / PE licence / PMP / MBA / PMTwin vetted / Other → free text
+A44	s	S3-ME-O09 — Years of experience values: 3–7 years / 7–15 years / 15–25 years / 25+ years
+A46	s	S3-ME-O10 — Languages offered values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A48	s	S3-ME-O11 — Rate range values: Free / goodwill / Under $500 / $500–$1K / $1K–$3K / $3K–$5K / Above $5K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A52	s	Need side — "The expertise or guidance you are seeking"
+A54	s	Code
+B54	s	Field label
+C54	s	Type
+D54	s	Required
+E54	s	Other trigger
+A55	s	S3-ME-N00
+B55	s	Match with
+C55	s	Single select
+D55	s	Yes
+E55	s	Yes
+A56	s	S3-ME-N01
+B56	s	Collaboration intent
+C56	s	Dropdown
+D56	s	Yes
+E56	s	No
+A57	s	S3-ME-N02
+B57	s	Mentorship domain needed
+C57	s	Dropdown
+D57	s	Yes
+E57	s	Yes
+A58	s	S3-ME-N03
+B58	s	Specific area needed
+C58	s	Dropdown
+D58	s	Yes
+E58	s	Yes
+A59	s	S3-ME-N04
+B59	s	What outcome are you seeking?
+C59	s	Text area
+D59	s	Yes
+E59	s	No
+A60	s	S3-ME-N05
+B60	s	Mentorship format preference
+C60	s	Multi-select dropdown
+D60	s	No
+E60	s	Yes
+A61	s	S3-ME-N06
+B61	s	Session location — country
+C61	s	Dropdown
+D61	s	No
+E61	s	Shows if in-person or hybrid
+A62	s	S3-ME-N06a
+B62	s	Session location — city
+C62	s	Dropdown
+D62	s	No
+E62	s	Populates per N06
+A63	s	S3-ME-N07
+B63	s	When do you want to start?
+C63	s	Dropdown
+D63	s	Yes
+E63	s	No
+A64	s	S3-ME-N08
+B64	s	Total duration of mentorship
+C64	s	Numeric input + time unit (S3-ME-N08-TU)
+D64	s	Yes
+E64	s	No
+A65	s	S3-ME-N09
+B65	s	Session frequency preferred
+C65	s	Dropdown
+D65	s	No
+E65	s	No
+A66	s	S3-ME-N10
+B66	s	Minimum mentor experience required
+C66	s	Dropdown
+D66	s	No
+E66	s	No
+A67	s	S3-ME-N11
+B67	s	Required credentials
+C67	s	Multi-select dropdown
+D67	s	No
+E67	s	Yes
+A68	s	S3-ME-N12
+B68	s	Language preference
+C68	s	Multi-select dropdown
+D68	s	No
+E68	s	No
+A69	s	S3-ME-N13
+B69	s	Budget range
+C69	s	Range dropdown + currency (S3-ME-N13-CUR)
+D69	s	No
+E69	s	No
+A71	s	S3-ME-N00 — Match with values: Companies only / Individual professionals only / Both If "Include individual professionals" selected → S3-ME-N00a section opens:
+A73	s	S3-ME-N00a — Individual mentor attributes
+A75	s	Code
+B75	s	Field label
+C75	s	Type
+D75	s	Required
+A76	s	S3-ME-N00a-1
+B76	s	Individual domain / expertise
+C76	s	Dropdown
+D76	s	Yes
+A77	s	S3-ME-N00a-2
+B77	s	Minimum years of experience
+C77	s	Dropdown
+D77	s	Yes
+A78	s	S3-ME-N00a-3
+B78	s	Individual credentials
+C78	s	Multi-select dropdown
+D78	s	No
+A79	s	S3-ME-N00a-4
+B79	s	Preferred format
+C79	s	Dropdown
+D79	s	No
+A81	s	Domain: same as S3-ME-N02 / Experience: 3–7 / 7–15 / 15–25 / 25+ yrs Credentials: RICS / CIOB / PE licence / PMP / MBA / PMTwin vetted / Other → free text
+A83	s	S3-ME-N01 — Collaboration intent values: Seeking a new mentorship / Extending an existing mentorship relationship / Changing mentor / Open to discussion
+A85	s	S3-ME-N02 — Mentorship domain values: Technical domain / Business domain / Leadership / Digital & technology / Finance & commercial / Career development / Other → free text
+A87	s	S3-ME-N03 — Specific area values (conditional on N02):
+A89	s	N02
+B89	s	N03 options
+A90	s	Technical domain
+B90	s	Structural engineering / MEP systems (mechanical) / MEP systems (electrical) / MEP systems (plumbing) / Civil engineering / Geotechnical engineering / Environmental engineering / Fire protection engineering / Project management / Construction management / Planning & scheduling / Quantity surveying / Contract management / BIM & digital construction / Commissioning / Facilities management / HSE / Quality management / Other
+A91	s	Business domain
+B91	s	Business development / Gulf market navigation / Investment & funding / Company scaling / Procurement & supply chain / Tendering & bid management / Client relationship management / JV & partnership management / Real estate development / Property investment / Market entry strategy / Entrepreneurship / Other
+A92	s	Leadership
+B92	s	Team management / Executive leadership / Strategic planning / Conflict resolution / Negotiation skills / Stakeholder management / Change management / People management / Presentation & communication / Emotional intelligence / Other
+A93	s	Digital & technology
+B93	s	PropTech / Digital transformation / BIM / Data analytics / Smart building / IoT / Software implementation / Cybersecurity / Digital marketing / Social media & content / Other
+A94	s	Finance & commercial
+B94	s	Financial management / Project finance / Cost control / Commercial management / Investor relations / Budgeting & forecasting / Other
+A95	s	Career development
+B95	s	Career planning / Professional development / Work-life balance / Professional branding / Academic guidance / Interview & CV preparation / Other
+A97	s	→ All include "Other" → free text
+A99	s	S3-ME-N05 — Mentorship format preference values: One-to-one sessions / Group sessions / Embedded in project / Online / In-person / Hybrid / Flexible
+A101	s	S3-ME-N06 — Session location country values: Full country list (same as S1-F03) — shown when In-person or Hybrid selected
+A103	s	S3-ME-N06a — Session location city values: Conditional on N06. Same city taxonomy as S1-F04
+A105	s	S3-ME-N07 — When do you want to start? values: Immediately / Within 2 weeks / Within 1 month / 1–3 months / Flexible / Specific date → date picker
+A107	s	S3-ME-N08-TU — Duration time unit values: Weeks / Months / Years
+A109	s	S3-ME-N09 — Session frequency values: Weekly / Bi-weekly / Monthly / Ad-hoc / To be agreed
+A111	s	S3-ME-N10 — Minimum mentor experience values: 3–7 years / 7–15 years / 15–25 years / 25+ years / Not specified
+A113	s	S3-ME-N11 — Required credentials values: RICS / CIOB / PE licence / PMP / MBA / PMTwin vetted / None / Other → free text
+A115	s	S3-ME-N12 — Language preference values: Arabic / English / Arabic & English / French / Mandarin / Other → free text
+A117	s	S3-ME-N13 — Budget range values: Free / goodwill / Under $500 / $500–$1K / $1K–$3K / $3K–$5K / Above $5K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A121	s	Deliverables (Need side — optional)
+A123	s	Collapsed by default. For mentorship, deliverables should describe learning outcomes, not work products. If work products are expected, Task-based Collaboration is the appropriate model.
+A127	s	Milestones (optional — both sides)
+A129	s	Collapsed by default. Useful for structured mentorship programmes with defined progression checkpoints.
+A133	s	Hidden fields for Mentorship model
+A135	s	Asset type / Pool size / Material category / Entity establishment / Swap duration / Quantity / Budget contribution

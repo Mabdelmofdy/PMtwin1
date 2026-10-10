@@ -1,0 +1,144 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 2-Lists
+state=visible dims=B2:Z15 max_row=15 max_col=26
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 2 · Collaboration model
+B3	s	Single source of truth for every Step 2 dropdown, routing rule and derived label.
+B5	s	Option
+C5	s	Label (S2-F01)
+D5	s	Routes to
+E5	s	Follow-up required
+G5	s	Parent
+H5	s	Label (S2-F02)
+I5	s	Suggested model
+J5	s	Variant
+L5	s	#
+M5	s	Model (S2-F03)
+N5	s	Description
+O5	s	Typical example
+P5	s	Base structure
+Q5	s	If both sides posted (Need & Offer)
+R5	s	If pooling / chain variant
+T5	s	Condition (S2-F05)
+U5	s	Label displayed
+W5	s	ENGINE — S2-F02 dynamic list
+Z5	s	FILTERED S2-F02 OPTIONS — validation source for 'Step 2-Wireframe'!C13
+B6	s	A
+C6	s	Entering a new market, project, or joint venture
+D6	s	→ follow-up question
+E6	s	Yes
+G6	s	A
+H6	s	Jointly execute a project
+I6	s	JV
+J6	s	—
+L6	n	1
+M6	s	JV
+N6	s	Partner to pursue a shared project or business outcome
+O6	s	SPV for a mixed-use development bid
+P6	s	Straightforward Match (Type 1)
+Q6	s	Two-Way Match (Type 2) — higher match value
+R6	s	Straightforward Match (Type 1)
+T6	s	Single party each side
+U6	s	Straightforward Match (Type 1)
+W6	s	Active S2-F01 label
+X6	f	='Step 2-Wireframe'!$C$12
+Z6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125E40F80>
+B7	s	B
+C7	s	Making better use of equipment, space, or capacity
+D7	s	→ follow-up question
+E7	s	Yes
+G7	s	A
+H7	s	Co-own an asset or company
+I7	s	Co-ownership
+J7	s	—
+L7	n	2
+M7	s	Co-ownership
+N7	s	Jointly own an asset, property, or company
+O7	s	Shared ownership of a logistics facility
+P7	s	Straightforward Match (Type 1)
+Q7	s	Two-Way Match (Type 2) — higher match value
+R7	s	Group Match (Type 3)
+T7	s	Both sides match both ways
+U7	s	Two-Way Match (Type 2) — higher match value
+W7	s	Parent option letter
+X7	f	=IFERROR(INDEX($B$6:$B$11,MATCH($X$6,$C$6:$C$11,0)),"")
+B8	s	C
+C8	s	Reducing material or supply costs by combining with others
+D8	s	Bulk Purchasing
+E8	s	No
+G8	s	B
+H8	s	I own the resource and want to share it with someone who doesn't have one
+I8	s	Resource Sharing
+J8	s	Sharing variant
+L8	n	3
+M8	s	Resource Sharing
+N8	s	Share or pool resources — one party owns or all contribute
+O8	s	Office space shared / shared crane fleet
+P8	s	Straightforward Match (Type 1)
+Q8	s	Two-Way Match (Type 2) — higher match value
+R8	s	Group Match (Type 3)
+T8	s	Multiple parties in pool
+U8	s	Group Match (Type 3)
+W8	s	Follow-up applicable?
+X8	f	=IF(OR($X$7="A",$X$7="B"),"Yes","No")
+B9	s	D
+C9	s	Providing or seeking a service or task-based collaboration
+D9	s	Task-based Collaboration
+E9	s	No
+G9	s	B
+H9	s	We each own a resource and want to swap
+I9	s	Resource Exchange
+J9	s	—
+L9	n	4
+M9	s	Resource Exchange
+N9	s	Swap resources you each own with one another
+O9	s	Excavator exchanged for concrete mixer
+P9	s	Two-Way Match (Type 2) — higher match value
+Q9	s	Multi-Party Match (Type 4) — highest match value
+R9	s	Group Match (Type 3)
+T9	s	Circular chain detected
+U9	s	Multi-Party Match (Type 4) — highest match value
+B10	s	E
+C10	s	Finding qualified people for a project or task
+D10	s	Hiring
+E10	s	No
+G10	s	B
+H10	s	Multiple companies each contribute to a shared pool
+I10	s	Resource Sharing
+J10	s	Pooling variant
+L10	n	5
+M10	s	Bulk Purchasing
+N10	s	Pool orders with others to access volume pricing
+O10	s	Group cement purchase for 4 companies
+P10	s	Group Match (Type 3)
+Q10	s	Group Match (Type 3)
+R10	s	Group Match (Type 3)
+B11	s	F
+C11	s	Developing expertise — mine or someone else's
+D11	s	Mentorship
+E11	s	No
+L11	n	6
+M11	s	Task-based Collaboration
+N11	s	Exchange or assign tasks and services
+O11	s	IT setup in exchange for legal services
+P11	s	Straightforward Match (Type 1)
+Q11	s	Two-Way Match (Type 2) — higher match value
+R11	s	Group Match (Type 3)
+L12	n	7
+M12	s	Hiring
+N12	s	Engage a professional or consultant
+O12	s	Senior PM for a 6-month programme
+P12	s	Straightforward Match (Type 1)
+Q12	s	Straightforward Match (Type 1)
+R12	s	Straightforward Match (Type 1)
+L13	n	8
+M13	s	Mentorship
+N13	s	Develop expertise — give or receive
+O13	s	PM mentorship in exchange for PropTech knowledge
+P13	s	Straightforward Match (Type 1)
+Q13	s	Two-Way Match (Type 2) — higher match value
+R13	s	Straightforward Match (Type 1)
+L15	s	PROPOSED DEFAULT — the three structure columns above are my mapping of your Type 1–4 rules onto the 8 models. Edit any cell and the wireframe follows.

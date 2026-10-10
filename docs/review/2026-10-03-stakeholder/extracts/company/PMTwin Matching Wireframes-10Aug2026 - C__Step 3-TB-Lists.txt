@@ -1,0 +1,444 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-TB-Lists
+state=visible dims=B2:BH114 max_row=114 max_col=60
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 6: Task-based Collaboration
+B3	s	Covers any task or service exchange. The exchange mechanism (barter, cash, profit share…) is selected at Step 4.
+B5	s	Collaboration intent — Offer (O00)
+D5	s	Collaboration intent — Need (N01)
+F5	s	Service category (O01 / N02 / N00a-1)
+H5	s	Sector / project context (O03 / N04)
+J5	s	Delivery mode (O05 / N06)
+L5	s	Engagement type (O07 / N08)
+N5	s	Availability — Offer (O08)
+P5	s	When do you need this? (N09)
+R5	s	Duration time unit (O09-TU / N10-TU)
+T5	s	Service value / budget range (O10 / N11)
+V5	s	Currency (O10-CUR / N11-CUR)
+X5	s	Credentials (O11 / N12)
+Z5	s	Languages offered (O12)
+AB5	s	Language requirement (N14)
+AD5	s	Experience level (N13)
+AF5	s	Match with (N00)
+AH5	s	Individual minimum experience (N00a-2)
+AJ5	s	Individual credentials (N00a-3)
+AL5	s	Individual availability (N00a-4)
+AN5	s	Hidden fields for the Task-based Collaboration model
+AP5	s	Month (date scope)
+AR5	s	Year (date scope)
+AT5	s	Service category
+AU5	s	Service sub-type (O02 / N03)
+AW5	s	O02 service sub-type source
+AY5	s	N03 service sub-type source
+BA5	s	O06a service city source
+BC5	s	N07a service city source
+BE5	s	Date options (specific dates & milestones)
+BG5	s	Value / budget rank helpers
+B6	s	Offering a new task collaboration
+D6	s	Seeking a new task collaboration
+F6	s	Technical services
+H6	s	Residential development
+J6	s	On-site
+L6	s	One-off task
+N6	s	Immediate
+P6	s	Immediately
+R6	s	Hours
+T6	s	Under $5K
+V6	s	USD ($)
+X6	s	RICS
+Z6	s	Arabic
+AB6	s	Arabic
+AD6	s	Junior (0–3 years)
+AF6	s	Companies only
+AH6	s	Junior (0–3 yrs)
+AJ6	s	RICS
+AL6	s	Immediate
+AN6	s	Entity establishment
+AP6	s	January
+AR6	n	2026
+AT6	s	Technical services
+AU6	s	Architectural design
+AW6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221262910D0>
+AY6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126250B90>
+BA6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126251100>
+BC6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126251130>
+BE6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126251160>
+BG6	s	Offer value rank (O10)
+BH6	f	=IFERROR(MATCH('Step 3-TB-Wireframe'!$C$31,$T$6:$T$12,0),0)
+B7	s	Extending an existing engagement
+D7	s	Extending an existing engagement
+F7	s	Professional services
+H7	s	Commercial development
+J7	s	Remote
+L7	s	Project-based
+N7	s	Within 2 weeks
+P7	s	Within 2 weeks
+R7	s	Days
+T7	s	$5K–$20K
+V7	s	SAR (ر.س)
+X7	s	CIOB
+Z7	s	English
+AB7	s	English
+AD7	s	Mid-level (3–7 years)
+AF7	s	Include individual professionals
+AH7	s	Mid-level (3–7 yrs)
+AJ7	s	CIOB
+AL7	s	Within 1 month
+AN7	s	Asset type
+AP7	s	February
+AR7	n	2027
+AT7	s	Technical services
+AU7	s	Structural engineering
+BE7	f	=
+BG7	s	Need budget rank (N11)
+BH7	f	=IFERROR(MATCH('Step 3-TB-Wireframe'!$C$60,$T$6:$T$12,0),0)
+B8	s	Open to discussion
+D8	s	Replacing an existing service provider
+F8	s	Technology services
+H8	s	Mixed-use
+J8	s	Hybrid
+L8	s	Retainer
+N8	s	Within 1 month
+P8	s	Within 1 month
+R8	s	Weeks
+T8	s	$20K–$50K
+V8	s	AED (د.إ)
+X8	s	PE licence
+Z8	s	Arabic & English
+AB8	s	Arabic & English
+AD8	s	Senior (7–15 years)
+AH8	s	Senior (7–15 yrs)
+AJ8	s	PE licence
+AL8	s	Flexible
+AN8	s	Pool size
+AP8	s	March
+AR8	n	2028
+AT8	s	Technical services
+AU8	s	MEP engineering
+BE8	f	=
+D9	s	Open to discussion
+F9	s	Logistics & operations
+H9	s	Infrastructure
+J9	s	Flexible
+L9	s	Fractional
+N9	s	1–3 months
+P9	s	1–3 months
+R9	s	Months
+T9	s	$50K–$100K
+V9	s	EGP (ج.م)
+X9	s	ISO certified
+Z9	s	French
+AB9	s	French
+AD9	s	Expert (15+ years)
+AH9	s	Expert (15+ yrs)
+AJ9	s	PMP
+AN9	s	Material category
+AP9	s	April
+AR9	n	2029
+AT9	s	Technical services
+AU9	s	Civil engineering
+BE9	f	=
+F10	s	Training & development
+H10	s	Industrial
+L10	s	Part-time
+N10	s	Flexible
+P10	s	3–6 months
+R10	s	Years
+T10	s	$100K–$500K
+V10	s	QAR (ر.ق)
+X10	s	PMP
+Z10	s	Mandarin
+AB10	s	Mandarin
+AD10	s	Not specified
+AJ10	s	MBA
+AN10	s	Minimum pool participants
+AP10	s	May
+AR10	n	2030
+AT10	s	Technical services
+AU10	s	Geotechnical engineering
+BE10	f	=
+F11	s	Administration & support
+H11	s	Hospitality
+L11	s	Full-time
+N11	s	Specific date
+P11	s	Flexible start
+T11	s	Above $500K
+V11	s	KWD (د.ك)
+X11	s	PRINCE2
+Z11	s	Hindi
+AB11	s	Other
+AJ11	s	PMTwin vetted
+AP11	s	June
+AR11	n	2031
+AT11	s	Technical services
+AU11	s	Environmental engineering
+BE11	f	=
+F12	s	Other
+H12	s	Healthcare
+L12	s	Advisory
+P12	s	Specific date
+T12	s	To be agreed
+V12	s	BHD (د.ب)
+X12	s	MBA
+Z12	s	Other
+AJ12	s	Other
+AP12	s	July
+AR12	n	2032
+AT12	s	Technical services
+AU12	s	Quantity surveying
+BE12	f	=
+H13	s	Education
+L13	s	Other
+V13	s	OMR (ر.ع)
+X13	s	PMTwin vetted
+AP13	s	August
+AR13	n	2033
+AT13	s	Technical services
+AU13	s	Cost estimation
+BE13	f	=
+H14	s	Giga-project
+V14	s	EUR (€)
+X14	s	Muqawil registered
+AP14	s	September
+AR14	n	2034
+AT14	s	Technical services
+AU14	s	Bills of quantities
+BE14	f	=
+H15	s	Retail
+V15	s	GBP (£)
+X15	s	MOMRA approved
+AP15	s	October
+AR15	n	2035
+AT15	s	Technical services
+AU15	s	Value engineering
+BE15	f	=
+H16	s	Logistics
+V16	s	Other
+X16	s	None
+AP16	s	November
+AR16	n	2036
+AT16	s	Technical services
+AU16	s	Claims management
+BE16	f	=
+H17	s	General business (not project-specific)
+X17	s	Other
+AP17	s	December
+AT17	s	Technical services
+AU17	s	Project management
+BE17	f	=
+H18	s	Other
+AT18	s	Technical services
+AU18	s	Project planning & scheduling
+BE18	f	=
+AT19	s	Technical services
+AU19	s	Risk management
+BE19	f	=
+AT20	s	Technical services
+AU20	s	Project controls
+BE20	f	=
+AT21	s	Technical services
+AU21	s	Document management
+BE21	f	=
+AT22	s	Technical services
+AU22	s	Site supervision
+BE22	f	=
+AT23	s	Technical services
+AU23	s	Resident engineer
+BE23	f	=
+AT24	s	Technical services
+AU24	s	Quality inspector
+BE24	f	=
+AT25	s	Technical services
+AU25	s	BIM modelling
+BE25	f	=
+AT26	s	Technical services
+AU26	s	Clash detection
+BE26	f	=
+AT27	s	Technical services
+AU27	s	4D/5D BIM
+BE27	f	=
+AT28	s	Technical services
+AU28	s	Digital twin
+BE28	f	=
+AT29	s	Technical services
+AU29	s	Materials testing
+BE29	f	=
+AT30	s	Technical services
+AU30	s	Structural inspection
+BE30	f	=
+AT31	s	Technical services
+AU31	s	NDT
+BE31	f	=
+AT32	s	Technical services
+AU32	s	Soil investigation
+BE32	f	=
+AT33	s	Technical services
+AU33	s	Land surveying
+BE33	f	=
+AT34	s	Technical services
+AU34	s	Topographic survey
+BE34	f	=
+AT35	s	Technical services
+AU35	s	As-built survey
+BE35	f	=
+AT36	s	Technical services
+AU36	s	Setting out
+AT37	s	Technical services
+AU37	s	Commissioning management
+AT38	s	Technical services
+AU38	s	Other
+AT39	s	Professional services
+AU39	s	Contract drafting
+AT40	s	Professional services
+AU40	s	Dispute resolution
+AT41	s	Professional services
+AU41	s	Arbitration
+AT42	s	Professional services
+AU42	s	Construction law
+AT43	s	Professional services
+AU43	s	Real estate law
+AT44	s	Professional services
+AU44	s	Corporate law
+AT45	s	Professional services
+AU45	s	Financial audit
+AT46	s	Professional services
+AU46	s	Tax advisory
+AT47	s	Professional services
+AU47	s	Bookkeeping
+AT48	s	Professional services
+AU48	s	VAT compliance
+AT49	s	Professional services
+AU49	s	Talent acquisition
+AT50	s	Professional services
+AU50	s	HR management
+AT51	s	Professional services
+AU51	s	Payroll
+AT52	s	Professional services
+AU52	s	Brand development
+AT53	s	Professional services
+AU53	s	Digital marketing
+AT54	s	Professional services
+AU54	s	Market research
+AT55	s	Professional services
+AU55	s	PR & communications
+AT56	s	Professional services
+AU56	s	Investment advisory
+AT57	s	Professional services
+AU57	s	Project finance
+AT58	s	Professional services
+AU58	s	Feasibility studies
+AT59	s	Professional services
+AU59	s	Property valuation
+AT60	s	Professional services
+AU60	s	Asset management
+AT61	s	Professional services
+AU61	s	Property management
+AT62	s	Professional services
+AU62	s	Real estate advisory
+AT63	s	Professional services
+AU63	s	Other
+AT64	s	Technology services
+AU64	s	Network setup
+AT65	s	Technology services
+AU65	s	Server management
+AT66	s	Technology services
+AU66	s	Cloud migration
+AT67	s	Technology services
+AU67	s	IT support
+AT68	s	Technology services
+AU68	s	Web development
+AT69	s	Technology services
+AU69	s	Mobile app development
+AT70	s	Technology services
+AU70	s	Custom software
+AT71	s	Technology services
+AU71	s	API integration
+AT72	s	Technology services
+AU72	s	Cybersecurity audit
+AT73	s	Technology services
+AU73	s	Penetration testing
+AT74	s	Technology services
+AU74	s	Data analysis
+AT75	s	Technology services
+AU75	s	BI & reporting
+AT76	s	Technology services
+AU76	s	Data visualisation
+AT77	s	Technology services
+AU77	s	Property management systems
+AT78	s	Technology services
+AU78	s	Smart building
+AT79	s	Technology services
+AU79	s	IoT
+AT80	s	Technology services
+AU80	s	Building automation
+AT81	s	Technology services
+AU81	s	ERP implementation
+AT82	s	Technology services
+AU82	s	CRM
+AT83	s	Technology services
+AU83	s	PMIS
+AT84	s	Technology services
+AU84	s	Finance systems
+AT85	s	Technology services
+AU85	s	Other
+AT86	s	Logistics & operations
+AU86	s	Freight & transportation
+AT87	s	Logistics & operations
+AU87	s	Equipment transport
+AT88	s	Logistics & operations
+AU88	s	Personnel transport
+AT89	s	Logistics & operations
+AU89	s	Supplier sourcing
+AT90	s	Logistics & operations
+AU90	s	Purchasing management
+AT91	s	Logistics & operations
+AU91	s	Logistics coordination
+AT92	s	Logistics & operations
+AU92	s	Warehousing & storage
+AT93	s	Logistics & operations
+AU93	s	Inventory management
+AT94	s	Logistics & operations
+AU94	s	Building maintenance
+AT95	s	Logistics & operations
+AU95	s	Facilities management
+AT96	s	Logistics & operations
+AU96	s	Asset management
+AT97	s	Logistics & operations
+AU97	s	Other
+AT98	s	Training & development
+AU98	s	Engineering CPD
+AT99	s	Training & development
+AU99	s	Safety & HSE training
+AT100	s	Training & development
+AU100	s	Equipment operation
+AT101	s	Training & development
+AU101	s	Technical skills
+AT102	s	Training & development
+AU102	s	Leadership training
+AT103	s	Training & development
+AU103	s	Project management training
+AT104	s	Training & development
+AU104	s	Commercial skills
+AT105	s	Training & development
+AU105	s	BIM & digital training
+AT106	s	Training & development
+AU106	s	Software training
+AT107	s	Training & development
+AU107	s	Compliance & regulatory training
+AT108	s	Training & development
+AU108	s	Other
+AT109	s	Administration & support
+AU109	s	Executive / PA support
+AT110	s	Administration & support
+AU110	s	General administration
+AT111	s	Administration & support
+AU111	s	Technical translation (Arabic/English)
+AT112	s	Administration & support
+AU112	s	Event & conference management
+AT113	s	Administration & support
+AU113	s	Other
+AT114	s	Other
+AU114	s	Other

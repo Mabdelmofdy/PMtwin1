@@ -1,0 +1,260 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-Hiring
+state=visible dims=A1:E156 max_row=156 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 7: Hiring / Professional Engagement
+A5	s	Screen title: Scope & Work — Hiring Screen subtitle: Define the role or expertise you are offering or seeking for a professional engagement. Layout: Offer side (top) and Need side (bottom). Both required. Note: This model covers companies seeking professionals AND professionals offering their expertise. Both sides are mandatory — a company seeking a hire must also declare what they offer (compensation, experience, project type). A professional must declare what they offer (expertise) and what they seek (engagement type, rate, location).
+A9	s	Offer side — "The role or expertise you are offering"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-HI-O01
+B12	s	Role / expertise category
+C12	s	Dropdown
+D12	s	Yes
+E12	s	Yes
+A13	s	S3-HI-O02
+B13	s	Role / expertise sub-type
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-HI-O03
+B14	s	Years of experience
+C14	s	Dropdown
+D14	s	Yes
+E14	s	No
+A15	s	S3-HI-O04
+B15	s	Relevant credentials
+C15	s	Multi-select dropdown
+D15	s	No
+E15	s	Yes
+A16	s	S3-HI-O05
+B16	s	Engagement type offered
+C16	s	Multi-select dropdown
+D16	s	Yes
+E16	s	No
+A17	s	S3-HI-O06
+B17	s	Availability
+C17	s	Dropdown
+D17	s	Yes
+E17	s	No
+A18	s	S3-HI-O07
+B18	s	Work location preference
+C18	s	Dropdown
+D18	s	Yes
+E18	s	Yes
+A19	s	S3-HI-O07a
+B19	s	Preferred work location — country
+C19	s	Dropdown
+D19	s	No
+E19	s	Shows if on-site or hybrid
+A20	s	S3-HI-O07b
+B20	s	Preferred work location — city
+C20	s	Dropdown
+D20	s	No
+E20	s	Populates per O07a
+A21	s	S3-HI-O08
+B21	s	Rate or compensation expected
+C21	s	Range dropdown + currency (S3-HI-O08-CUR)
+D21	s	No
+E21	s	No
+A22	s	S3-HI-O09
+B22	s	Rate unit
+C22	s	Dropdown
+D22	s	No
+E22	s	No
+A23	s	S3-HI-O10
+B23	s	Notice period
+C23	s	Dropdown
+D23	s	No
+E23	s	No
+A24	s	S3-HI-O11
+B24	s	Work permit / visa status
+C24	s	Dropdown
+D24	s	No
+E24	s	No
+A25	s	S3-HI-O12
+B25	s	Languages
+C25	s	Multi-select dropdown
+D25	s	No
+E25	s	No
+A26	s	S3-HI-O13
+B26	s	Sector experience
+C26	s	Multi-select dropdown
+D26	s	No
+E26	s	Yes
+A28	s	S3-HI-O01 — Role category values: Engineering / Project management / Commercial / Design / Digital & technology / Operations & HSE / Real estate / Finance & accounting / Legal & compliance / Administration / Sales & business development / Other → free text
+A30	s	S3-HI-O02 — Sub-type values (conditional on O01): Same comprehensive taxonomy as S3-HI-N02 (Need side) — full sub-type lists per category
+A32	s	S3-HI-O03 — Years of experience values: 0–3 years / 3–7 years / 7–15 years / 15+ years
+A34	s	S3-HI-O04 — Credentials values: RICS / CIOB / PE licence / PMP / PRINCE2 / MBA / ISO certified / PMTwin vetted / MOMRA approved / Saudi Council of Engineers / UAE Engineering licence / LEED AP / BREEAM Assessor / Other → free text
+A36	s	S3-HI-O05 — Engagement type values: Full-time / Part-time / Project-based / Fractional / Retainer / Advisory / Secondment / Other → free text
+A38	s	S3-HI-O06 — Availability values: Immediate / Within 2 weeks / Within 1 month / 1–3 months / Flexible / Specific date → date picker
+A40	s	S3-HI-O07 — Work location preference values: On-site / Remote / Hybrid / Flexible
+A42	s	S3-HI-O07a — Preferred work location country values: Full country list — shown when On-site or Hybrid selected
+A44	s	S3-HI-O07b — Preferred work location city values: Conditional on O07a. Same city taxonomy as S1-F04
+A46	s	S3-HI-O08 — Rate range values: Under $500/month / $500–$2K/month / $2K–$5K/month / $5K–$10K/month / $10K–$20K/month / Above $20K/month / Per project (specify) / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A48	s	S3-HI-O09 — Rate unit values: Per hour / Per day / Per month / Per project / To be agreed
+A50	s	S3-HI-O10 — Notice period values: Immediate / Up to 2 weeks / Up to 1 month / Up to 3 months / Flexible
+A52	s	S3-HI-O11 — Work permit / visa status values: Valid KSA work permit / Valid UAE work permit / Valid GCC permit / Valid Egyptian work permit / Requires visa sponsorship / Open to relocation / Other → free text
+A54	s	S3-HI-O12 — Languages values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A56	s	S3-HI-O13 — Sector experience values: Residential development / Commercial development / Mixed-use / Infrastructure / Industrial / Hospitality / Healthcare / Education / Giga-project / Retail / General business / Other → free text
+A60	s	Need side — "The role or expertise you are looking for"
+A62	s	Code
+B62	s	Field label
+C62	s	Type
+D62	s	Required
+E62	s	Other trigger
+A63	s	S3-HI-N00
+B63	s	Match with
+C63	s	Single select
+D63	s	Yes
+E63	s	Yes
+A64	s	S3-HI-N01
+B64	s	Role category needed
+C64	s	Dropdown
+D64	s	Yes
+E64	s	Yes
+A65	s	S3-HI-N02
+B65	s	Role sub-type
+C65	s	Dropdown
+D65	s	Yes
+E65	s	Yes
+A66	s	S3-HI-N03
+B66	s	Minimum experience required
+C66	s	Dropdown
+D66	s	Yes
+E66	s	No
+A67	s	S3-HI-N04
+B67	s	Required credentials
+C67	s	Multi-select dropdown
+D67	s	No
+E67	s	Yes
+A68	s	S3-HI-N05
+B68	s	Engagement type sought
+C68	s	Multi-select dropdown
+D68	s	Yes
+E68	s	No
+A69	s	S3-HI-N06
+B69	s	When do you need this?
+C69	s	Dropdown
+D69	s	Yes
+E69	s	No
+A70	s	S3-HI-N07
+B70	s	Engagement duration
+C70	s	Numeric input + time unit (S3-HI-N07-TU)
+D70	s	Yes
+E70	s	No
+A71	s	S3-HI-N08
+B71	s	Work location type
+C71	s	Dropdown
+D71	s	Yes
+E71	s	Yes
+A72	s	S3-HI-N08a
+B72	s	Work location — country
+C72	s	Dropdown
+D72	s	No
+E72	s	Shows if on-site or hybrid
+A73	s	S3-HI-N08b
+B73	s	Work location — city
+C73	s	Dropdown
+D73	s	No
+E73	s	Populates per N08a
+A74	s	S3-HI-N09
+B74	s	Budget / rate range
+C74	s	Range dropdown + currency (S3-HI-N09-CUR)
+D74	s	No
+E74	s	No
+A75	s	S3-HI-N10
+B75	s	Rate unit
+C75	s	Dropdown
+D75	s	No
+E75	s	No
+A76	s	S3-HI-N11
+B76	s	Sector or project type
+C76	s	Dropdown
+D76	s	No
+E76	s	Yes
+A77	s	S3-HI-N12
+B77	s	Language requirement
+C77	s	Multi-select dropdown
+D77	s	No
+E77	s	No
+A78	s	S3-HI-N13
+B78	s	Work permit / visa status required
+C78	s	Dropdown
+D78	s	No
+E78	s	No
+A79	s	S3-HI-N14
+B79	s	Expected notice period
+C79	s	Dropdown
+D79	s	No
+E79	s	No
+A81	s	S3-HI-N00 — Match with values: Companies only / Individual professionals only / Both → Determines credential options in S3-HI-N04:
+A83	s	Companies → Muqawil registered / ISO certified / PMTwin vetted / Other
+A85	s	Individuals → RICS / CIOB / PE licence / PMP / MBA / PMTwin vetted / Other
+A87	s	Both → all options combined
+A89	s	S3-HI-N01 — Role category values: Engineering / Project management / Commercial / Design / Digital & technology / Operations & HSE / Real estate / Finance & accounting / Legal & compliance / Administration / Sales & business development / Other → free text
+A91	s	S3-HI-N02 — Sub-type values (conditional on N01):
+A93	s	N01
+B93	s	N02 options
+A94	s	Engineering
+B94	s	Civil engineer / Structural engineer / MEP engineer (mechanical) / MEP engineer (electrical) / MEP engineer (plumbing) / Environmental engineer / Geotechnical engineer / Fire protection engineer / Acoustic engineer / Facade engineer / Infrastructure engineer / Traffic & transportation engineer / Other
+A95	s	Project management
+B95	s	Project manager / Senior project manager / Construction manager / Planning engineer / Scheduler / Risk manager / Document controller / Project coordinator / Programme manager / PMO manager / Other
+A96	s	Commercial
+B96	s	Quantity surveyor / Senior quantity surveyor / Chief QS / Contract manager / Procurement specialist / Cost estimator / Cost planner / Claims manager / Commercial manager / Commercial director / Other
+A97	s	Design
+B97	s	Architect / Senior architect / Principal architect / Interior designer / Urban planner / Landscape architect / Lighting designer / Signage designer / Graphic designer / Other
+A98	s	Digital & technology
+B98	s	BIM manager / BIM coordinator / Data analyst / PropTech specialist / IT systems manager / Software developer / Digital transformation specialist / GIS specialist / Other
+A99	s	Operations & HSE
+B99	s	Site engineer / Site manager / HSE officer / HSE manager / Logistics coordinator / Facilities manager / Operations manager / Commissioning engineer / Other
+A100	s	Real estate
+B100	s	Real estate agent / Property manager / Asset manager / Development manager / Sales manager / Leasing manager / Property valuer / Transaction manager / Other
+A101	s	Finance & accounting
+B101	s	Financial controller / CFO / Finance manager / Accountant / Internal auditor / Budget analyst / Other
+A102	s	Legal & compliance
+B102	s	Legal counsel / Contract specialist / Compliance officer / Corporate lawyer / Real estate lawyer / Construction lawyer / Other
+A103	s	Administration
+B103	s	Executive assistant / Project administrator / Office manager / Receptionist / Other
+A104	s	Sales & business development
+B104	s	Business development manager / Sales director / Account manager / Client relations manager / Marketing manager / Other
+A106	s	→ All include "Other" → free text
+A108	s	S3-HI-N03 — Minimum experience values: 0–3 years / 3–7 years / 7–15 years / 15+ years / Not specified
+A110	s	S3-HI-N04 — Required credentials values: Conditional on N00 (match with). See N00 logic above. Additional: MOMRA approved / Muqawil registered / Saudi Council of Engineers / UAE Engineering licence / PMP / PRINCE2 / LEED AP / BREEAM Assessor / None / Other → free text
+A112	s	S3-HI-N05 — Engagement type sought values: Full-time / Part-time / Project-based / Fractional / Retainer / Advisory / Secondment / Other → free text
+A114	s	S3-HI-N06 — When do you need this? values: Immediately / Within 2 weeks / Within 1 month / 1–3 months / Flexible start / Specific date → date picker
+A116	s	S3-HI-N07-TU — Duration time unit values: Days / Weeks / Months / Years
+A118	s	S3-HI-N08 — Work location type values: On-site / Remote / Hybrid / Flexible
+A120	s	S3-HI-N08a — Work location country values: Full country list (same as S1-F03) — shown when On-site or Hybrid selected
+A122	s	S3-HI-N08b — Work location city values: Conditional on N08a. Same city taxonomy as S1-F04
+A124	s	S3-HI-N09 — Budget / rate range values: Under $500/month / $500–$2K/month / $2K–$5K/month / $5K–$10K/month / $10K–$20K/month / Above $20K/month / Per project (specify) / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A126	s	S3-HI-N10 — Rate unit values: Per hour / Per day / Per month / Per project / To be agreed
+A128	s	S3-HI-N11 — Sector / project type values: Residential development / Commercial development / Mixed-use / Infrastructure / Industrial / Hospitality / Healthcare / Education / Giga-project / Retail / General business / Other → free text
+A130	s	S3-HI-N12 — Language requirement values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A132	s	S3-HI-N13 — Work permit / visa status required values: Must have valid KSA work permit / Must have valid UAE work permit / Must have valid GCC permit / Employer will sponsor visa / No requirement / Other → free text
+A134	s	S3-HI-N14 — Expected notice period values: Immediate availability / Up to 2 weeks / Up to 1 month / Up to 3 months / Flexible / Not specified
+A138	s	Deliverables (Need side — encouraged)
+A140	s	Code
+B140	s	Field label
+C140	s	Type
+D140	s	Required
+A141	s	S3-HI-D01
+B141	s	What should this professional deliver?
+C141	s	Text — add multiple
+D141	s	No
+A142	s	S3-HI-D02
+B142	s	Acceptance criteria
+C142	s	Text
+D142	s	No
+A144	s	Collapsed by default. Encouraged — helps professionals assess scope before responding.
+A148	s	Milestones (optional — both sides)
+A150	s	Collapsed by default. Useful for phased engagement or probationary periods.
+A154	s	Hidden fields for Hiring model
+A156	s	Asset type / Pool size / Material category / Entity establishment / Swap duration

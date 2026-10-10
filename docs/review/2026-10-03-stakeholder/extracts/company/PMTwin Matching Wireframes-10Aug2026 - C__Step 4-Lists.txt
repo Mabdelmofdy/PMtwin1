@@ -1,0 +1,307 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 4-Lists
+state=visible dims=B2:AT40 max_row=40 max_col=46
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 4 · Commercial structure
+B3	s	Exchange mechanisms are filtered by the Step 2 collaboration model using the compatibility matrix below.
+F4	s	LIVE MATRIX — this is what the wireframe reads.  ✓ shown & valid  ·  ○ shown, flagged as edge case  ·  ✗ hidden entirely
+N4	s	SUGGESTED REVISION — not wired up. Copy a cell across to the live matrix to adopt it. Changes are highlighted.
+B5	s	Exchange mechanism (S4-F01)
+C5	s	Code
+D5	s	Description
+F5	s	Collaboration model
+G5	s	Cash
+H5	s	Barter
+I5	s	Profit Sharing
+J5	s	Revenue Sharing
+K5	s	Equity
+L5	s	Custom
+N5	s	Collaboration model
+O5	s	Cash
+P5	s	Barter
+Q5	s	Profit Sharing
+R5	s	Revenue Sharing
+S5	s	Equity
+T5	s	Custom
+V5	s	Payment structure (S4-F02)
+X5	s	Currency (S4-F03-CUR / S4-F07-CUR)
+Z5	s	Payment timing (S4-F04)
+AB5	s	Barter type (S4-F05)
+AD5	s	Indicative profit share (S4-F09)
+AF5	s	Profit calculation basis (S4-F10)
+AH5	s	Indicative revenue share (S4-F11)
+AJ5	s	Revenue calculation basis (S4-F12)
+AL5	s	Indicative equity stake (S4-F13)
+AN5	s	Equity structure (S4-F14)
+AP5	s	Value band (any Step 3 model)
+AQ5	s	Midpoint (USD) — used for the barter balance ratio
+AS5	s	ENGINE — model routing & Step 3 need value
+B6	s	Cash
+C6	s	S4-F01-CA
+D6	s	Direct payment for the collaboration
+F6	s	JV
+G6	s	✓
+H6	s	○
+I6	s	✓
+J6	s	✓
+K6	s	✓
+L6	s	✓
+N6	s	JV
+O6	s	✓
+P6	s	○
+Q6	s	✓
+R6	s	✓
+S6	s	✓
+T6	s	✓
+V6	s	Fixed fee
+X6	s	USD ($)
+Z6	s	Upfront
+AB6	s	Full barter (no cash component)
+AD6	s	Up to 10%
+AF6	s	Net profit
+AH6	s	Up to 5%
+AJ6	s	Total project revenue
+AL6	s	Up to 10%
+AN6	s	SPV shares
+AP6	s	Free / goodwill
+AQ6	n	0
+AS6	s	Active collaboration model
+AT6	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+B7	s	Barter
+C7	s	S4-F01-BA
+D7	s	Exchange of equivalent value — no cash
+F7	s	Co-ownership
+G7	s	✓
+H7	s	✗
+I7	s	○
+J7	s	✓
+K7	s	✓
+L7	s	✓
+N7	s	Co-ownership
+O7	s	✓
+P7	s	○
+Q7	s	○
+R7	s	✓
+S7	s	✓
+T7	s	✓
+V7	s	Hourly rate
+X7	s	SAR (ر.س)
+Z7	s	On delivery
+AB7	s	Partial barter (combined with cash)
+AD7	s	10–25%
+AF7	s	Gross margin
+AH7	s	5–10%
+AJ7	s	Contract value
+AL7	s	10–25%
+AN7	s	Company shares
+AP7	s	Under $500
+AQ7	n	250
+AS7	s	Row in matrix
+AT7	f	=IFERROR(MATCH($AT$6,$F$6:$F$13,0),0)
+B8	s	Profit Sharing
+C8	s	S4-F01-PS
+D8	s	Share of net profit generated
+F8	s	Resource Sharing
+G8	s	✓
+H8	s	✓
+I8	s	○
+J8	s	○
+K8	s	○
+L8	s	✓
+N8	s	Resource Sharing
+O8	s	✓
+P8	s	✓
+Q8	s	○
+R8	s	○
+S8	s	○
+T8	s	✓
+V8	s	Daily rate
+X8	s	AED (د.إ)
+Z8	s	Milestone-based
+AB8	s	To be agreed
+AD8	s	25–50%
+AF8	s	Project profit
+AH8	s	10–20%
+AJ8	s	Sales revenue
+AL8	s	25–49%
+AN8	s	Asset ownership
+AP8	s	Under $500/month
+AQ8	n	250
+AS8	s	Step 3 need-value band
+AT8	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126549580>
+B9	s	Revenue Sharing
+C9	s	S4-F01-RS
+D9	s	Share of gross revenue generated
+F9	s	Resource Exchange
+G9	s	○
+H9	s	✓
+I9	s	✗
+J9	s	✗
+K9	s	✗
+L9	s	✓
+N9	s	Resource Exchange
+O9	s	○
+P9	s	✓
+Q9	s	✗
+R9	s	✗
+S9	s	✗
+T9	s	✓
+V9	s	Monthly retainer
+X9	s	EGP (ج.م)
+Z9	s	Monthly
+AD9	s	50%+
+AF9	s	To be agreed
+AH9	s	20%+
+AJ9	s	To be agreed
+AL9	s	50% (equal)
+AN9	s	To be agreed
+AP9	s	$500–$1K
+AQ9	n	750
+AS9	s	Need-value midpoint (USD)
+AT9	f	=IFERROR(INDEX($AQ$6:$AQ$38,MATCH($AT$8,$AP$6:$AP$38,0)),0)
+B10	s	Equity
+C10	s	S4-F01-EQ
+D10	s	Ownership stake in entity or asset
+F10	s	Bulk Purchasing
+G10	s	✓
+H10	s	✗
+I10	s	○
+J10	s	○
+K10	s	✗
+L10	s	✓
+N10	s	Bulk Purchasing
+O10	s	✓
+P10	s	○
+Q10	s	○
+R10	s	○
+S10	s	✗
+T10	s	✓
+V10	s	Milestone-based
+X10	s	QAR (ر.ق)
+Z10	s	To be agreed
+AD10	s	To be agreed
+AH10	s	To be agreed
+AL10	s	51%+
+AN10	s	Other
+AP10	s	$500–$2K/month
+AQ10	n	1250
+AS10	s	Barter offer value (S4-F07)
+AT10	f	=IF('Step 4-Wireframe'!$C$29="",0,'Step 4-Wireframe'!$C$29)
+B11	s	Custom
+C11	s	S4-F01-CU
+D11	s	Define your own arrangement — activates every mechanism available for this model
+F11	s	Task-based Collaboration
+G11	s	✓
+H11	s	✓
+I11	s	○
+J11	s	○
+K11	s	○
+L11	s	✓
+N11	s	Task-based Collaboration
+O11	s	✓
+P11	s	✓
+Q11	s	○
+R11	s	○
+S11	s	○
+T11	s	✓
+V11	s	To be agreed
+X11	s	KWD (د.ك)
+AL11	s	To be agreed
+AP11	s	$1K–$3K
+AQ11	n	2000
+AS11	s	Balance ratio
+AT11	f	=IF(OR($AT$9=0,$AT$10=0),0,$AT$10/$AT$9)
+F12	s	Hiring
+G12	s	✓
+H12	s	○
+I12	s	○
+J12	s	○
+K12	s	○
+L12	s	✓
+N12	s	Hiring
+O12	s	✓
+P12	s	○
+Q12	s	○
+R12	s	○
+S12	s	○
+T12	s	✓
+X12	s	BHD (د.ب)
+AP12	s	$2K–$5K/month
+AQ12	n	3500
+AS12	s	Mechanisms available (not ✗)
+AT12	f	=IF($AT$7=0,0,COUNTIF(INDEX($G$6:$L$13,$AT$7,0),"✓")+COUNTIF(INDEX($G$6:$L$13,$AT$7,0),"○"))
+F13	s	Mentorship
+G13	s	✓
+H13	s	✓
+I13	s	○
+J13	s	○
+K13	s	✓
+L13	s	✓
+N13	s	Mentorship
+O13	s	✓
+P13	s	✓
+Q13	s	○
+R13	s	○
+S13	s	○
+T13	s	✓
+X13	s	OMR (ر.ع)
+AP13	s	$3K–$5K
+AQ13	n	4000
+X14	s	EUR (€)
+AP14	s	Above $5K
+AQ14	n	7500
+N15	s	3 changes: Co-ownership × Barter ✗→○ (Step 3 CO already offers land / asset in-kind contributions) · Bulk Purchasing × Barter ✗→○ (a member may contribute logistics instead of cash) · Mentorship × Equity ✓→○ (advisor-for-equity is real but not the norm).
+X15	s	GBP (£)
+AP15	s	Under $5K
+AQ15	n	2500
+X16	s	Other
+AP16	s	$5K–$10K/month
+AQ16	n	7500
+AP17	s	$5K–$20K
+AQ17	n	12500
+AP18	s	$10K–$20K/month
+AQ18	n	15000
+AP19	s	Under $10K
+AQ19	n	5000
+AP20	s	$10K–$50K
+AQ20	n	30000
+AP21	s	$20K–$50K
+AQ21	n	35000
+AP22	s	Above $20K/month
+AQ22	n	30000
+AP23	s	$50K–$100K
+AQ23	n	75000
+AP24	s	Under $100K
+AQ24	n	50000
+AP25	s	$100K–$500K
+AQ25	n	300000
+AP26	s	$500K–$1M
+AQ26	n	750000
+AP27	s	Above $500K
+AQ27	n	750000
+AP28	s	Above $1M
+AQ28	n	1500000
+AP29	s	Under $1M
+AQ29	n	500000
+AP30	s	$1M–$5M
+AQ30	n	3000000
+AP31	s	$5M–$20M
+AQ31	n	12500000
+AP32	s	$20M–$100M
+AQ32	n	60000000
+AP33	s	$100M–$500M
+AQ33	n	300000000
+AP34	s	Above $100M
+AQ34	n	150000000
+AP35	s	Above $500M
+AQ35	n	750000000
+AP36	s	Prefer not to state
+AQ36	n	0
+AP37	s	To be agreed
+AQ37	n	0
+AP38	s	Per project (specify)
+AQ38	n	0
+AP40	s	Midpoint 0 = not comparable. The ratio assumes both figures are in the same currency.

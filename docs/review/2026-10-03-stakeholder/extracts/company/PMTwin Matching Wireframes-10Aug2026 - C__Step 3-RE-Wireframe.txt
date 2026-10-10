@@ -1,0 +1,376 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-RE-Wireframe
+state=visible dims=A1:Q102 max_row=102 max_col=17
+merged=[]
+
+## DATA VALIDATIONS
+sqref=C25 C47 type=decimal formula1=0 formula2=100000 allow_blank=True
+sqref=C32 C55 type=decimal formula1=0 formula2=1000000000 allow_blank=True
+
+## CELLS
+P1	s	STEP 5 SUMMARY FEED — read by the Review & Publish screen. Do not move.
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+P2	s	Model
+Q2	f	="Resource Exchange"
+B3	s	Scope & Work — Resource Exchange
+P3	s	Gate
+Q3	f	=$L$27
+B4	s	Define the resource you own and what you want to swap it for. Both parties must own a resource — this is a bilateral swap.
+P4	s	Readiness
+Q4	f	=$L$21
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form — Resource Exchange        ④  Exchange model        ⑤  Review & publish
+P5	s	Offer intent
+Q5	f	=$C$12
+P6	s	Offer category
+Q6	f	=$C$13
+B7	s	STEP 3 OF 5  —  MODEL 4: RESOURCE EXCHANGE
+D7	f	=TEXT($L$21,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$21*24,0))&REPT("░",24-ROUND($L$21*24,0))
+P7	s	Offer sub-category
+Q7	f	=$C$15
+B8	f	=IF($L$14="YES","● This form is ACTIVE — Step 2 collaboration model = Resource Exchange.",IF($L$13="","— Inactive: no collaboration model selected in Step 2 yet.","— Inactive: Step 2 model = "&$L$13&". A different Step 3 form applies."))
+P8	s	Offer value
+Q8	f	=$C$27
+P9	s	Need intent
+Q9	f	=$C$37
+B10	s	SECTION A  —  OFFER SIDE  ·  THE RESOURCE YOU ARE OFFERING TO SWAP
+G10	s	RESOURCE TAXONOMY  —  TYPES & SUB-TYPES
+P10	s	Need category
+Q10	f	=$C$38
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+G11	s	Resource type
+H11	s	Sub-types
+I11	s	First sub-options
+P11	s	Need sub-category
+Q11	f	=$C$40
+B12	s	S3-RE-O00 · Collaboration intent *
+D12	f	=IF($C12="","● Required","✓ Complete")
+E12	s	Dropdown. Initiating, exiting, extending an exchange — or open to discussion.
+G12	f	='Step 3-RE-Lists'!$D$6
+H12	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G12)
+I12	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126145940>
+K12	s	VALIDATION ENGINE (live)
+P12	s	Need value
+Q12	f	=$C$52
+B13	s	S3-RE-O01 · Resource type *
+D13	f	=IF($C13="","● Required","✓ Complete")
+E13	s	Dropdown. Heavy equipment, space, fleet, human capacity, technology, materials.
+G13	f	='Step 3-RE-Lists'!$D$7
+H13	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G13)
+I13	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144950>
+K13	s	Step 2 model selected
+L13	f	=IF('Step 2-Wireframe'!$C$18="","",'Step 2-Wireframe'!$C$18)
+P13	s	Match with
+Q13	f	=""
+B14	s	»  O01 — specify "Other"
+D14	f	=IF($C$13="Other",IF($C14="","● Required","✓ Complete"),"— Hidden")
+E14	s	Free text. Appears only when O01 = Other.
+G14	f	='Step 3-RE-Lists'!$D$8
+H14	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G14)
+I14	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x00000221261440E0>
+K14	s	This form active (Resource Exchange)
+L14	f	=IF($L$13="Resource Exchange","YES","NO")
+P14	s	Deliverables
+Q14	f	=COUNTA($C$65:$C$66)
+B15	s	S3-RE-O02 · Resource sub-type *
+D15	f	=IF($C15="","● Required","✓ Complete")
+E15	s	Dropdown, filtered to the sub-types of the resource type above.
+G15	f	='Step 3-RE-Lists'!$D$9
+H15	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G15)
+I15	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144050>
+K15	s	Offer — completed
+L15	f	=IF($C12<>"",1,0)+IF($C13<>"",1,0)+IF($C15<>"",1,0)+IF($C18<>"",1,0)+IF($C20<>"",1,0)+IF($C22<>"",1,0)+IF($C25<>"",1,0)+IF($C29<>"",1,0)
+P15	s	Milestones
+Q15	f	=COUNTA($C$71,$C$73,$C$75)
+B16	s	»  O02 — specify "Other"
+D16	f	=IF($C$15="Other",IF($C16="","● Required","✓ Complete"),"— Hidden")
+E16	s	Free text. Appears only when O02 = Other.
+G16	f	='Step 3-RE-Lists'!$D$10
+H16	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G16)
+I16	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144140>
+K16	s	Need — completed
+L16	f	=IF($C37<>"",1,0)+IF($C38<>"",1,0)+IF($C40<>"",1,0)+IF($C47<>"",1,0)+IF($C49<>"",1,0)
+B17	s	S3-RE-O03 · Resource description
+D17	f	=IF($C17="","○ Optional","✓ Complete")
+E17	s	Text area. Optional — make / model, specification, age, condition notes.
+G17	f	='Step 3-RE-Lists'!$D$11
+H17	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G17)
+I17	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144860>
+K17	s	Offer — total
+L17	f	=8
+B18	s	S3-RE-O04 · Resource location — country *
+D18	f	=IF($C18="","● Required","✓ Complete")
+E18	s	Full country list from the shared Cities dataset.
+G18	f	='Step 3-RE-Lists'!$D$12
+H18	f	=COUNTIF('Step 3-RE-Lists'!$AF$6:$AF$63,$G18)
+I18	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144BC0>
+K18	s	Need — total
+L18	f	=5
+B19	s	»  O04 — specify "Other" country
+D19	f	=IF($C$18="Other (not listed)",IF($C19="","● Required","✓ Complete"),"— Hidden")
+E19	s	Free text. Appears only when country = Other (not listed).
+K19	s	Required — total
+L19	f	=13+$L$22
+B20	s	S3-RE-O04a · Resource location — city *
+D20	f	=IF($C$18="","— Locked (select country first)",IF($C$20="","● Required","✓ Complete"))
+E20	s	Required. Populates from the country above.
+K20	s	Required — completed
+L20	f	=$L$15+$L$16+$L$23
+B21	s	»  O04a — specify "Other" city
+D21	f	=IF($C$20="Other",IF($C21="","● Required","✓ Complete"),"— Hidden")
+E21	s	Free text. Appears only when city = Other.
+G21	s	SWAP BALANCE MONITOR
+K21	s	Readiness
+L21	f	=IFERROR($L$20/$L$19,0)
+B22	s	S3-RE-O05 · Availability for swap *
+D22	f	=IF($C22="","● Required","✓ Complete")
+E22	s	Dropdown. Immediate through flexible. "Specific period" opens a date range below.
+G22	s	Item
+H22	s	Offer side
+I22	s	Need side
+K22	s	Conditional fields — active
+L22	f	=IF($C$13="Other",1,0)+IF($C$15="Other",1,0)+IF($C$18="Other (not listed)",1,0)+IF($C$20="Other",1,0)+IF($C$22="Specific period → date range",1,0)+IF($C$22="Specific period → date range",1,0)+IF($C$25<>"",1,0)+IF(AND($C$27<>"",$C$27<>"To be agreed"),1,0)+IF($C$29="Other",1,0)+IF(LEFT($C$31,3)="Yes",1,0)+IF(LEFT($C$31,3)="Yes",1,0)+IF($C$38="Other",1,0)+IF($C$40="Other",1,0)+IF($C$43="Other (not listed)",1,0)+IF($C$45="Other",1,0)+IF($C$47<>"",1,0)+IF($C$49="Specific period → date range",1,0)+IF($C$49="Specific period → date range",1,0)+IF(AND($C$52<>"",$C$52<>"To be agreed"),1,0)+IF(LEFT($C$54,3)="Yes",1,0)+IF(LEFT($C$54,3)="Yes",1,0)+IF($C$58="Specific country",1,0)+IF($C$60="Other",1,0)
+B23	s	»  O05 — period start
+D23	f	=IF($C$22="Specific period → date range",IF($C23="","● Required","✓ Complete"),"— Hidden")
+E23	s	Date picker. Appears only when O05 = Specific period.
+G23	s	Resource
+H23	f	=IF($C$15="","—",$C$15)
+I23	f	=IF($C$40="","—",$C$40)
+K23	s	Conditional fields — completed
+L23	f	=IF(AND($C$13="Other",$C$14<>""),1,0)+IF(AND($C$15="Other",$C$16<>""),1,0)+IF(AND($C$18="Other (not listed)",$C$19<>""),1,0)+IF(AND($C$20="Other",$C$21<>""),1,0)+IF(AND($C$22="Specific period → date range",$C$23<>""),1,0)+IF(AND($C$22="Specific period → date range",$C$24<>""),1,0)+IF(AND($C$25<>"",$C$26<>""),1,0)+IF(AND(AND($C$27<>"",$C$27<>"To be agreed"),$C$28<>""),1,0)+IF(AND($C$29="Other",$C$30<>""),1,0)+IF(AND(LEFT($C$31,3)="Yes",$C$32<>""),1,0)+IF(AND(LEFT($C$31,3)="Yes",$C$33<>""),1,0)+IF(AND($C$38="Other",$C$39<>""),1,0)+IF(AND($C$40="Other",$C$41<>""),1,0)+IF(AND($C$43="Other (not listed)",$C$44<>""),1,0)+IF(AND($C$45="Other",$C$46<>""),1,0)+IF(AND($C$47<>"",$C$48<>""),1,0)+IF(AND($C$49="Specific period → date range",$C$50<>""),1,0)+IF(AND($C$49="Specific period → date range",$C$51<>""),1,0)+IF(AND(AND($C$52<>"",$C$52<>"To be agreed"),$C$53<>""),1,0)+IF(AND(LEFT($C$54,3)="Yes",$C$55<>""),1,0)+IF(AND(LEFT($C$54,3)="Yes",$C$56<>""),1,0)+IF(AND($C$58="Specific country",$C$59<>""),1,0)+IF(AND($C$60="Other",$C$61<>""),1,0)
+B24	s	»  O05 — period end
+D24	f	=IF($C$22<>"Specific period → date range","— Hidden",IF($C$24="","● Required",IF(AND(ISNUMBER($C$23),$C$24<$C$23),"⚠ Earlier than period start","✓ Complete")))
+E24	s	Date picker. Must fall on or after the period start.
+G24	s	Value band
+H24	f	=IF($C$27="","—",$C$27)
+I24	f	=IF($C$52="","—",$C$52)
+K24	s	Step 2 gate
+L24	f	='Step 2-Wireframe'!$L$19
+B25	s	S3-RE-O06 · Swap duration available *
+D25	f	=IF($C25="","● Required","✓ Complete")
+E25	s	Numeric input. How long you can release the resource for.
+G25	s	Duration
+H25	f	=IF($C$25="","—",$C$25&" "&$C$26)
+I25	f	=IF($C$47="","—",$C$47&" "&$C$48)
+K25	s	Specific periods used
+L25	f	=IF($C$22="Specific period → date range",1,0)+IF($C$49="Specific period → date range",1,0)
+B26	s	»  O06-TU — time unit
+D26	f	=IF($C$25<>"",IF($C26="","● Required","✓ Complete"),"— Hidden")
+E26	s	Hours / Days / Weeks / Months. Required once a duration is entered.
+G26	s	Cash top-up
+H26	f	=IF($C$31="","—",$C$31)
+I26	f	=IF($C$54="","—",$C$54)
+K26	s	Invalid date ranges
+L26	f	=IF(AND(ISNUMBER($C$23),ISNUMBER($C$24),$C$24<$C$23),1,0)+IF(AND(ISNUMBER($C$50),ISNUMBER($C$51),$C$51<$C$50),1,0)
+B27	s	S3-RE-O07 · Estimated resource value
+D27	f	=IF($C27="","○ Optional","✓ Complete")
+E27	s	Range dropdown. Optional but strongly recommended — drives the value balance check.
+K27	s	Step 4 gate
+L27	f	=IF(AND($L$20=$L$19,$L$26=0,$L$24="YES",$L$14="YES"),"YES","NO")
+B28	s	»  O07-CUR — currency
+D28	f	=IF(AND($C$27<>"",$C$27<>"To be agreed"),IF($C28="","● Required","✓ Complete"),"— Hidden")
+E28	s	Currency for the range above.
+G28	s	DATE SCOPE  —  SWAP PERIODS & MILESTONES
+B29	s	S3-RE-O08 · Resource condition *
+D29	f	=IF($C29="","● Required","✓ Complete")
+E29	s	Dropdown. New through requires minor maintenance.
+G29	s	Month
+I29	s	Year
+B30	s	»  O08 — specify "Other"
+D30	f	=IF($C$29="Other",IF($C30="","● Required","✓ Complete"),"— Hidden")
+E30	s	Free text. Appears only when O08 = Other.
+B31	s	S3-RE-O09 · Cash top-up offered to balance?
+D31	f	=IF($C31="","○ Optional","✓ Complete")
+E31	s	Single select. Pure swap is the default; a top-up is optional and confirmed at Step 4.
+B32	s	»  O09 — estimated top-up amount
+D32	f	=IF(LEFT($C$31,3)="Yes",IF($C32="","● Required","✓ Complete"),"— Hidden")
+E32	s	Numeric. Appears only when a cash top-up is offered or requested.
+B33	s	»  O09 — top-up currency
+D33	f	=IF(LEFT($C$31,3)="Yes",IF($C33="","● Required","✓ Complete"),"— Hidden")
+E33	s	Currency for the top-up amount.
+B35	s	SECTION B  —  NEED SIDE  ·  THE RESOURCE YOU WANT IN EXCHANGE
+B36	s	Field
+C36	s	Your input
+D36	s	Status
+E36	s	Hint / validation rule
+B37	s	S3-RE-N00 · Collaboration intent *
+D37	f	=IF($C37="","● Required","✓ Complete")
+E37	s	Dropdown. Initiating, exiting, extending an exchange — or open to discussion.
+B38	s	S3-RE-N01 · Resource type needed *
+D38	f	=IF($C38="","● Required","✓ Complete")
+E38	s	Dropdown. Same taxonomy as the Offer side.
+B39	s	»  N01 — specify "Other"
+D39	f	=IF($C$38="Other",IF($C39="","● Required","✓ Complete"),"— Hidden")
+E39	s	Free text. Appears only when N01 = Other.
+B40	s	S3-RE-N02 · Resource sub-type *
+D40	f	=IF($C40="","● Required","✓ Complete")
+E40	s	Dropdown, filtered to the sub-types of the resource type above.
+B41	s	»  N02 — specify "Other"
+D41	f	=IF($C$40="Other",IF($C41="","● Required","✓ Complete"),"— Hidden")
+E41	s	Free text. Appears only when N02 = Other.
+B42	s	S3-RE-N03 · Resource specification
+D42	f	=IF($C42="","○ Optional","✓ Complete")
+E42	s	Text area. Optional — required spec, capacity, standard.
+B43	s	S3-RE-N04 · Resource location — country
+D43	f	=IF($C43="","○ Optional","✓ Complete")
+E43	s	Optional. Full country list from the shared Cities dataset.
+B44	s	»  N04 — specify "Other" country
+D44	f	=IF($C$43="Other (not listed)",IF($C44="","● Required","✓ Complete"),"— Hidden")
+E44	s	Free text. Appears only when country = Other (not listed).
+B45	s	S3-RE-N04a · Resource location — city
+D45	f	=IF($C$43="","— Locked (select country first)",IF($C$45="","○ Optional","✓ Complete"))
+E45	s	Optional. Populates from the country above.
+B46	s	»  N04a — specify "Other" city
+D46	f	=IF($C$45="Other",IF($C46="","● Required","✓ Complete"),"— Hidden")
+E46	s	Free text. Appears only when city = Other.
+B47	s	S3-RE-N05 · Swap duration needed *
+D47	f	=IF($C47="","● Required","✓ Complete")
+E47	s	Numeric input. How long you need the received resource for.
+B48	s	»  N05-TU — time unit
+D48	f	=IF($C$47<>"",IF($C48="","● Required","✓ Complete"),"— Hidden")
+E48	s	Hours / Days / Weeks / Months. Required once a duration is entered.
+B49	s	S3-RE-N06 · When do you need the swap? *
+D49	f	=IF($C49="","● Required","✓ Complete")
+E49	s	Dropdown. Immediate through flexible. "Specific period" opens a date range below.
+B50	s	»  N06 — period start
+D50	f	=IF($C$49="Specific period → date range",IF($C50="","● Required","✓ Complete"),"— Hidden")
+E50	s	Date picker. Appears only when N06 = Specific period.
+B51	s	»  N06 — period end
+D51	f	=IF($C$49<>"Specific period → date range","— Hidden",IF($C$51="","● Required",IF(AND(ISNUMBER($C$50),$C$51<$C$50),"⚠ Earlier than period start","✓ Complete")))
+E51	s	Date picker. Must fall on or after the period start.
+B52	s	S3-RE-N07 · Estimated value acceptable
+D52	f	=IF($C52="","○ Optional","✓ Complete")
+E52	s	Range dropdown. Optional but recommended — drives the value balance check.
+B53	s	»  N07-CUR — currency
+D53	f	=IF(AND($C$52<>"",$C$52<>"To be agreed"),IF($C53="","● Required","✓ Complete"),"— Hidden")
+E53	s	Currency for the range above.
+B54	s	S3-RE-N08 · Cash top-up acceptable to balance values?
+D54	f	=IF($C54="","○ Optional","✓ Complete")
+E54	s	Single select. Pure swap is the default.
+B55	s	»  N08 — estimated top-up amount
+D55	f	=IF(LEFT($C$54,3)="Yes",IF($C55="","● Required","✓ Complete"),"— Hidden")
+E55	s	Numeric. Appears only when a cash top-up is acceptable.
+B56	s	»  N08 — top-up currency
+D56	f	=IF(LEFT($C$54,3)="Yes",IF($C56="","● Required","✓ Complete"),"— Hidden")
+E56	s	Currency for the top-up amount.
+B57	s	S3-RE-N09 · Resource condition required
+D57	f	=IF($C57="","○ Optional","✓ Complete")
+E57	s	Dropdown. New through any condition acceptable.
+B58	s	S3-RE-N10 · Preferred owner location
+D58	f	=IF($C58="","○ Optional","✓ Complete")
+E58	s	Dropdown. Same country, Gulf region, any location — or a specific country.
+B59	s	»  N10 — specific country
+D59	f	=IF($C$58="Specific country",IF($C59="","● Required","✓ Complete"),"— Hidden")
+E59	s	Full country list. Appears only when N10 = Specific country.
+B60	s	S3-RE-N10a · Preferred owner location — city
+D60	f	=IF($C$58<>"Specific country","— Hidden",IF($C$59="","— Locked (pick a country first)",IF($C$60="","○ Optional","✓ Complete")))
+E60	s	Optional. Populates from the specific country above.
+B61	s	»  N10a — specify "Other" city
+D61	f	=IF($C$60="Other",IF($C61="","● Required","✓ Complete"),"— Hidden")
+E61	s	Free text. Appears only when city = Other.
+B63	s	SECTION C  —  CONDITIONS / DELIVERABLES  ·  NEED SIDE  (collapsed by default — optional)
+B64	s	Field
+C64	s	Your input
+D64	s	Status
+E64	s	Hint / validation rule
+B65	s	S3-RE-D01 · Condition on received resource 1
+D65	f	=IF($C$65="","○ Optional","✓ Complete")
+E65	s	Expected state or condition of the resource you receive.
+B66	s	S3-RE-D01 · Condition on received resource 2
+D66	f	=IF($C$65="","— Locked",IF($C$66="","○ Optional","✓ Complete"))
+E66	s	Offered once the first is filled.
+B67	s	S3-RE-D02 · Acceptance criteria
+D67	f	=IF($C$65="","— Locked (add a condition first)",IF($C$67="","○ Optional","✓ Complete"))
+E67	s	How you will judge the received resource as acceptable.
+B69	s	SECTION D  —  MILESTONES  ·  BOTH SIDES  (collapsed by default — optional)
+B70	s	Field
+C70	s	Your input
+D70	s	Status
+E70	s	Hint / validation rule
+B71	s	S3-RE-M01 · Milestone 1 — title
+D71	f	=IF($C$71="","○ Optional","✓ Complete")
+E71	s	Text. Add milestones (optional). User can add multiple.
+B72	s	S3-RE-M02 · Milestone 1 — target date
+D72	f	=IF($C$71="","— Locked",IF($C$72="","○ Optional",IF(NOT(ISNUMBER($C$72)),"⚠ Not a valid date","✓ Complete")))
+E72	s	Date picker — uses the shared date scope panel on the right.
+B73	s	S3-RE-M01 · Milestone 2 — title
+D73	f	=IF($C$73="","○ Optional","✓ Complete")
+E73	s	Offered once the previous milestone has a title.
+B74	s	S3-RE-M02 · Milestone 2 — target date
+D74	f	=IF($C$73="","— Locked",IF($C$74="","○ Optional",IF(NOT(ISNUMBER($C$74)),"⚠ Not a valid date","✓ Complete")))
+E74	s	Date picker — uses the shared date scope panel on the right.
+B75	s	S3-RE-M01 · Milestone 3 — title
+D75	f	=IF($C$75="","○ Optional","✓ Complete")
+E75	s	Offered once the previous milestone has a title.
+B76	s	S3-RE-M02 · Milestone 3 — target date
+D76	f	=IF($C$75="","— Locked",IF($C$76="","○ Optional",IF(NOT(ISNUMBER($C$76)),"⚠ Not a valid date","✓ Complete")))
+E76	s	Date picker — uses the shared date scope panel on the right.
+B77	s	SECTION E  —  SWAP BALANCE, MATCHING FLAGS & HIDDEN FIELDS
+B78	s	Item
+C78	s	Value
+D78	s	Status
+E78	s	Rule
+B79	s	Bilateral swap requirement
+C79	f	=IF(AND($C$13<>"",$C$38<>""),"Both sides declared — swap is bilateral","Both sides must declare a resource")
+D79	f	=IF(AND($C$13<>"",$C$38<>""),"✓ Pass","● Pending")
+E79	s	This model requires each party to own a resource. No cash by default.
+B80	s	Value balance check
+C80	f	=IF(OR('Step 3-RE-Lists'!$AU$6=0,'Step 3-RE-Lists'!$AU$7=0),"Not comparable — enter both value ranges",IF(ABS('Step 3-RE-Lists'!$AU$6-'Step 3-RE-Lists'!$AU$7)=0,"Balanced — same value band",IF(ABS('Step 3-RE-Lists'!$AU$6-'Step 3-RE-Lists'!$AU$7)=1,"Close — one band apart","Significant gap — "&ABS('Step 3-RE-Lists'!$AU$6-'Step 3-RE-Lists'!$AU$7)&" bands apart, cash top-up likely needed")))
+D80	f	=IF(OR('Step 3-RE-Lists'!$AU$6=0,'Step 3-RE-Lists'!$AU$7=0),"— Waiting",IF(ABS('Step 3-RE-Lists'!$AU$6-'Step 3-RE-Lists'!$AU$7)<=1,"✓ Balanced","⚠ Review"))
+E80	s	Compares O07 against N07 by value band. "To be agreed" is not comparable.
+B81	s	Cash top-up alignment
+C81	f	=IF(OR($C$31="",$C$54=""),"Not yet comparable",IF(AND($C$31="No — pure resource swap only",$C$54="No — pure resource swap only"),"Aligned — pure resource swap",IF(OR(AND($C$31="Yes — willing to pay cash top-up",$C$54="Yes — willing to receive cash to balance"),AND($C$31="Yes — willing to receive cash top-up",$C$54="Yes — willing to pay cash to balance")),"Aligned — top-up direction is compatible",IF(OR($C$31="To be agreed",$C$54="To be agreed"),"To be agreed at Step 4","Conflict — both sides want the same direction"))))
+D81	f	=IF(OR($C$31="",$C$54=""),"— Waiting",IF(LEFT($C$81,8)="Aligned ","✓ Pass",IF(LEFT($C$81,8)="Conflict","⚠ Conflict","◆ Deferred")))
+E81	s	Checks that the top-up directions on the two sides are compatible. Confirmed at Step 4.
+B82	s	Two-Way / circular chain flag
+C82	f	=IF(AND($L$15=$L$17,$L$16=$L$18),"Both sides complete — Type 2, chainable to Type 4","Offer "&$L$15&"/"&$L$17&" · Need "&$L$16&"/"&$L$18)
+D82	f	=IF(AND($L$15=$L$17,$L$16=$L$18),"◆ Type 2 / Type 4 eligible","● Incomplete")
+E82	s	Resource Exchange is inherently two-way; completing both sides makes it eligible for a circular Multi-Party Match.
+B83	s	Hidden for the Resource Exchange model
+C83	f	=_xlfn.TEXTJOIN(" · ",TRUE,'Step 3-RE-Lists'!$Z$6:$Z$11)
+D83	s	— Not rendered
+E83	s	These fields exist in other Step 3 model forms but are suppressed here.
+B85	s	SECTION F  —  CROSS-FIELD VALIDATION & COMPLETION
+B86	s	Check
+C86	s	Result
+D86	s	Status
+E86	s	Rule
+B87	s	Required fields completed
+C87	f	=$L$20&" of "&$L$19
+D87	f	=IF($L$20=$L$19,"✓ Complete","● Incomplete")
+E87	s	13 mandatory fields (8 Offer + 5 Need) plus every conditional field opened by a selection.
+B88	s	Offer side complete
+C88	f	=$L$15&" of "&$L$17
+D88	f	=IF($L$15=$L$17,"✓ Pass","● Incomplete")
+E88	s	O00, O01, O02, O04, O04a, O05, O06, O08.
+B89	s	Need side complete
+C89	f	=$L$16&" of "&$L$18
+D89	f	=IF($L$16=$L$18,"✓ Pass","● Incomplete")
+E89	s	N00, N01, N02, N05, N06.
+B90	s	Conditional fields resolved
+C90	f	=$L$23&" of "&$L$22
+D90	f	=IF($L$23=$L$22,"✓ Pass","● Pending")
+E90	s	Time units, currencies, top-up amounts, date ranges and "Other" free texts opened by a selection.
+B91	s	Date ranges valid
+C91	f	=IF($L$25=0,"No specific periods entered",IF($L$26=0,"All entered ranges valid",$L$26&" range(s) end before they start"))
+D91	f	=IF($L$26=0,"✓ Pass","⚠ Fix required")
+E91	s	Where a specific period is used, the end date must fall on or after the start date.
+B92	s	Step 2 model is Resource Exchange
+C92	f	=IF($L$14="YES","Yes — form applies",IF($L$13="","No model selected","No — Step 2 model = "&$L$13))
+D92	f	=IF($L$14="YES","✓ Pass","⚠ Wrong form")
+E92	s	This form is only valid when the Step 2 collaboration model is Resource Exchange.
+B93	s	Step 2 gate passed
+C93	f	=IF($L$24="YES","Steps 1–2 complete","Steps 1–2 still incomplete")
+D93	f	=IF($L$24="YES","✓ Pass","⚠ Blocks Step 4")
+E93	s	Step 4 cannot unlock while an earlier step has outstanding required fields.
+B94	s	Readiness meter
+C94	f	=TEXT($L$21,"0%")&" of required fields"
+D94	f	=IF($L$27="YES","✓ Step 4 unlocked","● Step 4 not yet open")
+E94	s	Optional fields, conditions and milestones do not affect the meter.
+B96	s	NAVIGATION
+B97	s	◀  Back to Step 2
+C97	s	💾  Save Draft
+D97	f	=IF($L$27="YES","Continue to Step 4  ▶","Continue to Step 4  ▶  (disabled)")
+E97	s	Continue activates only when Section F shows every check passed.

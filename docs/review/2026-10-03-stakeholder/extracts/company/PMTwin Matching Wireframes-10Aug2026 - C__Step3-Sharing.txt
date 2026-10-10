@@ -1,0 +1,309 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-Sharing
+state=visible dims=A1:E181 max_row=181 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Model 3: Resource Sharing
+A5	s	Screen title: Scope & Work — Resource Sharing Screen subtitle: Define the resource you are sharing or pooling and what you seek in return. Layout: Differentiating question first, then Offer side and Need side. Both sides required.
+A9	s	Differentiating question (shown before Offer/Need sections)
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+A12	s	S3-RS-Q01
+B12	s	How does this resource arrangement work?
+C12	s	Single select
+D12	s	Yes
+A14	s	S3-RS-Q01 values:
+A16	s	I own the resource and want to share it with others who need it → Sharing variant loads
+A18	s	Multiple parties each contribute resources to a shared pool → Pooling variant loads
+A22	s	VARIANT A — Sharing (one owner, others use)
+A24	s	Offer side — "The resource you are making available"
+A26	s	Code
+B26	s	Field label
+C26	s	Type
+D26	s	Required
+E26	s	Other trigger
+A27	s	S3-RS-O00
+B27	s	Collaboration intent
+C27	s	Dropdown
+D27	s	Yes
+E27	s	No
+A28	s	S3-RS-O01
+B28	s	Resource type
+C28	s	Dropdown
+D28	s	Yes
+E28	s	Yes
+A29	s	S3-RS-O02
+B29	s	Resource sub-type
+C29	s	Dropdown
+D29	s	Yes
+E29	s	Yes
+A30	s	S3-RS-O03
+B30	s	Resource description
+C30	s	Text area
+D30	s	No
+E30	s	No
+A31	s	S3-RS-O04
+B31	s	Resource location — country
+C31	s	Dropdown
+D31	s	Yes
+E31	s	Yes
+A32	s	S3-RS-O04a
+B32	s	Resource location — city
+C32	s	Dropdown
+D32	s	Yes
+E32	s	Populates per O04
+A33	s	S3-RS-O05
+B33	s	Availability
+C33	s	Dropdown
+D33	s	Yes
+E33	s	No
+A34	s	S3-RS-O06
+B34	s	Availability period
+C34	s	Dropdown
+D34	s	Yes
+E34	s	No
+A35	s	S3-RS-O07
+B35	s	Capacity available
+C35	s	Numeric input + unit
+D35	s	No
+E35	s	No
+A36	s	S3-RS-O08
+B36	s	Resource condition
+C36	s	Dropdown
+D36	s	No
+E36	s	No
+A38	s	S3-RS-O00 — Collaboration intent values: Making a resource available for sharing / Exiting an existing sharing arrangement / Open to discussion
+A40	s	S3-RS-O01 — Resource type values: Space & facilities / Heavy equipment / Fleet & vehicles / Human capacity / Technology & software / Materials & inventory / Other → free text
+A42	s	S3-RS-O02 — Sub-type values (conditional on O01): Same comprehensive taxonomy as S3-RS-N02 (Need side) — see Need side for full sub-type lists per category
+A44	s	S3-RS-O04 — Resource location country values: Full country list (same as S1-F03)
+A46	s	S3-RS-O04a — Resource location city values: Conditional on O04. Same city taxonomy as S1-F04
+A48	s	S3-RS-O05 — Availability values: Full-time / Part-time / Specific days per week / On-demand / Seasonal / Flexible
+A50	s	S3-RS-O06 — Availability period values: Less than 1 month / 1–3 months / 3–6 months / 6–12 months / Over 1 year / Ongoing / Flexible
+A52	s	S3-RS-O08 — Resource condition values: New / unused / Like new / Good working condition / Operational with minor wear / Requires minor maintenance / Other → free text
+A54	s	Need side — "The resource you need access to"
+A56	s	Code
+B56	s	Field label
+C56	s	Type
+D56	s	Required
+E56	s	Other trigger
+A57	s	S3-RS-N00
+B57	s	Collaboration intent
+C57	s	Dropdown
+D57	s	Yes
+E57	s	No
+A58	s	S3-RS-N01
+B58	s	Resource type needed
+C58	s	Dropdown
+D58	s	Yes
+E58	s	Yes
+A59	s	S3-RS-N02
+B59	s	Resource sub-type
+C59	s	Dropdown
+D59	s	Yes
+E59	s	Yes
+A60	s	S3-RS-N03
+B60	s	Resource specification
+C60	s	Text area
+D60	s	No
+E60	s	No
+A61	s	S3-RS-N04
+B61	s	Resource location — country
+C61	s	Dropdown
+D61	s	Yes
+E61	s	Yes
+A62	s	S3-RS-N04a
+B62	s	Resource location — city
+C62	s	Dropdown
+D62	s	No
+E62	s	Populates per N04
+A63	s	S3-RS-N05
+B63	s	Usage requirements
+C63	s	Text area
+D63	s	No
+E63	s	No
+A64	s	S3-RS-N06
+B64	s	Availability required
+C64	s	Dropdown
+D64	s	Yes
+E64	s	No
+A65	s	S3-RS-N07
+B65	s	Duration needed
+C65	s	Dropdown
+D65	s	Yes
+E65	s	No
+A66	s	S3-RS-N09
+B66	s	Owner location preference — country
+C66	s	Dropdown
+D66	s	No
+E66	s	Yes
+A68	s	S3-RS-N00 — Collaboration intent values: Seeking access to a resource I do not own / Seeking to exit an existing sharing arrangement / Open to discussion
+A70	s	S3-RS-N01 — Resource type needed values: Space & facilities / Heavy equipment / Fleet & vehicles / Human capacity / Technology & software / Materials & inventory / Other → free text
+A72	s	S3-RS-N02 — Sub-type values (conditional on N01):
+A74	s	N01
+B74	s	N02 options
+A75	s	Space & facilities
+B75	s	Office space / Co-working space / Meeting & conference rooms / Warehouse / Cold storage / Distribution centre / Workshop & fabrication yard / Labour accommodation / Retail space / Showroom / Laboratory / Testing facility / Data centre / server room / Other
+A76	s	Heavy equipment
+B76	s	Excavator / Backhoe loader / Tower crane / Mobile crane / Concrete mixer / Concrete pump / Batching plant / Bulldozer / Grader / Compactor / Generator / Power unit / Surveying equipment / Piling equipment / Drilling rig / Scaffolding & formwork / Forklifts & lifting equipment / Road construction equipment / Other
+A77	s	Fleet & vehicles
+B77	s	Heavy trucks / Tipper trucks / Concrete mixer trucks / Light vehicles / Pick-ups / Specialised transport / Low-loaders / Staff buses / Marine vessels / Aerial work platforms / Other
+A78	s	Human capacity
+B78	s	Engineering professionals / Project management professionals / Commercial professionals (QS / contracts) / Design professionals / Technical & trade skills / Site supervisors / Administrative staff / HSE professionals / Finance professionals / Other
+A79	s	Technology & software
+B79	s	Project management software / BIM software / Design software (AutoCAD / Revit) / ERP system access / PMIS / Server & computing capacity / Cloud storage / GIS & mapping software / Other
+A80	s	Materials & inventory
+B80	s	Construction materials / MEP materials / Finishing materials / Tools & small equipment / Other
+A82	s	→ All include "Other" → free text
+A84	s	S3-RS-N04 — Resource location country values: Full country list (same as S1-F03)
+A86	s	S3-RS-N04a — Resource location city values: Conditional on N04. Same city taxonomy as S1-F04
+A88	s	S3-RS-N06 — Availability required values: Full-time / Part-time / Specific days per week / On-demand / Seasonal / Flexible
+A90	s	S3-RS-N07 — Duration needed values: Less than 1 month / 1–3 months / 3–6 months / 6–12 months / Over 1 year / Ongoing / Flexible
+A92	s	S3-RS-N09 — Owner location preference values: Same location (same city) / Same country / Gulf region / Any location / Other → free text
+A96	s	VARIANT B — Pooling (multiple contributors, shared access)
+A98	s	Offer side — "What you are contributing to the pool"
+A100	s	Code
+B100	s	Field label
+C100	s	Type
+D100	s	Required
+E100	s	Other trigger
+A101	s	S3-RP-O00
+B101	s	Pool intent
+C101	s	Dropdown
+D101	s	Yes
+E101	s	No
+A102	s	S3-RP-O01
+B102	s	Resource type you are contributing
+C102	s	Dropdown
+D102	s	Yes
+E102	s	Yes
+A103	s	S3-RP-O02
+B103	s	Resource sub-type
+C103	s	Dropdown
+D103	s	Yes
+E103	s	Yes
+A104	s	S3-RP-O03
+B104	s	Contribution description
+C104	s	Text area
+D104	s	No
+E104	s	No
+A105	s	S3-RP-O04
+B105	s	Contribution location — country
+C105	s	Dropdown
+D105	s	Yes
+E105	s	Yes
+A106	s	S3-RP-O04a
+B106	s	Contribution location — city
+C106	s	Dropdown
+D106	s	Yes
+E106	s	Populates per O04
+A107	s	S3-RP-O05
+B107	s	Availability
+C107	s	Dropdown
+D107	s	Yes
+E107	s	No
+A108	s	S3-RP-O06
+B108	s	Availability period
+C108	s	Dropdown
+D108	s	Yes
+E108	s	No
+A109	s	S3-RP-O07
+B109	s	Resource condition
+C109	s	Dropdown
+D109	s	No
+E109	s	No
+A111	s	S3-RP-O00 — Pool intent values: Initiating a new pool / Joining an existing pool / Exiting an existing pool / Open to discussion
+A113	s	S3-RP-O01 — Resource type values: Same taxonomy as S3-RS-O01
+A115	s	S3-RP-O02 — Sub-type values: Same comprehensive taxonomy as S3-RS-N02
+A117	s	S3-RP-O04 — Contribution location country values: Full country list (same as S1-F03)
+A119	s	S3-RP-O04a — Contribution location city values: Conditional on O04. Same city taxonomy as S1-F04
+A121	s	S3-RP-O05 — Availability values: Full-time / Part-time / Specific days per week / On-demand / Seasonal / Flexible
+A123	s	S3-RP-O06 — Availability period values: Less than 1 month / 1–3 months / 3–6 months / 6–12 months / Over 1 year / Ongoing / Flexible
+A125	s	S3-RP-O07 — Resource condition values: New / unused / Like new / Good working condition / Operational with minor wear / Other → free text
+A127	s	Need side — "What you need from the pool"
+A129	s	Code
+B129	s	Field label
+C129	s	Type
+D129	s	Required
+E129	s	Other trigger
+A130	s	S3-RP-N00
+B130	s	Pool intent
+C130	s	Dropdown
+D130	s	Yes
+E130	s	No
+A131	s	S3-RP-N01
+B131	s	Resource type needed from pool
+C131	s	Dropdown
+D131	s	Yes
+E131	s	Yes
+A132	s	S3-RP-N02
+B132	s	Resource sub-type
+C132	s	Dropdown
+D132	s	Yes
+E132	s	Yes
+A133	s	S3-RP-N03
+B133	s	Pool location — country
+C133	s	Dropdown
+D133	s	Yes
+E133	s	Yes
+A134	s	S3-RP-N03a
+B134	s	Pool location — city
+C134	s	Dropdown
+D134	s	No
+E134	s	Populates per N03
+A135	s	S3-RP-N04
+B135	s	Usage requirements
+C135	s	Text area
+D135	s	No
+E135	s	No
+A136	s	S3-RP-N05
+B136	s	Usage frequency
+C136	s	Dropdown
+D136	s	Yes
+E136	s	No
+A137	s	S3-RP-N06
+B137	s	Duration of pool membership
+C137	s	Dropdown
+D137	s	Yes
+E137	s	No
+A138	s	S3-RP-N07
+B138	s	Minimum pool size
+C138	s	Dropdown
+D138	s	Yes
+E138	s	No
+A139	s	S3-RP-N08
+B139	s	Maximum pool size
+C139	s	Dropdown
+D139	s	No
+E139	s	No
+A140	s	S3-RP-N09
+B140	s	Pool governance preference
+C140	s	Dropdown
+D140	s	No
+E140	s	Yes
+A141	s	S3-RP-N10
+B141	s	Your contribution to the pool
+C141	s	Dropdown
+D141	s	Yes
+E141	s	Yes
+A143	s	S3-RP-N00 — Pool intent values: Initiating a new pool / Joining an existing pool / Exiting an existing pool / Open to discussion
+A145	s	S3-RP-N01 — Resource type needed from pool values: Same taxonomy as S3-RS-N01
+A147	s	S3-RP-N02 — Sub-type values: Same conditional mapping as S3-RS-N02
+A149	s	S3-RP-N03 — Pool location country values: Full country list (same as S1-F03)
+A151	s	S3-RP-N03a — Pool location city values: Conditional on N03. Same city taxonomy as S1-F04
+A153	s	S3-RP-N05 — Usage frequency values: Daily / Several times per week / Weekly / Monthly / Occasional / On-demand / To be agreed
+A155	s	S3-RP-N06 — Duration of pool membership values: Less than 1 month / 1–3 months / 3–6 months / 6–12 months / Over 1 year / Ongoing / Flexible
+A157	s	S3-RP-N07 — Minimum pool size values: 2 parties / 3 parties / 4 parties / 5 parties / 6 or more / Open
+A159	s	S3-RP-N08 — Maximum pool size values: 3 parties / 4 parties / 5 parties / 6 parties / No maximum / To be agreed
+A161	s	S3-RP-N09 — Pool governance values: First-come scheduling / Proportional usage based on contribution / Rotation / Booking system / To be agreed / Other → free text
+A163	s	S3-RP-N10 — Your contribution to the pool values: Same resource type taxonomy as S3-RS-N01 — what you bring to the pool in return for access
+A167	s	Deliverables (Need side only — optional)
+A169	s	Collapsed by default. User adds expected deliverables or conditions if needed.
+A173	s	Milestones (optional — both sides)
+A175	s	Collapsed by default.
+A179	s	Hidden fields for Resource Sharing model
+A181	s	Entity establishment / Project stage / Engineering credentials / Skill level / Material category

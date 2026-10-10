@@ -1,0 +1,354 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step 3-BP-Lists
+state=visible dims=B2:AX72 max_row=72 max_col=50
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	REFERENCE LISTS — Step 3 · Model 5: Bulk Purchasing
+B3	s	Offer side = your contribution to the pool (volume / budget / anchor order). Need side = what you want to procure.
+B5	s	Pool role (O00)
+D5	s	Pool intent (N00)
+F5	s	Material / product category (O01 / N01)
+H5	s	Volume / quantity unit (O03-TU / N06-TU)
+J5	s	Budget contribution range (O04)
+L5	s	Currency (O04-CUR / N07-CUR)
+N5	s	Supply preference (O07 / N10)
+P5	s	Brand / manufacturer preference (N04)
+R5	s	Quality certification required (N05)
+T5	s	Delivery format (N11)
+V5	s	Minimum pool size (N12)
+W5	s	Min pool — companies
+X5	s	Maximum pool size (N13)
+Y5	s	Max pool — companies
+Z5	s	Preferred supplier location (N14)
+AB5	s	Hidden fields for the Bulk Purchasing model
+AD5	s	Month (date scope)
+AF5	s	Year (date scope)
+AH5	s	Material category
+AI5	s	Sub-type (O02 / N02)
+AK5	s	O02 sub-type source
+AM5	s	N02 sub-type source
+AO5	s	O05a delivery city source
+AQ5	s	N09a delivery city source
+AS5	s	N14a supplier city source
+AU5	s	Date options (delivery dates & milestones)
+AW5	s	Pool size rank helpers
+B6	s	Pool initiator (anchor order)
+D6	s	Initiating a new purchasing pool
+F6	s	Structural materials
+H6	s	Units
+J6	s	Under $10K
+L6	s	USD ($)
+N6	s	Local supply only
+P6	s	Any brand acceptable
+R6	s	SASO (Saudi Standards)
+T6	s	Bulk delivery
+V6	s	2 companies
+W6	n	2
+X6	s	3 companies
+Y6	n	3
+Z6	s	Saudi Arabia
+AB6	s	Entity establishment
+AD6	s	January
+AF6	n	2026
+AH6	s	Structural materials
+AI6	s	Cement
+AK6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022126144CE0>
+AM6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619FBF0>
+AO6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619CBF0>
+AQ6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619CC20>
+AS6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619CC50>
+AU6	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212619CC80>
+AW6	s	Min pool rank (N12)
+AX6	f	=IFERROR(INDEX($W$6:$W$11,MATCH('Step 3-BP-Wireframe'!$C$54,$V$6:$V$11,0)),0)
+B7	s	Pool participant (joining existing pool)
+D7	s	Joining an existing pool
+F7	s	MEP materials
+H7	s	Tonnes
+J7	s	$10K–$50K
+L7	s	SAR (ر.س)
+N7	s	GCC manufacture preferred
+P7	s	Specific brand preferred
+R7	s	CE marked
+T7	s	Palletised
+V7	s	3 companies
+W7	n	3
+X7	s	4 companies
+Y7	n	4
+Z7	s	UAE
+AB7	s	Partner credentials
+AD7	s	February
+AF7	n	2027
+AH7	s	Structural materials
+AI7	s	Ready-mix concrete
+AU7	f	=
+AW7	s	Max pool rank (N13)
+AX7	f	=IFERROR(INDEX($Y$6:$Y$12,MATCH('Step 3-BP-Wireframe'!$C$55,$X$6:$X$12,0)),0)
+B8	s	Exiting existing pool commitment
+D8	s	Exiting an existing pool commitment
+F8	s	Finishing materials
+H8	s	Cubic metres (m³)
+J8	s	$50K–$100K
+L8	s	AED (د.إ)
+N8	s	Import acceptable
+P8	s	Approved vendor list only
+R8	s	ASTM standards
+T8	s	Containerised
+V8	s	4 companies
+W8	n	4
+X8	s	5 companies
+Y8	n	5
+Z8	s	Egypt
+AB8	s	Skill level
+AD8	s	March
+AF8	n	2028
+AH8	s	Structural materials
+AI8	s	Steel & rebar
+AU8	f	=
+AW8	s	Window valid?
+AX8	f	=IF(OR($AX$6=0,$AX$7=0),"n/a",IF($AX$6<=$AX$7,"OK","FAIL"))
+B9	s	Open to either
+D9	s	Open to either
+F9	s	Waterproofing & insulation
+H9	s	Linear metres (m)
+J9	s	$100K–$500K
+L9	s	EGP (ج.م)
+N9	s	No preference
+P9	s	Equivalent acceptable
+R9	s	BSI standards
+T9	s	Just-in-time delivery
+V9	s	5 companies
+W9	n	5
+X9	s	6 companies
+Y9	n	6
+Z9	s	Qatar
+AB9	s	Years experience
+AD9	s	April
+AF9	n	2029
+AH9	s	Structural materials
+AI9	s	Structural steel sections
+AU9	f	=
+F10	s	Landscaping materials
+H10	s	Square metres (m²)
+J10	s	$500K–$1M
+L10	s	QAR (ر.ق)
+N10	s	Other
+P10	s	Other
+R10	s	ISO 9001
+T10	s	Phased delivery
+V10	s	6 or more
+W10	n	6
+X10	s	10 companies
+Y10	n	10
+Z10	s	Kuwait
+AB10	s	Swap duration
+AD10	s	May
+AF10	n	2030
+AH10	s	Structural materials
+AI10	s	Concrete blocks
+AU10	f	=
+F11	s	Equipment & machinery
+H11	s	Bags
+J11	s	Above $1M
+L11	s	KWD (د.ك)
+R11	s	EN standards
+T11	s	No preference
+V11	s	Open — no minimum
+W11	n	0
+X11	s	No maximum
+Y11	n	9999
+Z11	s	Bahrain
+AB11	s	Pool governance
+AD11	s	June
+AF11	n	2031
+AH11	s	Structural materials
+AI11	s	AAC blocks
+AU11	f	=
+F12	s	Technology & software
+H12	s	Rolls
+J12	s	To be agreed
+L12	s	BHD (د.ب)
+R12	s	Gulf Conformity Mark (GCM)
+T12	s	Other
+X12	s	To be agreed
+Y12	n	0
+Z12	s	Oman
+AD12	s	July
+AF12	n	2032
+AH12	s	Structural materials
+AI12	s	Timber & formwork
+AU12	f	=
+F13	s	PPE & safety
+H13	s	Litres
+L13	s	OMR (ر.ع)
+R13	s	No specific certification required
+Z13	s	China
+AD13	s	August
+AF13	n	2033
+AH13	s	Structural materials
+AI13	s	Sand & aggregate
+AU13	f	=
+F14	s	Furniture & fit-out
+H14	s	Kilograms
+L14	s	EUR (€)
+R14	s	Other
+Z14	s	Turkey
+AD14	s	September
+AF14	n	2034
+AH14	s	Structural materials
+AI14	s	Gravel
+AU14	f	=
+F15	s	Specialist materials
+H15	s	Pallets
+L15	s	GBP (£)
+Z15	s	Europe (any)
+AD15	s	October
+AF15	n	2035
+AH15	s	Structural materials
+AI15	s	Other
+AU15	f	=
+F16	s	Other
+H16	s	Containers
+L16	s	Other
+Z16	s	International (any)
+AD16	s	November
+AF16	n	2036
+AH16	s	MEP materials
+AI16	s	Pipes & fittings (HDPE / PVC / GI)
+AU16	f	=
+H17	s	Other
+Z17	s	No preference
+AD17	s	December
+AH17	s	MEP materials
+AI17	s	Electrical cables & wiring
+AU17	f	=
+Z18	s	Other
+AH18	s	MEP materials
+AI18	s	Cable trays & conduits
+AU18	f	=
+AH19	s	MEP materials
+AI19	s	HVAC equipment
+AU19	f	=
+AH20	s	MEP materials
+AI20	s	Ductwork
+AU20	f	=
+AH21	s	MEP materials
+AI21	s	Plumbing fixtures
+AU21	f	=
+AH22	s	MEP materials
+AI22	s	Fire protection materials
+AU22	f	=
+AH23	s	MEP materials
+AI23	s	Low voltage systems
+AU23	f	=
+AH24	s	MEP materials
+AI24	s	Other
+AU24	f	=
+AH25	s	Finishing materials
+AI25	s	Tiles & flooring
+AU25	f	=
+AH26	s	Finishing materials
+AI26	s	Marble & stone
+AU26	f	=
+AH27	s	Finishing materials
+AI27	s	Porcelain
+AU27	f	=
+AH28	s	Finishing materials
+AI28	s	Paint & coatings
+AU28	f	=
+AH29	s	Finishing materials
+AI29	s	Gypsum & plasterboard
+AU29	f	=
+AH30	s	Finishing materials
+AI30	s	Doors & windows
+AU30	f	=
+AH31	s	Finishing materials
+AI31	s	Curtain wall
+AU31	f	=
+AH32	s	Finishing materials
+AI32	s	Ceiling systems
+AU32	f	=
+AH33	s	Finishing materials
+AI33	s	Aluminium & glazing
+AU33	f	=
+AH34	s	Finishing materials
+AI34	s	Other
+AU34	f	=
+AH35	s	Waterproofing & insulation
+AI35	s	Waterproofing membranes
+AU35	f	=
+AH36	s	Waterproofing & insulation
+AI36	s	Thermal insulation
+AH37	s	Waterproofing & insulation
+AI37	s	Acoustic insulation
+AH38	s	Waterproofing & insulation
+AI38	s	Sealants & adhesives
+AH39	s	Waterproofing & insulation
+AI39	s	Other
+AH40	s	Landscaping materials
+AI40	s	Pavers & kerbs
+AH41	s	Landscaping materials
+AI41	s	Turf & plants
+AH42	s	Landscaping materials
+AI42	s	Irrigation systems
+AH43	s	Landscaping materials
+AI43	s	Outdoor lighting
+AH44	s	Landscaping materials
+AI44	s	Other
+AH45	s	Equipment & machinery
+AI45	s	Heavy equipment
+AH46	s	Equipment & machinery
+AI46	s	Tools & small equipment
+AH47	s	Equipment & machinery
+AI47	s	Generators & power units
+AH48	s	Equipment & machinery
+AI48	s	Pumps & compressors
+AH49	s	Equipment & machinery
+AI49	s	Other
+AH50	s	Technology & software
+AI50	s	Software licences
+AH51	s	Technology & software
+AI51	s	Hardware & devices
+AH52	s	Technology & software
+AI52	s	Smart building systems
+AH53	s	Technology & software
+AI53	s	CCTV & security
+AH54	s	Technology & software
+AI54	s	Other
+AH55	s	PPE & safety
+AI55	s	Hard hats
+AH56	s	PPE & safety
+AI56	s	Safety vests
+AH57	s	PPE & safety
+AI57	s	Harnesses & fall protection
+AH58	s	PPE & safety
+AI58	s	Safety signage
+AH59	s	PPE & safety
+AI59	s	First aid
+AH60	s	PPE & safety
+AI60	s	Fire extinguishers
+AH61	s	PPE & safety
+AI61	s	Other
+AH62	s	Furniture & fit-out
+AI62	s	Office furniture
+AH63	s	Furniture & fit-out
+AI63	s	Loose furniture
+AH64	s	Furniture & fit-out
+AI64	s	Kitchen & pantry
+AH65	s	Furniture & fit-out
+AI65	s	Storage systems
+AH66	s	Furniture & fit-out
+AI66	s	Other
+AH67	s	Specialist materials
+AI67	s	Fire protection materials
+AH68	s	Specialist materials
+AI68	s	Acoustic materials
+AH69	s	Specialist materials
+AI69	s	Anti-static materials
+AH70	s	Specialist materials
+AI70	s	Hazardous material containers
+AH71	s	Specialist materials
+AI71	s	Other
+AH72	s	Other
+AI72	s	Other

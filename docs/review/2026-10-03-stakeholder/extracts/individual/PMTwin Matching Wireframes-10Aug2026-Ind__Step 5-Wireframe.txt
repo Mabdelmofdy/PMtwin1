@@ -1,0 +1,249 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 5-Wireframe
+state=visible dims=A1:L72 max_row=72 max_col=12
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+B3	s	Review & Publish
+B4	s	Confirm your opportunity before it goes live. This is exactly what potential matches will see.
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form        ④  Exchange model        ⑤  Review & publish
+B7	s	STEP 5 OF 5  —  REVIEW & PUBLISH
+D7	f	=TEXT($J$26,"0%")&" ready"
+E7	f	=REPT("█",ROUND($J$26*24,0))&REPT("░",24-ROUND($J$26*24,0))
+B8	f	=IF($J$17=0,"● All required fields are valid — this opportunity is ready to publish.","⚠ "&$J$17&" step(s) still have outstanding required fields — publishing is blocked until they are resolved.")
+B10	s	SECTION A  —  VALIDATION PANEL  (hidden in the live platform when everything is valid)
+G10	s	GATE SUMMARY
+B11	s	Step
+C11	s	Outstanding
+D11	s	Status
+E11	s	Action
+G11	s	Step
+H11	s	Gate
+B12	s	Step 1 · Opportunity basics
+C12	f	='Step 1-Wireframe'!$L$14&" of "&'Step 1-Wireframe'!$L$13&" required fields complete"
+D12	f	=IF('Step 1-Wireframe'!$L$17="YES","✓ Valid","⚠ Incomplete")
+E12	s	Fix in Step 1  ▸
+G12	s	Step 1
+H12	f	=IF('Step 1-Wireframe'!$L$17="YES","✓ Pass","⚠ Incomplete")
+I12	s	VALIDATION ENGINE (live)
+B13	s	Step 2 · Collaboration model
+C13	f	='Step 2-Wireframe'!$L$16&" of "&'Step 2-Wireframe'!$L$15&" required fields complete"
+D13	f	=IF('Step 2-Wireframe'!$L$19="YES","✓ Valid","⚠ Incomplete")
+E13	s	Fix in Step 2  ▸
+G13	s	Step 2
+H13	f	=IF('Step 2-Wireframe'!$L$19="YES","✓ Pass","⚠ Incomplete")
+I13	s	Step 1 gate
+J13	f	='Step 1-Wireframe'!$L$17
+B14	s	Step 3 · Scope & work
+C14	f	=IF('Step 5-Lists'!$Z$8="","No model selected yet",TEXT('Step 5-Lists'!$Z$10,"0%")&" of required fields complete ("&'Step 5-Lists'!$Z$8&")")
+D14	f	=IF('Step 5-Lists'!$Z$9="YES","✓ Valid","⚠ Incomplete")
+E14	s	Fix in Step 3  ▸
+G14	s	Step 3
+H14	f	=IF('Step 5-Lists'!$Z$9="YES","✓ Pass","⚠ Incomplete")
+I14	s	Step 2 gate
+J14	f	='Step 2-Wireframe'!$L$19
+B15	s	Step 4 · Commercial structure
+C15	f	='Step 4-Wireframe'!$M$25&" of "&'Step 4-Wireframe'!$M$24&" required fields complete"
+D15	f	=IF('Step 4-Wireframe'!$M$27="YES","✓ Valid","⚠ Incomplete")
+E15	s	Fix in Step 4  ▸
+G15	s	Step 4
+H15	f	=IF('Step 4-Wireframe'!$M$27="YES","✓ Pass","⚠ Incomplete")
+I15	s	Step 3 gate
+J15	f	=IF('Step 5-Lists'!$Z$9="","NO",'Step 5-Lists'!$Z$9)
+B16	s	»  Blocking errors
+C16	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x000002212650A870>
+D16	f	=IF($J$17=0,"✓ Clear","⚠ Blocked")
+E16	s	Publish stays disabled until this reads Clear.
+I16	s	Step 4 gate
+J16	f	='Step 4-Wireframe'!$M$27
+B17	s	»  Warnings (non-blocking)
+C17	f	=IF($J$18=0,"None — nothing further recommended",_xlfn.TEXTJOIN("  ·  ",TRUE,IF(N('Step 5-Lists'!$Z$20)=0,"Adding deliverables helps matches assess fit before requesting an introduction",""),IF(N('Step 5-Lists'!$Z$21)=0,"Adding milestones clarifies the timeline",""),IF('Step 1-Wireframe'!$C$12<>"Need & Offer","Posting the complementary side unlocks Two-Way and Multi-Party matches",""),IF(AND('Step 5-Lists'!$Z$14="",'Step 5-Lists'!$Z$18=""),"Adding an estimated value enables the barter balance calculator",""),IF('Step 1-Wireframe'!$C$26="— none selected","Specifying a coverage area widens your reach","")))
+D17	f	=IF($J$18=0,"✓ Optimised","◆ "&$J$18&" suggestion(s)")
+E17	s	Recommendations only — these never block publishing.
+G17	s	All gates
+H17	f	=IF($J$17=0,"✓ Clear to publish",$J$17&" blocking")
+I17	s	Blocking steps
+J17	f	=COUNTIF($J$13:$J$16,"NO")
+I18	s	Warnings
+J18	f	=IF(N('Step 5-Lists'!$Z$20)=0,1,0)+IF(N('Step 5-Lists'!$Z$21)=0,1,0)+IF('Step 1-Wireframe'!$C$12<>"Need & Offer",1,0)+IF(AND('Step 5-Lists'!$Z$14="",'Step 5-Lists'!$Z$18=""),1,0)+IF('Step 1-Wireframe'!$C$26="— none selected",1,0)
+B19	s	SECTION B  —  EXECUTIVE SUMMARY  (read-only, auto-generated)
+B20	s	Field
+C20	s	Value
+D20	s	Status
+E20	s	Source
+G20	s	MATCH TYPE EARNED
+I20	s	Base score
+J20	f	='Step 5-Lists'!$F$6*IFERROR(AVERAGE('Step 1-Wireframe'!$L$15,'Step 2-Wireframe'!$L$17,IF('Step 5-Lists'!$Z$10="",0,'Step 5-Lists'!$Z$10),'Step 4-Wireframe'!$M$26),0)
+B21	s	S5-F02 · Opportunity headline
+C21	f	=IF('Step 1-Wireframe'!$C$17="","—",'Step 1-Wireframe'!$C$17)
+D21	f	=IF($C$21="—","● Missing","✓ Set")
+E21	s	Read-only — pulls from S1-F01.
+G21	s	Post type
+H21	f	=IF('Step 1-Wireframe'!$C$12="","—",'Step 1-Wireframe'!$C$12)
+I21	s	Need & Offer bonus
+J21	f	=IF('Step 1-Wireframe'!$C$12="Need & Offer",'Step 5-Lists'!$F$7,0)
+B22	s	S5-F02a · Post type
+C22	f	=IF('Step 1-Wireframe'!$C$12="","—",'Step 1-Wireframe'!$C$12)
+D22	f	=IF($C$22="—","● Missing","✓ Set")
+E22	s	Read-only — pulls from S1-F00.
+G22	s	Collaboration model
+H22	f	=IF('Step 2-Wireframe'!$C$18="","—",'Step 2-Wireframe'!$C$18)
+I22	s	Deliverables bonus
+J22	f	=IF(N('Step 5-Lists'!$Z$20)>0,'Step 5-Lists'!$F$8,0)
+B23	s	S5-F03 · Collaboration model
+C23	f	=IF('Step 2-Wireframe'!$C$18="","—",'Step 2-Wireframe'!$C$18)
+D23	f	=IF($C$23="—","● Missing","✓ Set")
+E23	s	Read-only — pulls from S2-F03.
+G23	s	Matching structure
+H23	f	=IF('Step 2-Wireframe'!$C$25="—","—",'Step 2-Wireframe'!$C$25)
+I23	s	Milestones bonus
+J23	f	=IF(N('Step 5-Lists'!$Z$21)>0,'Step 5-Lists'!$F$9,0)
+B24	s	S5-F03a · Collaboration intent
+C24	f	=IF('Step 5-Lists'!$Z$8="","—",IF(AND('Step 5-Lists'!$Z$11="",'Step 5-Lists'!$Z$15=""),"Not applicable for this model",IF('Step 5-Lists'!$Z$11="",'Step 5-Lists'!$Z$15,'Step 5-Lists'!$Z$11)))
+D24	f	=IF($C$24="—","● Missing",IF($C$24="Not applicable for this model","— N/A","✓ Set"))
+E24	s	Read-only — pulls from S3-[MODEL]-O00 / N00.
+G24	s	Upgrade path
+H24	f	=IF('Step 1-Wireframe'!$C$12="Need & Offer","Already dual-sided — highest available for this model","Post the complementary side to unlock a higher match type")
+I24	s	Estimated value bonus
+J24	f	=IF(OR('Step 5-Lists'!$Z$14<>"",'Step 5-Lists'!$Z$18<>""),'Step 5-Lists'!$F$10,0)
+B25	s	S5-F04 · Exchange mechanism
+C25	f	=IF('Step 4-Wireframe'!$C$13="— none selected","—",'Step 4-Wireframe'!$C$13&IF('Step 4-Wireframe'!$M$16="YES","  (hybrid)",""))
+D25	f	=IF($C$25="—","● Missing","✓ Set")
+E25	s	Read-only — pulls from S4-F01.
+I25	s	Coverage area bonus
+J25	f	=IF('Step 1-Wireframe'!$C$26<>"— none selected",'Step 5-Lists'!$F$11,0)
+B26	s	S5-F05 · Location
+C26	f	=IF('Step 1-Wireframe'!$C$22="","—",IF('Step 1-Wireframe'!$C$24="",'Step 1-Wireframe'!$C$22,'Step 1-Wireframe'!$C$24&", "&'Step 1-Wireframe'!$C$22))
+D26	f	=IF($C$26="—","● Missing","✓ Set")
+E26	s	Read-only — pulls from S1-F03 + S1-F04.
+I26	s	Readiness score
+J26	f	=MIN(1,SUM($J$20:$J$25))
+B27	s	S5-F06 · Timeline
+C27	f	=IF('Step 1-Wireframe'!$C$31="","—",'Step 1-Wireframe'!$C$31&IF(ISNUMBER('Step 1-Wireframe'!$C$30),"  ·  from "&TEXT('Step 1-Wireframe'!$C$30,"dd-mmm-yyyy"),""))
+D27	f	=IF($C$27="—","● Missing","✓ Set")
+E27	s	Read-only — pulls from S1-F06 + S1-F07.
+I27	s	Publish allowed
+J27	f	=IF($J$17=0,"YES","NO")
+B28	s	S5-F07 · Matching structure
+C28	f	=IF('Step 2-Wireframe'!$C$25="—","—",'Step 2-Wireframe'!$C$25)
+D28	f	=IF($C$28="—","● Missing","✓ Set")
+E28	s	Read-only — pulls from S2-F05.
+B30	s	SECTION C  —  STEP SUMMARIES  (read-only, with Edit links)
+G30	s	SCHEDULE DATE SCOPE
+B31	s	Section
+C31	s	Summary
+D31	s	Status
+E31	s	Edit
+G31	s	Month
+B32	s	Opportunity basics  (Step 1)
+C32	f	=IF('Step 1-Wireframe'!$C$12="","Not started",_xlfn.TEXTJOIN("  ·  ",TRUE,'Step 1-Wireframe'!$C$12,IF('Step 1-Wireframe'!$C$17="","","“"&'Step 1-Wireframe'!$C$17&"”"),IF('Step 1-Wireframe'!$C$22="","",'Step 1-Wireframe'!$C$24&", "&'Step 1-Wireframe'!$C$22),IF('Step 1-Wireframe'!$C$26="— none selected","","Coverage: "&'Step 1-Wireframe'!$C$26),IF('Step 1-Wireframe'!$C$31="","",'Step 1-Wireframe'!$C$31)))
+D32	f	=IF('Step 1-Wireframe'!$L$17="YES","✓ Complete","● Incomplete")
+E32	s	Edit Step 1  ▸
+G32	s	Year
+B33	s	Collaboration model  (Step 2)
+C33	f	=IF('Step 2-Wireframe'!$C$12="","Not started",_xlfn.TEXTJOIN("  ·  ",TRUE,"Route: "&'Step 2-Wireframe'!$C$12,IF('Step 2-Wireframe'!$C$13="","","Follow-up: "&'Step 2-Wireframe'!$C$13),IF('Step 2-Wireframe'!$C$18="","","Model: "&'Step 2-Wireframe'!$C$18),IF('Step 2-Wireframe'!$C$25="—","",'Step 2-Wireframe'!$C$25)))
+D33	f	=IF('Step 2-Wireframe'!$L$19="YES","✓ Complete","● Incomplete")
+E33	s	Edit Step 2  ▸
+B34	s	»  Scope & work — sides shown
+C34	f	=IF('Step 1-Wireframe'!$C$12="","Set the post type in Step 1 first",IF('Step 1-Wireframe'!$C$12="Need","Need only — the Need side is summarised below",IF('Step 1-Wireframe'!$C$12="Offer","Offer only — the Offer side is summarised below","Need & Offer — both sides are summarised below")))
+D34	f	=IF('Step 1-Wireframe'!$C$12="","● Waiting","◆ Auto-set")
+E34	s	Section C adapts to the Step 1 post type, exactly as specified.
+B35	s	Scope & work — Offer side  (Step 3)
+C35	f	=IF('Step 1-Wireframe'!$C$12="Need","Not shown for a Need-only post",IF('Step 5-Lists'!$Z$8="","No model selected",_xlfn.TEXTJOIN("  ·  ",TRUE,IF('Step 5-Lists'!$Z$11="","",'Step 5-Lists'!$Z$11),IF('Step 5-Lists'!$Z$12="","",'Step 5-Lists'!$Z$12),IF('Step 5-Lists'!$Z$13="","",'Step 5-Lists'!$Z$13),IF('Step 5-Lists'!$Z$14="","","Value: "&'Step 5-Lists'!$Z$14))))
+D35	f	=IF('Step 1-Wireframe'!$C$12="Need","— Not shown",IF('Step 5-Lists'!$Z$9="YES","✓ Complete","● Incomplete"))
+E35	s	Edit Step 3 — Offer side  ▸
+B36	s	Scope & work — Need side  (Step 3)
+C36	f	=IF('Step 1-Wireframe'!$C$12="Offer","Not shown for an Offer-only post",IF('Step 5-Lists'!$Z$8="","No model selected",_xlfn.TEXTJOIN("  ·  ",TRUE,IF('Step 5-Lists'!$Z$15="","",'Step 5-Lists'!$Z$15),IF('Step 5-Lists'!$Z$16="","",'Step 5-Lists'!$Z$16),IF('Step 5-Lists'!$Z$17="","",'Step 5-Lists'!$Z$17),IF('Step 5-Lists'!$Z$19="","","Match with: "&'Step 5-Lists'!$Z$19),"Deliverables: "&'Step 5-Lists'!$Z$20,"Milestones: "&'Step 5-Lists'!$Z$21)))
+D36	f	=IF('Step 1-Wireframe'!$C$12="Offer","— Not shown",IF('Step 5-Lists'!$Z$9="YES","✓ Complete","● Incomplete"))
+E36	s	Edit Step 3 — Need side  ▸
+B37	s	Commercial structure  (Step 4)
+C37	f	=IF('Step 4-Wireframe'!$C$13="— none selected","Not started",_xlfn.TEXTJOIN("  ·  ",TRUE,'Step 4-Wireframe'!$C$13,IF('Step 4-Wireframe'!$M$19="YES","Barter: "&IF('Step 4-Wireframe'!$C$28="","specification pending",'Step 4-Wireframe'!$C$28),""),IF('Step 4-Wireframe'!$M$18="YES",IF('Step 4-Wireframe'!$C$20="","","Payment: "&'Step 4-Wireframe'!$C$20),""),IF(AND('Step 4-Wireframe'!$M$19="YES",'Step 4-Lists'!$AT$11>0),"Balance: "&TEXT('Step 4-Lists'!$AT$11,"0.00")&" ×","")))
+D37	f	=IF('Step 4-Wireframe'!$M$27="YES","✓ Complete","● Incomplete")
+E37	s	Edit Step 4  ▸
+B39	s	SECTION D  —  OPPORTUNITY READINESS
+B40	s	Component
+C40	s	Value
+D40	s	Status
+E40	s	Rule
+B41	s	S5-F09 · Opportunity readiness score
+C41	f	=TEXT($J$26,"0%")
+D41	f	=IF($J$26>=1,"✓ Fully optimised",IF($J$26>=0.8,"◆ Strong",IF($J$26>=0.5,"◆ Moderate","● Building")))
+E41	s	Base score from required fields, plus optional bonuses. Capped at 100%.
+B42	s	»  Readiness meter
+C42	f	=REPT("█",ROUND($J$26*20,0))&REPT("░",20-ROUND($J$26*20,0))
+D42	f	=TEXT($J$26,"0%")
+E42	s	Twenty-block meter mirroring the header.
+B43	s	»  Required fields completed (base)
+C43	f	=TEXT($J$20,"0%")&" of "&TEXT('Step 5-Lists'!$F$6,"0%")
+D43	f	=IF($J$20>0,"✓ Earned","○ Available")
+E43	s	Average completion across Steps 1–4.
+B44	s	»  Need & Offer dual declaration
+C44	f	=TEXT($J$21,"0%")&" of "&TEXT('Step 5-Lists'!$F$7,"0%")
+D44	f	=IF($J$21>0,"✓ Earned","○ Available")
+E44	s	Awarded when the Step 1 post type is "Need & Offer" — unlocks higher match types.
+B45	s	»  Deliverables added
+C45	f	=TEXT($J$22,"0%")&" of "&TEXT('Step 5-Lists'!$F$8,"0%")
+D45	f	=IF($J$22>0,"✓ Earned","○ Available")
+E45	s	Awarded when at least one deliverable is entered in Step 3.
+B46	s	»  Milestones added
+C46	f	=TEXT($J$23,"0%")&" of "&TEXT('Step 5-Lists'!$F$9,"0%")
+D46	f	=IF($J$23>0,"✓ Earned","○ Available")
+E46	s	Awarded when at least one milestone is entered in Step 3.
+B47	s	»  Estimated value entered
+C47	f	=TEXT($J$24,"0%")&" of "&TEXT('Step 5-Lists'!$F$10,"0%")
+D47	f	=IF($J$24>0,"✓ Earned","○ Available")
+E47	s	Awarded when an Offer- or Need-side value is entered in Step 3.
+B48	s	»  Coverage area specified
+C48	f	=TEXT($J$25,"0%")&" of "&TEXT('Step 5-Lists'!$F$11,"0%")
+D48	f	=IF($J$25>0,"✓ Earned","○ Available")
+E48	s	Awarded when at least one coverage area is ticked in Step 1.
+B49	s	S5-F10 · Readiness detail
+C49	f	=IF($J$18=0,"Nothing further recommended — this opportunity is fully optimised",$C$17)
+D49	f	=IF($J$18=0,"✓ Optimised","◆ "&$J$18&" improvement(s)")
+E49	s	Recommendations, not blockers. Mirrors the warnings row in Section A.
+B51	s	SECTION E  —  PUBLISH ACTIONS
+B52	s	Action
+C52	s	Your input
+D52	s	Status
+E52	s	Rule
+B53	s	S5-F11 · Save Draft
+C53	s	💾  Save Draft
+D53	s	✓ Always available
+E53	s	Saves without publishing. Available at every step.
+B54	s	S5-F13 · Schedule publish instead?
+D54	f	=IF($C$54="","○ Optional","✓ Complete")
+E54	s	Yes opens a date and time selector. No publishes immediately on click.
+B55	s	»  Scheduled date
+D55	f	=IF($C$54<>"Yes","— Hidden",IF($C$55="","● Required",IF(NOT(ISNUMBER($C$55)),"⚠ Not a valid date",IF($C$55<TODAY(),"⚠ Date is in the past","✓ Complete"))))
+E55	s	Date picker — use the schedule date scope panel on the right to change month / year.
+B56	s	»  Scheduled time
+D56	f	=IF($C$54<>"Yes","— Hidden",IF($C$56="","● Required","✓ Complete"))
+E56	s	24-hour time selector.
+B57	s	S5-F12 · Publish Opportunity
+C57	f	=IF($J$17>0,"🚀  Publish Opportunity  (disabled)",IF($C$54="Yes",IF(AND($C$55<>"",$C$56<>""),"🕐  Schedule for "&TEXT($C$55,"dd-mmm-yyyy")&" at "&IF(ISNUMBER($C$56),TEXT($C$56,"hh:mm"),$C$56),"🕐  Schedule Publish  (set date and time)"),"🚀  Publish Opportunity"))
+D57	f	=IF($J$17>0,"⚠ Blocked",IF($C$54="Yes",IF(AND($C$55<>"",$C$56<>""),"✓ Ready to schedule","● Set date and time"),"✓ Ready to publish"))
+E57	s	Enabled only when every required field across Steps 1–4 is valid. Submits to the live platform and triggers the matching engine.
+B59	s	POST-PUBLISH STATE  (preview of the confirmation screen)
+B60	s	Element
+C60	s	Content
+D60	s	Status
+E60	s	Note
+B61	s	Confirmation headline
+C61	f	=IF($J$17>0,"— shown after a successful publish","Your opportunity is live")
+D61	f	=IF($J$17>0,"— Preview","◆ Ready")
+E61	s	Displayed immediately after publishing.
+B62	s	Matching structure label
+C62	f	=IF('Step 2-Wireframe'!$C$25="—","—","Eligible for "&'Step 2-Wireframe'!$C$25)
+D62	f	=IF('Step 2-Wireframe'!$C$25="—","— Waiting","◆ Auto-derived")
+E62	s	Pulls the Step 2 matching structure so the user sees the match type they earned.
+B63	s	Call to action
+C63	s	View your opportunity   ·   Post another opportunity   ·   Go to dashboard
+D63	s	◆ Static
+E63	s	Three CTAs on the confirmation screen.
+B65	s	NAVIGATION
+B66	s	◀  Back to Step 4
+C66	s	💾  Save Draft
+D66	f	=IF($J$17>0,"🚀  Publish  (disabled)","🚀  Publish")
+E66	s	Publish activates only when Section A shows no blocking errors.

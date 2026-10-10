@@ -1,0 +1,155 @@
+# PMTwin Matching Wireframes-10Aug2026-Indivadual.xlsx :: Step 1-Wireframe
+state=visible dims=A1:N60 max_row=60 max_col=14
+merged=[]
+
+## DATA VALIDATIONS
+sqref=H22:H37 type=list formula1="No,Yes" formula2=None allow_blank=True
+sqref=C17 type=custom formula1=LEN($C$17)<=100 formula2=None allow_blank=True
+sqref=C18 type=custom formula1=LEN($C$18)<=300 formula2=None allow_blank=True
+
+## CELLS
+B2	s	PMTWIN  ·  MATCHMAKING WORKFLOW
+B3	s	Create Opportunity
+B4	s	Start with the basics — everything you enter here applies across both sides of your opportunity.
+B5	s	①  Basics        ②  Collaboration intent        ③  Model form        ④  Exchange model        ⑤  Review & publish
+B7	s	STEP 1 OF 5  —  OPPORTUNITY BASICS
+D7	f	=TEXT($L$15,"0%")&" ready"
+E7	f	=REPT("█",ROUND($L$15*24,0))&REPT("░",24-ROUND($L$15*24,0))
+B8	s	Auto-save active — your draft is stored as you type. Fields marked * are mandatory.
+B10	s	SECTION A  —  POST TYPE
+B11	s	Field
+C11	s	Your input
+D11	s	Status
+E11	s	Hint / validation rule
+B12	s	S1-F00 · What are you posting? *
+D12	f	=IF($C$12="","● Required","✓ Complete")
+E12	s	Single select. Need = you are seeking · Offer = you are providing · Need & Offer = both, within the same collaboration model.
+K12	s	VALIDATION ENGINE (live)
+B13	s	»  Matching eligibility (derived)
+C13	f	=IF($C$12="","—",IFERROR(INDEX('Step 1-Lists'!$D$6:$D$8,MATCH($C$12,'Step 1-Lists'!$B$6:$B$8,0)),"—"))
+D13	f	=IF($C$12="","— Waiting","◆ Auto-set")
+E13	s	Read-only. Drives which matching types Step 3 and Step 4 will expose. If Need and Offer sit in different collaboration models, create two posts and link them via barter in Step 4.
+K13	s	Required fields — total
+L13	f	=7+IF($C$22="Other (not listed)",1,0)+IF($C$24="Other",1,0)
+K14	s	Required fields — completed
+L14	f	=IF($C$12<>"",1,0)+IF(AND($C$17<>"",LEN($C$17)<=100),1,0)+IF(AND($C$18<>"",LEN($C$18)<=300),1,0)+IF($C$22<>"",1,0)+IF($C$24<>"",1,0)+IF(ISNUMBER($C$30),1,0)+IF($C$31<>"",1,0)+IF($C$22="Other (not listed)",IF($C$23<>"",1,0),0)+IF($C$24="Other",IF($C$25<>"",1,0),0)
+B15	s	SECTION B  —  OPPORTUNITY IDENTITY
+K15	s	Readiness
+L15	f	=IFERROR($L$14/$L$13,0)
+B16	s	Field
+D16	s	Status
+E16	s	Hint / validation rule
+K16	s	Deadline ≥ availability
+L16	f	=IF(OR($C$32="",NOT(ISNUMBER($C$30))),"n/a",IF($C$32>=$C$30,"OK","FAIL"))
+B17	s	S1-F01 · Opportunity title *
+D17	f	=IF($C$17="","● Required",IF(LEN($C$17)>100,"⚠ Over limit ("&LEN($C$17)&"/100)","✓ Complete ("&LEN($C$17)&"/100)"))
+E17	s	Free text, max 100 characters. e.g. "Oracle ERP partnership with KSA local representative".
+K17	s	Step 2 gate
+L17	f	=IF(AND($L$14=$L$13,$L$16<>"FAIL"),"YES","NO")
+B18	s	S1-F02 · Short description *
+D18	f	=IF($C$18="","● Required",IF(LEN($C$18)>300,"⚠ Over limit ("&LEN($C$18)&"/300)","✓ Complete ("&LEN($C$18)&"/300)"))
+E18	s	Free text, max 300 characters. What the opportunity is about and why it is worth engaging with.
+B20	s	SECTION C  —  LOCATION
+B21	s	Field
+D21	s	Status
+E21	s	Hint / validation rule
+G21	s	COVERAGE AREA — TICK ALL THAT APPLY
+H21	s	Select
+B22	s	S1-F03 · Primary location — country *
+D22	f	=IF($C$22="","● Required","✓ Complete")
+E22	s	Full country list, Gulf and North Africa grouped first. Selecting "Other (not listed)" opens the specify field below.
+G22	f	=IF('Step 1-Lists'!H6="","",'Step 1-Lists'!H6)
+H22	s	No
+B23	s	»  Specify country
+D23	f	=IF($C$22="Other (not listed)",IF($C$23="","● Required","✓ Complete"),"— Hidden")
+E23	f	=IF($C$22="Other (not listed)","Conditional field is now ACTIVE — type the country name.","Hidden — only shown when country = Other (not listed).")
+G23	f	=IF('Step 1-Lists'!H7="","",'Step 1-Lists'!H7)
+H23	s	No
+B24	s	S1-F04 · Primary location — city *
+D24	f	=IF($C$22="","— Locked",IF($C$24="","● Required","✓ Complete"))
+E24	f	=IF($C$22="","Locked until a country is selected.","City list filtered to "&$C$22&" — includes a nationwide value and Other.")
+G24	f	=IF('Step 1-Lists'!H8="","",'Step 1-Lists'!H8)
+H24	s	No
+B25	s	»  Specify city
+D25	f	=IF($C$24="Other",IF($C$25="","● Required","✓ Complete"),"— Hidden")
+E25	f	=IF($C$24="Other","Conditional field is now ACTIVE — type the city name.","Hidden — only shown when city = Other.")
+G25	f	=IF('Step 1-Lists'!H9="","",'Step 1-Lists'!H9)
+H25	s	No
+B26	s	S1-F05 · Coverage area
+D26	f	=IF(COUNTIF($H$22:$H$37,"Yes")=0,"○ Optional","✓ "&COUNTIF($H$22:$H$37,"Yes")&" selected")
+E26	s	Multi-select. Tick items in the picker on the right — selections roll up here automatically. No Other trigger.
+G26	f	=IF('Step 1-Lists'!H10="","",'Step 1-Lists'!H10)
+H26	s	No
+G27	f	=IF('Step 1-Lists'!H11="","",'Step 1-Lists'!H11)
+H27	s	No
+B28	s	SECTION D  —  TIMELINE
+G28	f	=IF('Step 1-Lists'!H12="","",'Step 1-Lists'!H12)
+H28	s	No
+B29	s	Field
+C29	s	Your input
+D29	s	Status
+E29	s	Hint / validation rule
+G29	f	=IF('Step 1-Lists'!H13="","",'Step 1-Lists'!H13)
+H29	s	No
+B30	s	S1-F06 · Availability from *
+D30	f	=IF($C$30="","● Required",IF(NOT(ISNUMBER($C$30)),"⚠ Not a valid date","✓ Complete"))
+E30	s	Click the field and pick a date from the dropdown (dd-mmm-yyyy). Use the Date picker panel to switch month / year.
+G30	f	=IF('Step 1-Lists'!H14="","",'Step 1-Lists'!H14)
+H30	s	No
+B31	s	S1-F07 · Timeline duration *
+D31	f	=IF($C$31="","● Required","✓ Complete")
+E31	s	How long the opportunity is expected to run or remain open.
+G31	f	=IF('Step 1-Lists'!H15="","",'Step 1-Lists'!H15)
+H31	s	No
+B32	s	S1-F08 · Hard deadline
+D32	f	=IF($C$32="","○ Optional",IF(NOT(ISNUMBER($C$32)),"⚠ Not a valid date",IF(AND(ISNUMBER($C$30),$C$32<$C$30),"⚠ Earlier than availability","✓ Complete")))
+E32	s	Optional. Leave the picker blank if there is no fixed cut-off. Must fall on or after S1-F06.
+G32	f	=IF('Step 1-Lists'!H16="","",'Step 1-Lists'!H16)
+H32	s	No
+G33	f	=IF('Step 1-Lists'!H17="","",'Step 1-Lists'!H17)
+H33	s	No
+B34	s	SECTION E  —  CROSS-FIELD VALIDATION & COMPLETION
+G34	f	=IF('Step 1-Lists'!H18="","",'Step 1-Lists'!H18)
+H34	s	No
+B35	s	Check
+C35	s	Result
+D35	s	Status
+E35	s	Rule
+G35	f	=IF('Step 1-Lists'!H19="","",'Step 1-Lists'!H19)
+H35	s	No
+B36	s	Required fields completed
+C36	f	=$L$14&" of "&$L$13
+D36	f	=IF($L$14=$L$13,"✓ Complete","● Incomplete")
+E36	s	S1-F00, F01, F02, F03, F04, F06, F07 — plus any active conditional specify field — must all be completed.
+G36	f	=IF('Step 1-Lists'!H20="","",'Step 1-Lists'!H20)
+H36	s	No
+B37	s	Date logic — hard deadline vs availability
+C37	f	=$L$16
+D37	f	=IF($L$16="FAIL","⚠ Fix required","✓ Pass")
+E37	s	If S1-F08 is entered it must be on or after S1-F06.
+G37	f	=IF('Step 1-Lists'!H21="","",'Step 1-Lists'!H21)
+H37	s	No
+B38	s	Conditional fields resolved
+C38	f	=IF(AND(IF($C$22="Other (not listed)",$C$23<>"",TRUE),IF($C$24="Other",$C$25<>"",TRUE)),"All resolved","Pending")
+D38	f	=IF($C$38="All resolved","✓ Pass","● Pending")
+E38	s	Any specify field opened by an "Other" selection must be filled before the step can close.
+B39	s	Country ↔ city consistency
+C39	f	=IF(OR($C$22="",$C$24=""),"Pending",IF(ISNUMBER(MATCH($C$24,INDEX(Cities!$B$2:$AN$200,MATCH($C$22,Cities!$A$2:$A$200,0),0),0)),"Valid for "&$C$22,"⚠ City not in "&$C$22))
+D39	f	=IF(LEFT($C$39,1)="⚠","⚠ Fix required",IF($C$39="Pending","— Waiting","✓ Pass"))
+E39	s	City must belong to the selected country's mapped list (Cities sheet).
+G39	s	DATE PICKER  —  SET MONTH & YEAR, THEN PICK THE DATE IN THE FIELD
+B40	s	Readiness meter
+C40	f	=TEXT($L$15,"0%")&" of required fields"
+D40	f	=IF($L$17="YES","✓ Step 2 unlocked","● Step 2 locked")
+E40	s	Meter reflects required fields only — optional fields do not affect it.
+G40	s	Field
+H40	s	Month
+I40	s	Year
+G41	s	S1-F06 · Availability from *
+B42	s	NAVIGATION
+G42	s	S1-F08 · Hard deadline
+B43	s	◀  Back  (not available — first step)
+C43	s	💾  Save Draft
+D43	f	=IF($L$17="YES","Continue to Step 2  ▶","Continue to Step 2  ▶  (disabled)")
+E43	s	Continue activates only when Section E shows every check passed.
+G43	s	Changing month / year re-scopes the dropdown inside the Section D date field. Blank = current month.

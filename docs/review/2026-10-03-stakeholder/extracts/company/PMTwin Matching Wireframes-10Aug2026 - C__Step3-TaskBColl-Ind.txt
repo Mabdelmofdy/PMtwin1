@@ -1,0 +1,230 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Step3-TaskBColl-Ind
+state=visible dims=A1:E137 max_row=137 max_col=5
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Step 3 — Scope & Work
+A3	s	Individual path: Task-based Collaboration
+A5	s	Screen title: Scope & Work — Task-based Collaboration (Individual) Screen subtitle: Define the task or service you can deliver as a professional and what you need in return. Account type: Individual professional only Note: Both sides are available. Post an Offer to make your services visible, post a Need to find a service you require, or post both to create an exchange pair. Exchange mechanism (cash, barter, etc.) is selected at Step 4.
+A9	s	Offer side — "The task or service you can deliver"
+A11	s	Code
+B11	s	Field label
+C11	s	Type
+D11	s	Required
+E11	s	Other trigger
+A12	s	S3-TB-I-O01
+B12	s	Service category
+C12	s	Dropdown
+D12	s	Yes
+E12	s	Yes
+A13	s	S3-TB-I-O02
+B13	s	Service sub-type
+C13	s	Dropdown
+D13	s	Yes
+E13	s	Yes
+A14	s	S3-TB-I-O03
+B14	s	Service description
+C14	s	Text area
+D14	s	Yes
+E14	s	No
+A15	s	S3-TB-I-O04
+B15	s	Years of experience
+C15	s	Dropdown
+D15	s	Yes
+E15	s	No
+A16	s	S3-TB-I-O05
+B16	s	Professional credentials
+C16	s	Multi-select dropdown
+D16	s	No
+E16	s	Yes
+A17	s	S3-TB-I-O06
+B17	s	Engagement type you offer
+C17	s	Multi-select dropdown
+D17	s	Yes
+E17	s	No
+A18	s	S3-TB-I-O07
+B18	s	Delivery mode
+C18	s	Dropdown
+D18	s	Yes
+E18	s	No
+A19	s	S3-TB-I-O07a
+B19	s	Service location — country
+C19	s	Dropdown
+D19	s	No
+E19	s	Shows if on-site or hybrid
+A20	s	S3-TB-I-O07b
+B20	s	Service location — city
+C20	s	Dropdown
+D20	s	No
+E20	s	Populates per O07a
+A21	s	S3-TB-I-O08
+B21	s	Availability
+C21	s	Dropdown
+D21	s	Yes
+E21	s	No
+A22	s	S3-TB-I-O09
+B22	s	Capacity
+C22	s	Dropdown
+D22	s	No
+E22	s	No
+A23	s	S3-TB-I-O10
+B23	s	Rate expected
+C23	s	Range dropdown + currency (S3-TB-I-O10-CUR)
+D23	s	No
+E23	s	No
+A24	s	S3-TB-I-O11
+B24	s	Rate unit
+C24	s	Dropdown
+D24	s	No
+E24	s	No
+A25	s	S3-TB-I-O12
+B25	s	Languages
+C25	s	Multi-select dropdown
+D25	s	No
+E25	s	No
+A26	s	S3-TB-I-O13
+B26	s	Sector experience
+C26	s	Multi-select dropdown
+D26	s	No
+E26	s	Yes
+A27	s	S3-TB-I-O14
+B27	s	Portfolio / work samples
+C27	s	URL or file upload
+D27	s	No
+E27	s	No
+A29	s	S3-TB-I-O01 — Service category values: Technical services / Professional services / Technology services / Logistics & operations / Training & development / Administration & support / Other → free text
+A31	s	S3-TB-I-O02 — Sub-type values (conditional on O01): Same comprehensive taxonomy as S3-TB-N03 (company Task-based Need side)
+A33	s	S3-TB-I-O04 — Years of experience values: 0–3 years / 3–7 years / 7–15 years / 15+ years
+A35	s	S3-TB-I-O05 — Professional credentials values: RICS / CIOB / PE licence / PMP / PRINCE2 / MBA / PMTwin vetted / MOMRA approved / Saudi Council of Engineers / UAE Engineering licence / LEED AP / BREEAM Assessor / None / Other → free text
+A37	s	S3-TB-I-O06 — Engagement type values: One-off task / Project-based / Retainer / Fractional / Part-time / Advisory / Other → free text
+A39	s	S3-TB-I-O07 — Delivery mode values: On-site / Remote / Hybrid / Flexible
+A41	s	S3-TB-I-O07a — Service location country: Full country list (same as S1-F03)
+A43	s	S3-TB-I-O07b — Service location city: Conditional on O07a. Same city taxonomy as S1-F04
+A45	s	S3-TB-I-O08 — Availability values: Immediate / Within 2 weeks / Within 1 month / 1–3 months / Flexible / Specific date → date picker
+A47	s	S3-TB-I-O09 — Capacity values: Under 10 hrs/week / 10–20 hrs/week / 20–40 hrs/week / Full-time / Flexible
+A49	s	S3-TB-I-O10 — Rate expected range: Under $500 / $500–$2K / $2K–$5K / $5K–$10K / $10K–$20K / Above $20K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A51	s	S3-TB-I-O11 — Rate unit values: Per hour / Per day / Per task / Per month / Fixed fee per project / To be agreed
+A53	s	S3-TB-I-O12 — Languages values: Arabic / English / Arabic & English / French / Mandarin / Hindi / Other → free text
+A55	s	S3-TB-I-O13 — Sector experience values: Residential development / Commercial development / Mixed-use / Infrastructure / Industrial / Hospitality / Healthcare / Education / Giga-project / Retail / Logistics / General business / Other → free text
+A57	s	S3-TB-I-O14 — Portfolio / work samples: Link (URL) or upload (PDF, JPG, PNG — max 10 MB). Shown to matched parties only
+A62	s	Need side — "The task or service you need"
+A64	s	Code
+B64	s	Field label
+C64	s	Type
+D64	s	Required
+E64	s	Other trigger
+A65	s	S3-TB-I-N01
+B65	s	Service category needed
+C65	s	Dropdown
+D65	s	Yes
+E65	s	Yes
+A66	s	S3-TB-I-N02
+B66	s	Service sub-type
+C66	s	Dropdown
+D66	s	Yes
+E66	s	Yes
+A67	s	S3-TB-I-N03
+B67	s	Scope description
+C67	s	Text area
+D67	s	Yes
+E67	s	No
+A68	s	S3-TB-I-N04
+B68	s	Delivery mode preference
+C68	s	Dropdown
+D68	s	No
+E68	s	No
+A69	s	S3-TB-I-N04a
+B69	s	Service location — country
+C69	s	Dropdown
+D69	s	No
+E69	s	Shows if on-site or hybrid
+A70	s	S3-TB-I-N04b
+B70	s	Service location — city
+C70	s	Dropdown
+D70	s	No
+E70	s	Populates per N04a
+A71	s	S3-TB-I-N05
+B71	s	When do you need this?
+C71	s	Dropdown
+D71	s	Yes
+E71	s	No
+A72	s	S3-TB-I-N06
+B72	s	Duration required
+C72	s	Numeric input + time unit (S3-TB-I-N06-TU)
+D72	s	Yes
+E72	s	No
+A73	s	S3-TB-I-N07
+B73	s	Budget range
+C73	s	Range dropdown + currency (S3-TB-I-N07-CUR)
+D73	s	No
+E73	s	No
+A74	s	S3-TB-I-N08
+B74	s	Budget unit
+C74	s	Dropdown
+D74	s	No
+E74	s	No
+A75	s	S3-TB-I-N09
+B75	s	Required credentials
+C75	s	Multi-select dropdown
+D75	s	No
+E75	s	Yes
+A76	s	S3-TB-I-N10
+B76	s	Experience level required
+C76	s	Dropdown
+D76	s	No
+E76	s	No
+A77	s	S3-TB-I-N11
+B77	s	Language requirement
+C77	s	Multi-select dropdown
+D77	s	No
+E77	s	No
+A78	s	S3-TB-I-N12
+B78	s	Match with
+C78	s	Single select
+D78	s	Yes
+E78	s	No
+A80	s	S3-TB-I-N01 — Service category needed values: Same taxonomy as S3-TB-I-O01
+A82	s	S3-TB-I-N02 — Sub-type values (conditional on N01): Same comprehensive taxonomy as S3-TB-N03
+A84	s	S3-TB-I-N04 — Delivery mode values: On-site / Remote / Hybrid / Flexible
+A86	s	S3-TB-I-N04a — Service location country: Full country list (same as S1-F03)
+A88	s	S3-TB-I-N04b — Service location city: Conditional on N04a. Same city taxonomy as S1-F04
+A90	s	S3-TB-I-N05 — When do you need this? values: Immediately / Within 2 weeks / Within 1 month / 1–3 months / 3–6 months / Flexible start / Specific date → date picker
+A92	s	S3-TB-I-N06-TU — Duration time unit values: Hours / Days / Weeks / Months / Years
+A94	s	S3-TB-I-N07 — Budget range values: Under $500 / $500–$2K / $2K–$5K / $5K–$10K / $10K–$20K / Above $20K / To be agreed Currency: USD ($) / SAR (ر.س) / AED (د.إ) / EGP (ج.م) / QAR (ر.ق) / KWD (د.ك) / BHD (د.ب) / OMR (ر.ع) / EUR (€) / GBP (£) / Other → free text
+A96	s	S3-TB-I-N08 — Budget unit values: Per hour / Per day / Per task / Per month / Fixed fee per project / To be agreed
+A98	s	S3-TB-I-N09 — Required credentials values: RICS / CIOB / PE licence / ISO certified / PMP / PRINCE2 / MBA / PMTwin vetted / Muqawil registered / MOMRA approved / None / Other → free text
+A100	s	S3-TB-I-N10 — Experience level values: Junior (0–3 years) / Mid-level (3–7 years) / Senior (7–15 years) / Expert (15+ years) / Not specified
+A102	s	S3-TB-I-N11 — Language requirement values: Arabic / English / Arabic & English / French / Mandarin / Other → free text
+A104	s	S3-TB-I-N12 — Match with values: Companies only / Individual professionals only / Both
+A109	s	Deliverables (Need side — encouraged)
+A111	s	Code
+B111	s	Field label
+C111	s	Type
+D111	s	Required
+A112	s	S3-TB-I-D01
+B112	s	What should be delivered at the end of this task?
+C112	s	Text — add multiple
+D112	s	No
+A113	s	S3-TB-I-D02
+B113	s	Acceptance criteria
+C113	s	Text
+D113	s	No
+A115	s	Collapsed by default. Encouraged for Need side — sets clear expectations for the service provider.
+A120	s	Milestones (optional — both sides)
+A122	s	Code
+B122	s	Field label
+C122	s	Type
+D122	s	Required
+A123	s	S3-TB-I-M01
+B123	s	Milestone title
+C123	s	Text
+D123	s	No
+A124	s	S3-TB-I-M02
+B124	s	Target date
+C124	s	Date picker
+D124	s	No
+A126	s	Collapsed by default. Useful for phased task delivery.
+A131	s	Barter note (informational — shown when barter is selected at Step 4)
+A133	s	When barter is selected at Step 4, the system links the Offer side of this post to the Need side as an explicit exchange pair (e.g., an individual offering BIM modelling in exchange for contract-drafting support).

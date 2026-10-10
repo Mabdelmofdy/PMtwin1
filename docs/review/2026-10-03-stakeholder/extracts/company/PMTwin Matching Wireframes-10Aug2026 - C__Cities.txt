@@ -1,0 +1,1704 @@
+# PMTwin Matching Wireframes-10Aug2026 - Companyflow.xlsx :: Cities
+state=visible dims=A1:AQ199 max_row=199 max_col=43
+merged=[]
+
+## DATA VALIDATIONS
+
+## CELLS
+A1	s	Country
+B1	s	City 1
+C1	s	City 2
+D1	s	City 3
+E1	s	City 4
+F1	s	City 5
+G1	s	City 6
+H1	s	City 7
+I1	s	City 8
+J1	s	City 9
+K1	s	City 10
+L1	s	City 11
+M1	s	City 12
+N1	s	City 13
+O1	s	City 14
+P1	s	City 15
+Q1	s	City 16
+R1	s	City 17
+S1	s	City 18
+T1	s	City 19
+U1	s	City 20
+V1	s	City 21
+W1	s	City 22
+X1	s	City 23
+Y1	s	City 24
+Z1	s	City 25
+AA1	s	City 26
+AB1	s	City 27
+AC1	s	City 28
+AD1	s	City 29
+AE1	s	City 30
+AF1	s	City 31
+AG1	s	City 32
+AH1	s	City 33
+AI1	s	City 34
+AJ1	s	City 35
+AK1	s	City 36
+AL1	s	City 37
+AM1	s	City 38
+AN1	s	City 39
+AP1	s	ACTIVE COUNTRY (from 'Step 1'!C22)
+AQ1	s	FILTERED CITY LIST — validation source for 'Step 1'!C24
+A2	s	Saudi Arabia
+B2	s	Riyadh
+C2	s	Jeddah
+D2	s	Mecca
+E2	s	Medina
+F2	s	Dammam
+G2	s	Al Khobar
+H2	s	Dhahran
+I2	s	Jubail
+J2	s	Yanbu
+K2	s	Tabuk
+L2	s	Abha
+M2	s	Khamis Mushait
+N2	s	Hail
+O2	s	Buraidah
+P2	s	Qassim
+Q2	s	Taif
+R2	s	Najran
+S2	s	Jazan
+T2	s	Al Ahsa
+U2	s	Hafar Al Batin
+V2	s	Arar
+W2	s	Sakaka
+X2	s	NEOM
+Y2	s	Al Ula
+Z2	s	King Abdullah Economic City
+AA2	s	Diriyah
+AB2	s	All Saudi Arabia (nationwide)
+AC2	s	Other
+AP2	f	='Step 1-Wireframe'!C22
+AQ2	f	<openpyxl.worksheet.formula.ArrayFormula object at 0x0000022125D9E8D0>
+A3	s	United Arab Emirates
+B3	s	Dubai
+C3	s	Abu Dhabi
+D3	s	Sharjah
+E3	s	Ajman
+F3	s	Ras Al Khaimah
+G3	s	Fujairah
+H3	s	Umm Al Quwain
+I3	s	Al Ain
+J3	s	Jebel Ali
+K3	s	KIZAD / Khalifa Industrial Zone
+L3	s	Masdar City
+M3	s	Dubai South
+N3	s	All United Arab Emirates (nationwide)
+O3	s	Other
+A4	s	Qatar
+B4	s	Doha
+C4	s	Al Rayyan
+D4	s	Al Wakrah
+E4	s	Al Khor
+F4	s	Lusail
+G4	s	Umm Salal
+H4	s	Al Shamal
+I4	s	Dukhan
+J4	s	Mesaieed
+K4	s	Education City / Qatar Foundation
+L4	s	All Qatar (nationwide)
+M4	s	Other
+A5	s	Kuwait
+B5	s	Kuwait City
+C5	s	Hawalli
+D5	s	Salmiya
+E5	s	Al Farwaniya
+F5	s	Al Ahmadi
+G5	s	Al Jahra
+H5	s	Mubarak Al Kabeer
+I5	s	Sabah Al Salem
+J5	s	Shuwaikh
+K5	s	Fahaheel
+L5	s	All Kuwait (nationwide)
+M5	s	Other
+A6	s	Bahrain
+B6	s	Manama
+C6	s	Muharraq
+D6	s	Riffa
+E6	s	Hamad Town
+F6	s	Isa Town
+G6	s	Sitra
+H6	s	Budaiya
+I6	s	Juffair
+J6	s	Seef
+K6	s	Bahrain International Investment Park
+L6	s	All Bahrain (nationwide)
+M6	s	Other
+A7	s	Oman
+B7	s	Muscat
+C7	s	Salalah
+D7	s	Sohar
+E7	s	Nizwa
+F7	s	Sur
+G7	s	Duqm
+H7	s	Ibri
+I7	s	Barka
+J7	s	Al Musannah
+K7	s	Khasab
+L7	s	Rustaq
+M7	s	All Oman (nationwide)
+N7	s	Other
+A8	s	Egypt
+B8	s	Cairo
+C8	s	New Cairo
+D8	s	New Administrative Capital
+E8	s	Giza
+F8	s	6th of October City
+G8	s	Sheikh Zayed City
+H8	s	Alexandria
+I8	s	North Coast (Sahel)
+J8	s	Al Ain Al Sokhna
+K8	s	Suez
+L8	s	Port Said
+M8	s	Ismailia
+N8	s	Sharm El Sheikh
+O8	s	Hurghada
+P8	s	Luxor
+Q8	s	Aswan
+R8	s	Mansoura
+S8	s	Tanta
+T8	s	Zagazig
+U8	s	Damietta
+V8	s	Assiut
+W8	s	Sohag
+X8	s	Minya
+Y8	s	Beni Suef
+Z8	s	Fayoum
+AA8	s	Damanhur
+AB8	s	Banha
+AC8	s	Marsa Matrouh
+AD8	s	10th of Ramadan City
+AE8	s	Badr City
+AF8	s	Sadat City
+AG8	s	All Egypt (nationwide)
+AH8	s	Other
+A9	s	Morocco
+B9	s	Casablanca
+C9	s	Rabat
+D9	s	Marrakech
+E9	s	Fez
+F9	s	Tangier
+G9	s	All Morocco (nationwide)
+H9	s	Other
+A10	s	Algeria
+B10	s	Algiers
+C10	s	Oran
+D10	s	Constantine
+E10	s	Annaba
+F10	s	Blida
+G10	s	All Algeria (nationwide)
+H10	s	Other
+A11	s	Tunisia
+B11	s	Tunis
+C11	s	Sfax
+D11	s	Sousse
+E11	s	Kairouan
+F11	s	Bizerte
+G11	s	All Tunisia (nationwide)
+H11	s	Other
+A12	s	Libya
+B12	s	Tripoli
+C12	s	Benghazi
+D12	s	Misrata
+E12	s	Zawiya
+F12	s	Tobruk
+G12	s	All Libya (nationwide)
+H12	s	Other
+A13	s	Sudan
+B13	s	Khartoum
+C13	s	Omdurman
+D13	s	Port Sudan
+E13	s	Nyala
+F13	s	Kassala
+G13	s	All Sudan (nationwide)
+H13	s	Other
+A14	s	Jordan
+B14	s	Amman
+C14	s	Zarqa
+D14	s	Irbid
+E14	s	Aqaba
+F14	s	Madaba
+G14	s	All Jordan (nationwide)
+H14	s	Other
+A15	s	Lebanon
+B15	s	Beirut
+C15	s	Tripoli
+D15	s	Sidon
+E15	s	Tyre
+F15	s	Jounieh
+G15	s	All Lebanon (nationwide)
+H15	s	Other
+A16	s	Iraq
+B16	s	Baghdad
+C16	s	Basra
+D16	s	Erbil
+E16	s	Mosul
+F16	s	Najaf
+G16	s	All Iraq (nationwide)
+H16	s	Other
+A17	s	Syria
+B17	s	Damascus
+C17	s	Aleppo
+D17	s	Homs
+E17	s	Latakia
+F17	s	Hama
+G17	s	All Syria (nationwide)
+H17	s	Other
+A18	s	Yemen
+B18	s	Sanaa
+C18	s	Aden
+D18	s	Taiz
+E18	s	Hodeidah
+F18	s	Mukalla
+G18	s	All Yemen (nationwide)
+H18	s	Other
+A19	s	Palestine
+B19	s	Ramallah
+C19	s	Gaza
+D19	s	Hebron
+E19	s	Nablus
+F19	s	Bethlehem
+G19	s	All Palestine (nationwide)
+H19	s	Other
+A20	s	Turkey
+B20	s	Istanbul
+C20	s	Ankara
+D20	s	Izmir
+E20	s	Antalya
+F20	s	Bursa
+G20	s	All Turkey (nationwide)
+H20	s	Other
+A21	s	Iran
+B21	s	Tehran
+C21	s	Mashhad
+D21	s	Isfahan
+E21	s	Shiraz
+F21	s	Tabriz
+G21	s	All Iran (nationwide)
+H21	s	Other
+A22	s	Israel
+B22	s	Tel Aviv
+C22	s	Jerusalem
+D22	s	Haifa
+E22	s	Beersheba
+F22	s	Netanya
+G22	s	All Israel (nationwide)
+H22	s	Other
+A23	s	Afghanistan
+B23	s	Kabul
+C23	s	Kandahar
+D23	s	Herat
+E23	s	Mazar-i-Sharif
+F23	s	Jalalabad
+G23	s	All Afghanistan (nationwide)
+H23	s	Other
+A24	s	Albania
+B24	s	Tirana
+C24	s	Durrës
+D24	s	Vlorë
+E24	s	Elbasan
+F24	s	Shkodër
+G24	s	All Albania (nationwide)
+H24	s	Other
+A25	s	Andorra
+B25	s	Andorra la Vella
+C25	s	Escaldes-Engordany
+D25	s	Encamp
+E25	s	Sant Julià de Lòria
+F25	s	La Massana
+G25	s	All Andorra (nationwide)
+H25	s	Other
+A26	s	Angola
+B26	s	Luanda
+C26	s	Huambo
+D26	s	Lobito
+E26	s	Benguela
+F26	s	Lubango
+G26	s	All Angola (nationwide)
+H26	s	Other
+A27	s	Antigua and Barbuda
+B27	s	St. John's
+C27	s	All Saints
+D27	s	Liberta
+E27	s	Potters Village
+F27	s	Bolans
+G27	s	All Antigua and Barbuda (nationwide)
+H27	s	Other
+A28	s	Argentina
+B28	s	Buenos Aires
+C28	s	Córdoba
+D28	s	Rosario
+E28	s	Mendoza
+F28	s	La Plata
+G28	s	All Argentina (nationwide)
+H28	s	Other
+A29	s	Armenia
+B29	s	Yerevan
+C29	s	Gyumri
+D29	s	Vanadzor
+E29	s	Vagharshapat
+F29	s	Abovyan
+G29	s	All Armenia (nationwide)
+H29	s	Other
+A30	s	Australia
+B30	s	Sydney
+C30	s	Melbourne
+D30	s	Brisbane
+E30	s	Perth
+F30	s	Adelaide
+G30	s	All Australia (nationwide)
+H30	s	Other
+A31	s	Austria
+B31	s	Vienna
+C31	s	Graz
+D31	s	Linz
+E31	s	Salzburg
+F31	s	Innsbruck
+G31	s	All Austria (nationwide)
+H31	s	Other
+A32	s	Azerbaijan
+B32	s	Baku
+C32	s	Ganja
+D32	s	Sumqayit
+E32	s	Mingachevir
+F32	s	Lankaran
+G32	s	All Azerbaijan (nationwide)
+H32	s	Other
+A33	s	Bahamas
+B33	s	Nassau
+C33	s	Freeport
+D33	s	West End
+E33	s	Coopers Town
+F33	s	Marsh Harbour
+G33	s	All Bahamas (nationwide)
+H33	s	Other
+A34	s	Bangladesh
+B34	s	Dhaka
+C34	s	Chittagong
+D34	s	Khulna
+E34	s	Rajshahi
+F34	s	Sylhet
+G34	s	All Bangladesh (nationwide)
+H34	s	Other
+A35	s	Barbados
+B35	s	Bridgetown
+C35	s	Speightstown
+D35	s	Oistins
+E35	s	Holetown
+F35	s	Bathsheba
+G35	s	All Barbados (nationwide)
+H35	s	Other
+A36	s	Belarus
+B36	s	Minsk
+C36	s	Gomel
+D36	s	Mogilev
+E36	s	Vitebsk
+F36	s	Grodno
+G36	s	All Belarus (nationwide)
+H36	s	Other
+A37	s	Belgium
+B37	s	Brussels
+C37	s	Antwerp
+D37	s	Ghent
+E37	s	Charleroi
+F37	s	Liège
+G37	s	All Belgium (nationwide)
+H37	s	Other
+A38	s	Belize
+B38	s	Belize City
+C38	s	San Ignacio
+D38	s	Belmopan
+E38	s	Orange Walk
+F38	s	Dangriga
+G38	s	All Belize (nationwide)
+H38	s	Other
+A39	s	Benin
+B39	s	Cotonou
+C39	s	Porto-Novo
+D39	s	Parakou
+E39	s	Abomey-Calavi
+F39	s	Djougou
+G39	s	All Benin (nationwide)
+H39	s	Other
+A40	s	Bhutan
+B40	s	Thimphu
+C40	s	Phuentsholing
+D40	s	Paro
+E40	s	Punakha
+F40	s	Wangdue
+G40	s	All Bhutan (nationwide)
+H40	s	Other
+A41	s	Bolivia
+B41	s	Santa Cruz de la Sierra
+C41	s	La Paz
+D41	s	Cochabamba
+E41	s	Sucre
+F41	s	Oruro
+G41	s	All Bolivia (nationwide)
+H41	s	Other
+A42	s	Bosnia and Herzegovina
+B42	s	Sarajevo
+C42	s	Banja Luka
+D42	s	Tuzla
+E42	s	Zenica
+F42	s	Mostar
+G42	s	All Bosnia and Herzegovina (nationwide)
+H42	s	Other
+A43	s	Botswana
+B43	s	Gaborone
+C43	s	Francistown
+D43	s	Molepolole
+E43	s	Maun
+F43	s	Serowe
+G43	s	All Botswana (nationwide)
+H43	s	Other
+A44	s	Brazil
+B44	s	São Paulo
+C44	s	Rio de Janeiro
+D44	s	Brasília
+E44	s	Salvador
+F44	s	Belo Horizonte
+G44	s	All Brazil (nationwide)
+H44	s	Other
+A45	s	Brunei
+B45	s	Bandar Seri Begawan
+C45	s	Kuala Belait
+D45	s	Seria
+E45	s	Tutong
+F45	s	Bangar
+G45	s	All Brunei (nationwide)
+H45	s	Other
+A46	s	Bulgaria
+B46	s	Sofia
+C46	s	Plovdiv
+D46	s	Varna
+E46	s	Burgas
+F46	s	Ruse
+G46	s	All Bulgaria (nationwide)
+H46	s	Other
+A47	s	Burkina Faso
+B47	s	Ouagadougou
+C47	s	Bobo-Dioulasso
+D47	s	Koudougou
+E47	s	Ouahigouya
+F47	s	Banfora
+G47	s	All Burkina Faso (nationwide)
+H47	s	Other
+A48	s	Burundi
+B48	s	Bujumbura
+C48	s	Gitega
+D48	s	Muyinga
+E48	s	Ruyigi
+F48	s	Ngozi
+G48	s	All Burundi (nationwide)
+H48	s	Other
+A49	s	Cambodia
+B49	s	Phnom Penh
+C49	s	Siem Reap
+D49	s	Battambang
+E49	s	Sihanoukville
+F49	s	Poipet
+G49	s	All Cambodia (nationwide)
+H49	s	Other
+A50	s	Cameroon
+B50	s	Douala
+C50	s	Yaoundé
+D50	s	Garoua
+E50	s	Bamenda
+F50	s	Bafoussam
+G50	s	All Cameroon (nationwide)
+H50	s	Other
+A51	s	Canada
+B51	s	Toronto
+C51	s	Montreal
+D51	s	Vancouver
+E51	s	Calgary
+F51	s	Ottawa
+G51	s	All Canada (nationwide)
+H51	s	Other
+A52	s	Cape Verde
+B52	s	Praia
+C52	s	Mindelo
+D52	s	Santa Maria
+E52	s	Assomada
+F52	s	Espargos
+G52	s	All Cape Verde (nationwide)
+H52	s	Other
+A53	s	Central African Republic
+B53	s	Bangui
+C53	s	Bimbo
+D53	s	Berbérati
+E53	s	Carnot
+F53	s	Bambari
+G53	s	All Central African Republic (nationwide)
+H53	s	Other
+A54	s	Chad
+B54	s	N'Djamena
+C54	s	Moundou
+D54	s	Sarh
+E54	s	Abéché
+F54	s	Kelo
+G54	s	All Chad (nationwide)
+H54	s	Other
+A55	s	Chile
+B55	s	Santiago
+C55	s	Valparaíso
+D55	s	Concepción
+E55	s	Antofagasta
+F55	s	Viña del Mar
+G55	s	All Chile (nationwide)
+H55	s	Other
+A56	s	China
+B56	s	Shanghai
+C56	s	Beijing
+D56	s	Shenzhen
+E56	s	Guangzhou
+F56	s	Chengdu
+G56	s	All China (nationwide)
+H56	s	Other
+A57	s	Colombia
+B57	s	Bogotá
+C57	s	Medellín
+D57	s	Cali
+E57	s	Barranquilla
+F57	s	Cartagena
+G57	s	All Colombia (nationwide)
+H57	s	Other
+A58	s	Comoros
+B58	s	Moroni
+C58	s	Mutsamudu
+D58	s	Fomboni
+E58	s	Domoni
+F58	s	Tsémbehou
+G58	s	All Comoros (nationwide)
+H58	s	Other
+A59	s	Congo (Republic)
+B59	s	Brazzaville
+C59	s	Pointe-Noire
+D59	s	Dolisie
+E59	s	Nkayi
+F59	s	Ouesso
+G59	s	All Congo (Republic) (nationwide)
+H59	s	Other
+A60	s	Congo (DR)
+B60	s	Kinshasa
+C60	s	Lubumbashi
+D60	s	Mbuji-Mayi
+E60	s	Kisangani
+F60	s	Goma
+G60	s	All Congo (DR) (nationwide)
+H60	s	Other
+A61	s	Costa Rica
+B61	s	San José
+C61	s	Alajuela
+D61	s	Cartago
+E61	s	Heredia
+F61	s	Liberia
+G61	s	All Costa Rica (nationwide)
+H61	s	Other
+A62	s	Côte d'Ivoire
+B62	s	Abidjan
+C62	s	Yamoussoukro
+D62	s	Bouaké
+E62	s	San-Pédro
+F62	s	Korhogo
+G62	s	All Côte d'Ivoire (nationwide)
+H62	s	Other
+A63	s	Croatia
+B63	s	Zagreb
+C63	s	Split
+D63	s	Rijeka
+E63	s	Osijek
+F63	s	Zadar
+G63	s	All Croatia (nationwide)
+H63	s	Other
+A64	s	Cuba
+B64	s	Havana
+C64	s	Santiago de Cuba
+D64	s	Camagüey
+E64	s	Holguín
+F64	s	Santa Clara
+G64	s	All Cuba (nationwide)
+H64	s	Other
+A65	s	Cyprus
+B65	s	Nicosia
+C65	s	Limassol
+D65	s	Larnaca
+E65	s	Paphos
+F65	s	Famagusta
+G65	s	All Cyprus (nationwide)
+H65	s	Other
+A66	s	Czechia
+B66	s	Prague
+C66	s	Brno
+D66	s	Ostrava
+E66	s	Plzeň
+F66	s	Olomouc
+G66	s	All Czechia (nationwide)
+H66	s	Other
+A67	s	Denmark
+B67	s	Copenhagen
+C67	s	Aarhus
+D67	s	Odense
+E67	s	Aalborg
+F67	s	Esbjerg
+G67	s	All Denmark (nationwide)
+H67	s	Other
+A68	s	Djibouti
+B68	s	Djibouti City
+C68	s	Ali Sabieh
+D68	s	Tadjourah
+E68	s	Obock
+F68	s	Dikhil
+G68	s	All Djibouti (nationwide)
+H68	s	Other
+A69	s	Dominica
+B69	s	Roseau
+C69	s	Portsmouth
+D69	s	Marigot
+E69	s	Berekua
+F69	s	Mahaut
+G69	s	All Dominica (nationwide)
+H69	s	Other
+A70	s	Dominican Republic
+B70	s	Santo Domingo
+C70	s	Santiago
+D70	s	La Romana
+E70	s	Punta Cana
+F70	s	San Pedro de Macorís
+G70	s	All Dominican Republic (nationwide)
+H70	s	Other
+A71	s	Ecuador
+B71	s	Quito
+C71	s	Guayaquil
+D71	s	Cuenca
+E71	s	Santo Domingo
+F71	s	Manta
+G71	s	All Ecuador (nationwide)
+H71	s	Other
+A72	s	El Salvador
+B72	s	San Salvador
+C72	s	Santa Ana
+D72	s	San Miguel
+E72	s	Soyapango
+F72	s	Sonsonate
+G72	s	All El Salvador (nationwide)
+H72	s	Other
+A73	s	Equatorial Guinea
+B73	s	Malabo
+C73	s	Bata
+D73	s	Ebebiyin
+E73	s	Aconibe
+F73	s	Mongomo
+G73	s	All Equatorial Guinea (nationwide)
+H73	s	Other
+A74	s	Eritrea
+B74	s	Asmara
+C74	s	Keren
+D74	s	Massawa
+E74	s	Assab
+F74	s	Mendefera
+G74	s	All Eritrea (nationwide)
+H74	s	Other
+A75	s	Estonia
+B75	s	Tallinn
+C75	s	Tartu
+D75	s	Narva
+E75	s	Pärnu
+F75	s	Kohtla-Järve
+G75	s	All Estonia (nationwide)
+H75	s	Other
+A76	s	Eswatini
+B76	s	Mbabane
+C76	s	Manzini
+D76	s	Lobamba
+E76	s	Siteki
+F76	s	Nhlangano
+G76	s	All Eswatini (nationwide)
+H76	s	Other
+A77	s	Ethiopia
+B77	s	Addis Ababa
+C77	s	Dire Dawa
+D77	s	Mekelle
+E77	s	Adama
+F77	s	Hawassa
+G77	s	All Ethiopia (nationwide)
+H77	s	Other
+A78	s	Fiji
+B78	s	Suva
+C78	s	Nadi
+D78	s	Lautoka
+E78	s	Labasa
+F78	s	Nausori
+G78	s	All Fiji (nationwide)
+H78	s	Other
+A79	s	Finland
+B79	s	Helsinki
+C79	s	Espoo
+D79	s	Tampere
+E79	s	Vantaa
+F79	s	Oulu
+G79	s	All Finland (nationwide)
+H79	s	Other
+A80	s	France
+B80	s	Paris
+C80	s	Lyon
+D80	s	Marseille
+E80	s	Toulouse
+F80	s	Lille
+G80	s	All France (nationwide)
+H80	s	Other
+A81	s	Gabon
+B81	s	Libreville
+C81	s	Port-Gentil
+D81	s	Franceville
+E81	s	Oyem
+F81	s	Moanda
+G81	s	All Gabon (nationwide)
+H81	s	Other
+A82	s	Gambia
+B82	s	Banjul
+C82	s	Serekunda
+D82	s	Brikama
+E82	s	Bakau
+F82	s	Farafenni
+G82	s	All Gambia (nationwide)
+H82	s	Other
+A83	s	Georgia
+B83	s	Tbilisi
+C83	s	Batumi
+D83	s	Kutaisi
+E83	s	Rustavi
+F83	s	Zugdidi
+G83	s	All Georgia (nationwide)
+H83	s	Other
+A84	s	Germany
+B84	s	Berlin
+C84	s	Munich
+D84	s	Frankfurt
+E84	s	Hamburg
+F84	s	Düsseldorf
+G84	s	All Germany (nationwide)
+H84	s	Other
+A85	s	Ghana
+B85	s	Accra
+C85	s	Kumasi
+D85	s	Tamale
+E85	s	Takoradi
+F85	s	Tema
+G85	s	All Ghana (nationwide)
+H85	s	Other
+A86	s	Greece
+B86	s	Athens
+C86	s	Thessaloniki
+D86	s	Patras
+E86	s	Heraklion
+F86	s	Larissa
+G86	s	All Greece (nationwide)
+H86	s	Other
+A87	s	Grenada
+B87	s	St. George's
+C87	s	Gouyave
+D87	s	Grenville
+E87	s	Victoria
+F87	s	Sauteurs
+G87	s	All Grenada (nationwide)
+H87	s	Other
+A88	s	Guatemala
+B88	s	Guatemala City
+C88	s	Quetzaltenango
+D88	s	Escuintla
+E88	s	Mixco
+F88	s	Villa Nueva
+G88	s	All Guatemala (nationwide)
+H88	s	Other
+A89	s	Guinea
+B89	s	Conakry
+C89	s	Nzérékoré
+D89	s	Kankan
+E89	s	Kindia
+F89	s	Labé
+G89	s	All Guinea (nationwide)
+H89	s	Other
+A90	s	Guinea-Bissau
+B90	s	Bissau
+C90	s	Bafatá
+D90	s	Gabú
+E90	s	Canchungo
+F90	s	Farim
+G90	s	All Guinea-Bissau (nationwide)
+H90	s	Other
+A91	s	Guyana
+B91	s	Georgetown
+C91	s	Linden
+D91	s	New Amsterdam
+E91	s	Bartica
+F91	s	Anna Regina
+G91	s	All Guyana (nationwide)
+H91	s	Other
+A92	s	Haiti
+B92	s	Port-au-Prince
+C92	s	Cap-Haïtien
+D92	s	Gonaïves
+E92	s	Les Cayes
+F92	s	Jacmel
+G92	s	All Haiti (nationwide)
+H92	s	Other
+A93	s	Honduras
+B93	s	Tegucigalpa
+C93	s	San Pedro Sula
+D93	s	Choloma
+E93	s	La Ceiba
+F93	s	El Progreso
+G93	s	All Honduras (nationwide)
+H93	s	Other
+A94	s	Hungary
+B94	s	Budapest
+C94	s	Debrecen
+D94	s	Szeged
+E94	s	Miskolc
+F94	s	Pécs
+G94	s	All Hungary (nationwide)
+H94	s	Other
+A95	s	Iceland
+B95	s	Reykjavík
+C95	s	Kópavogur
+D95	s	Hafnarfjörður
+E95	s	Akureyri
+F95	s	Reykjanesbær
+G95	s	All Iceland (nationwide)
+H95	s	Other
+A96	s	India
+B96	s	Mumbai
+C96	s	Delhi
+D96	s	Bengaluru
+E96	s	Hyderabad
+F96	s	Chennai
+G96	s	All India (nationwide)
+H96	s	Other
+A97	s	Indonesia
+B97	s	Jakarta
+C97	s	Surabaya
+D97	s	Bandung
+E97	s	Medan
+F97	s	Semarang
+G97	s	All Indonesia (nationwide)
+H97	s	Other
+A98	s	Ireland
+B98	s	Dublin
+C98	s	Cork
+D98	s	Limerick
+E98	s	Galway
+F98	s	Waterford
+G98	s	All Ireland (nationwide)
+H98	s	Other
+A99	s	Italy
+B99	s	Rome
+C99	s	Milan
+D99	s	Naples
+E99	s	Turin
+F99	s	Bologna
+G99	s	All Italy (nationwide)
+H99	s	Other
+A100	s	Jamaica
+B100	s	Kingston
+C100	s	Montego Bay
+D100	s	Spanish Town
+E100	s	Portmore
+F100	s	Ocho Rios
+G100	s	All Jamaica (nationwide)
+H100	s	Other
+A101	s	Japan
+B101	s	Tokyo
+C101	s	Osaka
+D101	s	Yokohama
+E101	s	Nagoya
+F101	s	Fukuoka
+G101	s	All Japan (nationwide)
+H101	s	Other
+A102	s	Kazakhstan
+B102	s	Almaty
+C102	s	Astana
+D102	s	Shymkent
+E102	s	Aktobe
+F102	s	Karaganda
+G102	s	All Kazakhstan (nationwide)
+H102	s	Other
+A103	s	Kenya
+B103	s	Nairobi
+C103	s	Mombasa
+D103	s	Kisumu
+E103	s	Nakuru
+F103	s	Eldoret
+G103	s	All Kenya (nationwide)
+H103	s	Other
+A104	s	Kiribati
+B104	s	Tarawa
+C104	s	Betio
+D104	s	Bikenibeu
+E104	s	Bairiki
+F104	s	Teaoraereke
+G104	s	All Kiribati (nationwide)
+H104	s	Other
+A105	s	Kosovo
+B105	s	Pristina
+C105	s	Prizren
+D105	s	Peja
+E105	s	Gjakova
+F105	s	Mitrovica
+G105	s	All Kosovo (nationwide)
+H105	s	Other
+A106	s	Kyrgyzstan
+B106	s	Bishkek
+C106	s	Osh
+D106	s	Jalal-Abad
+E106	s	Karakol
+F106	s	Tokmok
+G106	s	All Kyrgyzstan (nationwide)
+H106	s	Other
+A107	s	Laos
+B107	s	Vientiane
+C107	s	Savannakhet
+D107	s	Pakse
+E107	s	Luang Prabang
+F107	s	Thakhek
+G107	s	All Laos (nationwide)
+H107	s	Other
+A108	s	Latvia
+B108	s	Riga
+C108	s	Daugavpils
+D108	s	Liepāja
+E108	s	Jelgava
+F108	s	Jūrmala
+G108	s	All Latvia (nationwide)
+H108	s	Other
+A109	s	Lesotho
+B109	s	Maseru
+C109	s	Teyateyaneng
+D109	s	Mafeteng
+E109	s	Hlotse
+F109	s	Mohale's Hoek
+G109	s	All Lesotho (nationwide)
+H109	s	Other
+A110	s	Liberia
+B110	s	Monrovia
+C110	s	Gbarnga
+D110	s	Buchanan
+E110	s	Kakata
+F110	s	Harper
+G110	s	All Liberia (nationwide)
+H110	s	Other
+A111	s	Liechtenstein
+B111	s	Vaduz
+C111	s	Schaan
+D111	s	Balzers
+E111	s	Triesen
+F111	s	Eschen
+G111	s	All Liechtenstein (nationwide)
+H111	s	Other
+A112	s	Lithuania
+B112	s	Vilnius
+C112	s	Kaunas
+D112	s	Klaipėda
+E112	s	Šiauliai
+F112	s	Panevėžys
+G112	s	All Lithuania (nationwide)
+H112	s	Other
+A113	s	Luxembourg
+B113	s	Luxembourg City
+C113	s	Esch-sur-Alzette
+D113	s	Differdange
+E113	s	Dudelange
+F113	s	Ettelbruck
+G113	s	All Luxembourg (nationwide)
+H113	s	Other
+A114	s	Madagascar
+B114	s	Antananarivo
+C114	s	Toamasina
+D114	s	Antsirabe
+E114	s	Mahajanga
+F114	s	Fianarantsoa
+G114	s	All Madagascar (nationwide)
+H114	s	Other
+A115	s	Malawi
+B115	s	Lilongwe
+C115	s	Blantyre
+D115	s	Mzuzu
+E115	s	Zomba
+F115	s	Kasungu
+G115	s	All Malawi (nationwide)
+H115	s	Other
+A116	s	Malaysia
+B116	s	Kuala Lumpur
+C116	s	Johor Bahru
+D116	s	George Town (Penang)
+E116	s	Ipoh
+F116	s	Kuching
+G116	s	All Malaysia (nationwide)
+H116	s	Other
+A117	s	Maldives
+B117	s	Malé
+C117	s	Addu City
+D117	s	Fuvahmulah
+E117	s	Kulhudhuffushi
+F117	s	Thinadhoo
+G117	s	All Maldives (nationwide)
+H117	s	Other
+A118	s	Mali
+B118	s	Bamako
+C118	s	Sikasso
+D118	s	Mopti
+E118	s	Koutiala
+F118	s	Ségou
+G118	s	All Mali (nationwide)
+H118	s	Other
+A119	s	Malta
+B119	s	Valletta
+C119	s	Birkirkara
+D119	s	Sliema
+E119	s	St. Paul's Bay
+F119	s	Mosta
+G119	s	All Malta (nationwide)
+H119	s	Other
+A120	s	Marshall Islands
+B120	s	Majuro
+C120	s	Ebeye
+D120	s	Jabor
+E120	s	Wotje
+F120	s	Laura
+G120	s	All Marshall Islands (nationwide)
+H120	s	Other
+A121	s	Mauritania
+B121	s	Nouakchott
+C121	s	Nouadhibou
+D121	s	Kiffa
+E121	s	Kaédi
+F121	s	Zouérat
+G121	s	All Mauritania (nationwide)
+H121	s	Other
+A122	s	Mauritius
+B122	s	Port Louis
+C122	s	Beau Bassin-Rose Hill
+D122	s	Vacoas-Phoenix
+E122	s	Curepipe
+F122	s	Quatre Bornes
+G122	s	All Mauritius (nationwide)
+H122	s	Other
+A123	s	Mexico
+B123	s	Mexico City
+C123	s	Guadalajara
+D123	s	Monterrey
+E123	s	Puebla
+F123	s	Tijuana
+G123	s	All Mexico (nationwide)
+H123	s	Other
+A124	s	Micronesia
+B124	s	Palikir
+C124	s	Weno
+D124	s	Kolonia
+E124	s	Tofol
+F124	s	Colonia
+G124	s	All Micronesia (nationwide)
+H124	s	Other
+A125	s	Moldova
+B125	s	Chișinău
+C125	s	Bălți
+D125	s	Tiraspol
+E125	s	Bender
+F125	s	Cahul
+G125	s	All Moldova (nationwide)
+H125	s	Other
+A126	s	Monaco
+B126	s	Monaco
+C126	s	Monte Carlo
+D126	s	La Condamine
+E126	s	Fontvieille
+F126	s	Larvotto
+G126	s	All Monaco (nationwide)
+H126	s	Other
+A127	s	Mongolia
+B127	s	Ulaanbaatar
+C127	s	Erdenet
+D127	s	Darkhan
+E127	s	Choibalsan
+F127	s	Murun
+G127	s	All Mongolia (nationwide)
+H127	s	Other
+A128	s	Montenegro
+B128	s	Podgorica
+C128	s	Nikšić
+D128	s	Herceg Novi
+E128	s	Bar
+F128	s	Budva
+G128	s	All Montenegro (nationwide)
+H128	s	Other
+A129	s	Mozambique
+B129	s	Maputo
+C129	s	Matola
+D129	s	Nampula
+E129	s	Beira
+F129	s	Nacala
+G129	s	All Mozambique (nationwide)
+H129	s	Other
+A130	s	Myanmar
+B130	s	Yangon
+C130	s	Mandalay
+D130	s	Naypyidaw
+E130	s	Bago
+F130	s	Mawlamyine
+G130	s	All Myanmar (nationwide)
+H130	s	Other
+A131	s	Namibia
+B131	s	Windhoek
+C131	s	Walvis Bay
+D131	s	Swakopmund
+E131	s	Oshakati
+F131	s	Rundu
+G131	s	All Namibia (nationwide)
+H131	s	Other
+A132	s	Nauru
+B132	s	Yaren
+C132	s	Denigomodu
+D132	s	Aiwo
+E132	s	Meneng
+F132	s	Boe
+G132	s	All Nauru (nationwide)
+H132	s	Other
+A133	s	Nepal
+B133	s	Kathmandu
+C133	s	Pokhara
+D133	s	Lalitpur
+E133	s	Biratnagar
+F133	s	Bharatpur
+G133	s	All Nepal (nationwide)
+H133	s	Other
+A134	s	Netherlands
+B134	s	Amsterdam
+C134	s	Rotterdam
+D134	s	The Hague
+E134	s	Utrecht
+F134	s	Eindhoven
+G134	s	All Netherlands (nationwide)
+H134	s	Other
+A135	s	New Zealand
+B135	s	Auckland
+C135	s	Wellington
+D135	s	Christchurch
+E135	s	Hamilton
+F135	s	Tauranga
+G135	s	All New Zealand (nationwide)
+H135	s	Other
+A136	s	Nicaragua
+B136	s	Managua
+C136	s	León
+D136	s	Masaya
+E136	s	Granada
+F136	s	Matagalpa
+G136	s	All Nicaragua (nationwide)
+H136	s	Other
+A137	s	Niger
+B137	s	Niamey
+C137	s	Zinder
+D137	s	Maradi
+E137	s	Agadez
+F137	s	Tahoua
+G137	s	All Niger (nationwide)
+H137	s	Other
+A138	s	Nigeria
+B138	s	Lagos
+C138	s	Abuja
+D138	s	Kano
+E138	s	Ibadan
+F138	s	Port Harcourt
+G138	s	All Nigeria (nationwide)
+H138	s	Other
+A139	s	North Korea
+B139	s	Pyongyang
+C139	s	Hamhung
+D139	s	Chongjin
+E139	s	Nampo
+F139	s	Wonsan
+G139	s	All North Korea (nationwide)
+H139	s	Other
+A140	s	North Macedonia
+B140	s	Skopje
+C140	s	Bitola
+D140	s	Kumanovo
+E140	s	Prilep
+F140	s	Tetovo
+G140	s	All North Macedonia (nationwide)
+H140	s	Other
+A141	s	Norway
+B141	s	Oslo
+C141	s	Bergen
+D141	s	Trondheim
+E141	s	Stavanger
+F141	s	Drammen
+G141	s	All Norway (nationwide)
+H141	s	Other
+A142	s	Pakistan
+B142	s	Karachi
+C142	s	Lahore
+D142	s	Islamabad
+E142	s	Faisalabad
+F142	s	Rawalpindi
+G142	s	All Pakistan (nationwide)
+H142	s	Other
+A143	s	Palau
+B143	s	Ngerulmud
+C143	s	Koror
+D143	s	Airai
+E143	s	Kloulklubed
+F143	s	Melekeok
+G143	s	All Palau (nationwide)
+H143	s	Other
+A144	s	Panama
+B144	s	Panama City
+C144	s	Colón
+D144	s	David
+E144	s	La Chorrera
+F144	s	Santiago
+G144	s	All Panama (nationwide)
+H144	s	Other
+A145	s	Papua New Guinea
+B145	s	Port Moresby
+C145	s	Lae
+D145	s	Mount Hagen
+E145	s	Madang
+F145	s	Kokopo
+G145	s	All Papua New Guinea (nationwide)
+H145	s	Other
+A146	s	Paraguay
+B146	s	Asunción
+C146	s	Ciudad del Este
+D146	s	San Lorenzo
+E146	s	Luque
+F146	s	Encarnación
+G146	s	All Paraguay (nationwide)
+H146	s	Other
+A147	s	Peru
+B147	s	Lima
+C147	s	Arequipa
+D147	s	Trujillo
+E147	s	Chiclayo
+F147	s	Cusco
+G147	s	All Peru (nationwide)
+H147	s	Other
+A148	s	Philippines
+B148	s	Manila
+C148	s	Quezon City
+D148	s	Cebu City
+E148	s	Davao City
+F148	s	Makati
+G148	s	All Philippines (nationwide)
+H148	s	Other
+A149	s	Poland
+B149	s	Warsaw
+C149	s	Kraków
+D149	s	Wrocław
+E149	s	Poznań
+F149	s	Gdańsk
+G149	s	All Poland (nationwide)
+H149	s	Other
+A150	s	Portugal
+B150	s	Lisbon
+C150	s	Porto
+D150	s	Braga
+E150	s	Coimbra
+F150	s	Faro
+G150	s	All Portugal (nationwide)
+H150	s	Other
+A151	s	Romania
+B151	s	Bucharest
+C151	s	Cluj-Napoca
+D151	s	Timișoara
+E151	s	Iași
+F151	s	Constanța
+G151	s	All Romania (nationwide)
+H151	s	Other
+A152	s	Russia
+B152	s	Moscow
+C152	s	Saint Petersburg
+D152	s	Novosibirsk
+E152	s	Yekaterinburg
+F152	s	Kazan
+G152	s	All Russia (nationwide)
+H152	s	Other
+A153	s	Rwanda
+B153	s	Kigali
+C153	s	Butare
+D153	s	Gitarama
+E153	s	Musanze
+F153	s	Rubavu
+G153	s	All Rwanda (nationwide)
+H153	s	Other
+A154	s	Saint Kitts and Nevis
+B154	s	Basseterre
+C154	s	Charlestown
+D154	s	Sandy Point Town
+E154	s	Cayon
+F154	s	Dieppe Bay
+G154	s	All Saint Kitts and Nevis (nationwide)
+H154	s	Other
+A155	s	Saint Lucia
+B155	s	Castries
+C155	s	Gros Islet
+D155	s	Vieux Fort
+E155	s	Soufrière
+F155	s	Micoud
+G155	s	All Saint Lucia (nationwide)
+H155	s	Other
+A156	s	Saint Vincent and the Grenadines
+B156	s	Kingstown
+C156	s	Georgetown
+D156	s	Layou
+E156	s	Barrouallie
+F156	s	Chateaubelair
+G156	s	All Saint Vincent and the Grenadines (nationwide)
+H156	s	Other
+A157	s	Samoa
+B157	s	Apia
+C157	s	Vaitele
+D157	s	Faleula
+E157	s	Siusega
+F157	s	Malie
+G157	s	All Samoa (nationwide)
+H157	s	Other
+A158	s	San Marino
+B158	s	San Marino
+C158	s	Serravalle
+D158	s	Borgo Maggiore
+E158	s	Domagnano
+F158	s	Fiorentino
+G158	s	All San Marino (nationwide)
+H158	s	Other
+A159	s	Sao Tome and Principe
+B159	s	São Tomé
+C159	s	Santo Amaro
+D159	s	Neves
+E159	s	Santana
+F159	s	Trindade
+G159	s	All Sao Tome and Principe (nationwide)
+H159	s	Other
+A160	s	Senegal
+B160	s	Dakar
+C160	s	Thiès
+D160	s	Touba
+E160	s	Saint-Louis
+F160	s	Ziguinchor
+G160	s	All Senegal (nationwide)
+H160	s	Other
+A161	s	Serbia
+B161	s	Belgrade
+C161	s	Novi Sad
+D161	s	Niš
+E161	s	Kragujevac
+F161	s	Subotica
+G161	s	All Serbia (nationwide)
+H161	s	Other
+A162	s	Seychelles
+B162	s	Victoria
+C162	s	Anse Boileau
+D162	s	Beau Vallon
+E162	s	Takamaka
+F162	s	Bel Ombre
+G162	s	All Seychelles (nationwide)
+H162	s	Other
+A163	s	Sierra Leone
+B163	s	Freetown
+C163	s	Bo
+D163	s	Kenema
+E163	s	Makeni
+F163	s	Koidu
+G163	s	All Sierra Leone (nationwide)
+H163	s	Other
+A164	s	Singapore
+B164	s	Singapore (city-state)
+C164	s	Jurong
+D164	s	Tampines
+E164	s	Woodlands
+F164	s	Changi
+G164	s	All Singapore (nationwide)
+H164	s	Other
+A165	s	Slovakia
+B165	s	Bratislava
+C165	s	Košice
+D165	s	Prešov
+E165	s	Nitra
+F165	s	Žilina
+G165	s	All Slovakia (nationwide)
+H165	s	Other
+A166	s	Slovenia
+B166	s	Ljubljana
+C166	s	Maribor
+D166	s	Celje
+E166	s	Kranj
+F166	s	Koper
+G166	s	All Slovenia (nationwide)
+H166	s	Other
+A167	s	Solomon Islands
+B167	s	Honiara
+C167	s	Gizo
+D167	s	Auki
+E167	s	Munda
+F167	s	Tulagi
+G167	s	All Solomon Islands (nationwide)
+H167	s	Other
+A168	s	Somalia
+B168	s	Mogadishu
+C168	s	Hargeisa
+D168	s	Bosaso
+E168	s	Kismayo
+F168	s	Galkayo
+G168	s	All Somalia (nationwide)
+H168	s	Other
+A169	s	South Africa
+B169	s	Johannesburg
+C169	s	Cape Town
+D169	s	Durban
+E169	s	Pretoria
+F169	s	Port Elizabeth
+G169	s	All South Africa (nationwide)
+H169	s	Other
+A170	s	South Korea
+B170	s	Seoul
+C170	s	Busan
+D170	s	Incheon
+E170	s	Daegu
+F170	s	Daejeon
+G170	s	All South Korea (nationwide)
+H170	s	Other
+A171	s	South Sudan
+B171	s	Juba
+C171	s	Wau
+D171	s	Malakal
+E171	s	Yei
+F171	s	Aweil
+G171	s	All South Sudan (nationwide)
+H171	s	Other
+A172	s	Spain
+B172	s	Madrid
+C172	s	Barcelona
+D172	s	Valencia
+E172	s	Seville
+F172	s	Bilbao
+G172	s	All Spain (nationwide)
+H172	s	Other
+A173	s	Sri Lanka
+B173	s	Colombo
+C173	s	Kandy
+D173	s	Galle
+E173	s	Jaffna
+F173	s	Negombo
+G173	s	All Sri Lanka (nationwide)
+H173	s	Other
+A174	s	Suriname
+B174	s	Paramaribo
+C174	s	Lelydorp
+D174	s	Nieuw Nickerie
+E174	s	Moengo
+F174	s	Albina
+G174	s	All Suriname (nationwide)
+H174	s	Other
+A175	s	Sweden
+B175	s	Stockholm
+C175	s	Gothenburg
+D175	s	Malmö
+E175	s	Uppsala
+F175	s	Västerås
+G175	s	All Sweden (nationwide)
+H175	s	Other
+A176	s	Switzerland
+B176	s	Zurich
+C176	s	Geneva
+D176	s	Basel
+E176	s	Bern
+F176	s	Lausanne
+G176	s	All Switzerland (nationwide)
+H176	s	Other
+A177	s	Taiwan
+B177	s	Taipei
+C177	s	Kaohsiung
+D177	s	Taichung
+E177	s	Tainan
+F177	s	Hsinchu
+G177	s	All Taiwan (nationwide)
+H177	s	Other
+A178	s	Tajikistan
+B178	s	Dushanbe
+C178	s	Khujand
+D178	s	Kulob
+E178	s	Bokhtar
+F178	s	Istaravshan
+G178	s	All Tajikistan (nationwide)
+H178	s	Other
+A179	s	Tanzania
+B179	s	Dar es Salaam
+C179	s	Dodoma
+D179	s	Mwanza
+E179	s	Arusha
+F179	s	Zanzibar City
+G179	s	All Tanzania (nationwide)
+H179	s	Other
+A180	s	Thailand
+B180	s	Bangkok
+C180	s	Chiang Mai
+D180	s	Pattaya
+E180	s	Phuket
+F180	s	Nonthaburi
+G180	s	All Thailand (nationwide)
+H180	s	Other
+A181	s	Timor-Leste
+B181	s	Dili
+C181	s	Baucau
+D181	s	Maliana
+E181	s	Suai
+F181	s	Lospalos
+G181	s	All Timor-Leste (nationwide)
+H181	s	Other
+A182	s	Togo
+B182	s	Lomé
+C182	s	Sokodé
+D182	s	Kara
+E182	s	Kpalimé
+F182	s	Atakpamé
+G182	s	All Togo (nationwide)
+H182	s	Other
+A183	s	Tonga
+B183	s	Nuku'alofa
+C183	s	Neiafu
+D183	s	Haveluloto
+E183	s	Vaini
+F183	s	Pangai
+G183	s	All Tonga (nationwide)
+H183	s	Other
+A184	s	Trinidad and Tobago
+B184	s	Port of Spain
+C184	s	San Fernando
+D184	s	Chaguanas
+E184	s	Arima
+F184	s	Scarborough
+G184	s	All Trinidad and Tobago (nationwide)
+H184	s	Other
+A185	s	Turkmenistan
+B185	s	Ashgabat
+C185	s	Türkmenabat
+D185	s	Daşoguz
+E185	s	Mary
+F185	s	Balkanabat
+G185	s	All Turkmenistan (nationwide)
+H185	s	Other
+A186	s	Tuvalu
+B186	s	Funafuti
+C186	s	Vaiaku
+D186	s	Asau
+E186	s	Tanrake
+F186	s	Toga
+G186	s	All Tuvalu (nationwide)
+H186	s	Other
+A187	s	Uganda
+B187	s	Kampala
+C187	s	Gulu
+D187	s	Lira
+E187	s	Mbarara
+F187	s	Jinja
+G187	s	All Uganda (nationwide)
+H187	s	Other
+A188	s	Ukraine
+B188	s	Kyiv
+C188	s	Kharkiv
+D188	s	Odesa
+E188	s	Dnipro
+F188	s	Lviv
+G188	s	All Ukraine (nationwide)
+H188	s	Other
+A189	s	United Kingdom
+B189	s	London
+C189	s	Manchester
+D189	s	Birmingham
+E189	s	Edinburgh
+F189	s	Glasgow
+G189	s	All United Kingdom (nationwide)
+H189	s	Other
+A190	s	United States
+B190	s	New York
+C190	s	Los Angeles
+D190	s	Chicago
+E190	s	Houston
+F190	s	San Francisco
+G190	s	All United States (nationwide)
+H190	s	Other
+A191	s	Uruguay
+B191	s	Montevideo
+C191	s	Salto
+D191	s	Paysandú
+E191	s	Ciudad de la Costa
+F191	s	Maldonado
+G191	s	All Uruguay (nationwide)
+H191	s	Other
+A192	s	Uzbekistan
+B192	s	Tashkent
+C192	s	Samarkand
+D192	s	Bukhara
+E192	s	Namangan
+F192	s	Andijan
+G192	s	All Uzbekistan (nationwide)
+H192	s	Other
+A193	s	Vanuatu
+B193	s	Port Vila
+C193	s	Luganville
+D193	s	Norsup
+E193	s	Isangel
+F193	s	Sola
+G193	s	All Vanuatu (nationwide)
+H193	s	Other
+A194	s	Vatican City
+B194	s	Vatican City
+C194	s	Borgo
+D194	s	Prati
+E194	s	Aurelio
+F194	s	Trastevere
+G194	s	All Vatican City (nationwide)
+H194	s	Other
+A195	s	Venezuela
+B195	s	Caracas
+C195	s	Maracaibo
+D195	s	Valencia
+E195	s	Barquisimeto
+F195	s	Maracay
+G195	s	All Venezuela (nationwide)
+H195	s	Other
+A196	s	Vietnam
+B196	s	Hanoi
+C196	s	Ho Chi Minh City
+D196	s	Da Nang
+E196	s	Hai Phong
+F196	s	Can Tho
+G196	s	All Vietnam (nationwide)
+H196	s	Other
+A197	s	Zambia
+B197	s	Lusaka
+C197	s	Ndola
+D197	s	Kitwe
+E197	s	Livingstone
+F197	s	Kabwe
+G197	s	All Zambia (nationwide)
+H197	s	Other
+A198	s	Zimbabwe
+B198	s	Harare
+C198	s	Bulawayo
+D198	s	Mutare
+E198	s	Gweru
+F198	s	Victoria Falls
+G198	s	All Zimbabwe (nationwide)
+H198	s	Other
+A199	s	Other (not listed)
+B199	s	Other
